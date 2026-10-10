@@ -26,6 +26,6 @@ Thống kê live nhập được so với vector thống kê cuối trận lịc
 
 Airflow thêm `match_forecast_v2` giữa `match_outcome` và `publish`; đọc goal events Silver thật, lưu artifact/metrics vào HDFS và đọc lại trước khi hoàn tất. Neo4j chỉ công bố khi toàn bộ bundle hoàn chỉnh. Kafka schema 2 đóng băng phiên bản model, dataset fingerprint và ngày dự đoán; replay đọc đúng bản đã công bố, schema 1 vẫn được hỗ trợ.
 
-Huấn luyện fixture: `PYTHONPATH=apps/football/analytics python -m match_outcome.train_v2`. Dependencies không bổ sung; NumPy được khóa trong runtime. CI huấn luyện lại, build ứng dụng, import DAG, kiểm thử Neo4j/Kafka/replay/recovery và Web sau khi bỏ báo cáo cục bộ; xuất ZIP và screenshot. Máy local chỉ dùng container Airflow/Spark/Kafka hiện có. Không build/pull image, tạo container hay thêm Hadoop.
+Huấn luyện fixture: `PYTHONPATH=apps/api/football/analytics python -m match_outcome.train_v2`. Dependencies không bổ sung; NumPy được khóa trong runtime. CI huấn luyện lại, build ứng dụng, import DAG, kiểm thử Neo4j/Kafka/replay/recovery và Web sau khi bỏ báo cáo cục bộ; xuất ZIP và screenshot. Máy local chỉ dùng container Airflow/Spark/Kafka hiện có. Không build/pull image, tạo container hay thêm Hadoop.
 
-Neo4j Desktop local đang cần `NEO4J_PASSWORD` trong `portable/.env` để công bố dữ liệu trên máy này. Không đưa mật khẩu vào Git hoặc ZIP. Kiểm thử Database thực trên CI không thay thế nghiệm thu Neo4j Desktop khi chưa có cấu hình này; chuyển máy thực tế vẫn cần máy nhận.
+Neo4j Desktop local đang cần `NEO4J_PASSWORD` trong `.env` để công bố dữ liệu trên máy này. Không đưa mật khẩu vào Git hoặc ZIP. Kiểm thử Database thực trên CI không thay thế nghiệm thu Neo4j Desktop khi chưa có cấu hình này; chuyển máy thực tế vẫn cần máy nhận.

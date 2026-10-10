@@ -1,19 +1,19 @@
 {
   "sources": [
     {
-      "source": "Danh/pipelines/spark/step_05_spark_sql_analysis.py",
+      "source": "Danh/processing/spark/step_05_spark_sql_analysis.py",
       "sha256": "6559780e98744f0b3f0111aa95ea4d24918b58e0d270e5ab24efcac6ea95b5d7"
     },
     {
-      "source": "Danh/pipelines/spark/step_07_save_analytics_hdfs.py",
+      "source": "Danh/processing/spark/step_07_save_analytics_hdfs.py",
       "sha256": "1a2f07b673f33ff86bb87dc52fb0eea9afcba98d41c0f7fba99ddd0dd6c206f2"
     },
     {
-      "source": "Danh/pipelines/spark/step_06_rfm_clustering.py",
+      "source": "Danh/processing/spark/step_06_rfm_clustering.py",
       "sha256": "6b81cb5665494b58b34b0e5a7f557e1cd55499921ac96535b88feb912d7d03c0"
     },
     {
-      "source": "Danh/pipelines/spark/generate_visual_dashboard.py",
+      "source": "Danh/processing/spark/generate_visual_dashboard.py",
       "sha256": "3d8910bf421d8f059763170f3595c14fd35080c8e58d0c8c879fcc599703a338"
     },
     {

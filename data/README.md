@@ -1,7 +1,8 @@
 # Data layout
 
-- `bronze/fbref/` và `bronze/transfermarkt/`: bản nguồn có cấu trúc, chia theo mùa khi Airflow nhập vào HDFS.
-- `silver/`: seed/fixture cục bộ; dữ liệu chuẩn hóa đầy đủ được ghi thành Parquet trên HDFS.
-- `gold/`: dành cho fixture nhỏ. Báo cáo Gold đã công bố được lưu trên HDFS; Neon chỉ giữ báo cáo, provenance và trạng thái chạy.
+- `raw/`: FBref, Transfermarkt and DataMB source snapshots used by ingestion. The large appearances file is stored compressed and expanded with checksum verification by `infrastructure/scripts/build/expand_raw.py`.
+- `lake/silver/`: a small, validated CSV snapshot used for local analysis and tests. Production Silver and Gold tables live in HDFS, not in this directory or Neon.
+- `samples/pipeline-seed/`: packaged CI seed for HDFS and model checks.
+- `models/`: versioned match-model artifacts and KNN output used by tests and the packaged pipeline.
 
-Đường dẫn lakehouse chuẩn: `hdfs:///premier-league/{bronze,silver,gold}`.
+The path, schema, source and checksum manifests live beside this data. Do not place secrets, Hadoop volumes, or local database volumes in this tracked directory.

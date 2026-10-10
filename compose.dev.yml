@@ -1,0 +1,63 @@
+name: premier-league-ci
+x-env: &env
+  NEO4J_HTTP_URI: http://neo4j:7474
+  NEO4J_USER: neo4j
+  NEO4J_PASSWORD: ci-fixture-password
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  HDFS_URI: file:///
+  HDFS_BASE_PATH: /tmp/ci-hdfs
+  APP_NAMESPACE: ci-premier-league
+  RAW_FIXTURE_LIMIT: '20'
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    environment:
+      NEO4J_AUTH: neo4j/ci-fixture-password
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 768m
+      NEO4J_server_memory_pagecache_size: 256m
+    healthcheck:
+      test: [CMD-SHELL, 'wget -q -O /dev/null http://localhost:7474/']
+      interval: 10s
+      retries: 30
+  kafka:
+    image: apache/kafka:4.3.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_HEAP_OPTS: -Xms128m -Xmx256m
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    healthcheck:
+      test: [CMD-SHELL, 'bash -c "echo > /dev/tcp/localhost/9092"']
+      interval: 10s
+      retries: 30
+  publish:
+    image: football-runtime:4.0
+    environment: *env
+    command: [python, -m, analytics.publish, --silver-dir, /opt/project/data/lake/silver]
+    depends_on: {neo4j: {condition: service_healthy}}
+  api:
+    image: football-api:4.0
+    environment: *env
+    depends_on: {publish: {condition: service_completed_successfully}, kafka: {condition: service_healthy}}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      retries: 30
+  web:
+    image: football-web:4.0
+    environment: {FOOTBALL_API_URL: 'http://api:8000', HOSTNAME: '0.0.0.0'}
+    depends_on: {api: {condition: service_healthy}}
+    ports: ['3000:3000']
+    healthcheck:
+      test: [CMD, node, -e, "require('http').get('http://localhost:3000',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      retries: 30
