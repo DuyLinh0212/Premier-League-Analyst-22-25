@@ -48,12 +48,12 @@ export default function Football() {
   }
   const name = id => data?.clubs.find(c => c.id === id)?.name || id;
   const knn = data?.knn.find(r => r.query_club_id === club);
-  return <main className="football">
-    <header className="f-header"><a href="/" className="f-brand"><span className="f-ball">◉</span> PREMIER LEAGUE <small>THỐNG KÊ TRÊN SÂN</small></a>
+  return <section className="football a-match">
+    <header className="f-header"><span className="a-match-label">Phân tích trận đấu</span>
       <nav aria-label="Phân tích"><button aria-pressed={tab === "match"} onClick={() => { setTab("match"); setError(""); }}>Dự đoán trận</button><button aria-pressed={tab === "knn"} onClick={() => { setTab("knn"); setError(""); }}>Đội tương đồng · KNN</button></nav>
     </header>
     {!data ? <section className="f-loading"><h1>{error ? "Chưa tải được dữ liệu" : "Đang đọc dữ liệu trận…"}</h1>{error && <><p role="alert">{error}</p><button onClick={() => location.reload()}>Tải lại dữ liệu</button></>}</section> : <>
-      <div className="f-intro"><div><span className="f-eyebrow">{tab === "match" ? "THỐNG KÊ HAI ĐỘI → BA XÁC SUẤT" : "PHONG ĐỘ TƯƠNG ĐỒNG QUA CÁC MÙA"}</span><h1>{tab === "match" ? "Một trận. Ba khả năng." : "Đội nào chơi gần giống?"}</h1><p>{tab === "match" ? "Điều chỉnh số liệu chủ nhà và đội khách để xem xác suất thắng, hòa và thua." : "So sánh phong độ mùa 2024–2025 với những đội ở hai mùa trước."}</p></div><div className="f-source">1.140 trận thật<br/><span>2022–2023 → 2024–2025</span></div></div>
+      <div className="f-intro"><div><span className="f-eyebrow">{tab === "match" ? "THỐNG KÊ HAI ĐỘI → BA XÁC SUẤT" : "PHONG ĐỘ TƯƠNG ĐỒNG QUA CÁC MÙA"}</span><h1>{tab === "match" ? "Dự đoán trận đấu" : "Đội tương đồng · KNN"}</h1><p>{tab === "match" ? "Điều chỉnh số liệu chủ nhà và đội khách để xem xác suất thắng, hòa và thua." : "So sánh phong độ mùa 2024–2025 với những đội ở hai mùa trước."}</p></div><div className="f-source">1.140 trận thật<br/><span>2022–2023 → 2024–2025</span></div></div>
       {error && <div role="alert" className="f-error">{error}</div>}
       {tab === "match" ? <>
         <form onSubmit={submit} className="f-workspace">
@@ -78,5 +78,5 @@ export default function Football() {
       </> : <section className="f-knn"><label>Chọn CLB mùa 2024–2025<select value={club} onChange={e => setClub(e.target.value)}>{data.knn.map(r => <option key={r.query_club_id} value={r.query_club_id}>{r.query_club_name}</option>)}</select></label>{knn && <><div className="f-knn-summary"><h2>{knn.query_club_name}</h2><div><strong>{Number(knn.predicted_rank).toFixed(1)}</strong><span>Hạng trung bình láng giềng</span></div><div><strong>{percent(knn.top4_probability)}</strong><span>Tỷ lệ láng giềng Top 4</span></div></div><h3>5 đội / mùa gần nhất</h3><div className="f-table-scroll"><table><thead><tr><th>Thứ tự</th><th>CLB</th><th>Mùa</th><th>Khoảng cách</th><th>Hạng thật</th></tr></thead><tbody>{neighbors.map((r, i) => <tr key={i}><td>{r.neighbor_order}</td><td>{r.neighbor_club_name}</td><td>{r.neighbor_season}</td><td>{Number(r.distance).toFixed(3)}</td><td>{r.neighbor_rank}</td></tr>)}</tbody></table></div><p className="f-footnote">KNN dùng 5 chỉ số phong độ đã chuẩn hóa và khoảng cách Euclid. Tỷ lệ Top 4 là tỷ lệ trong nhóm láng giềng. Các mùa giả lập không được đưa vào phân tích.</p></>}</section>}
       <footer className="f-footer">Nguồn: FBref · Ba mùa lịch sử · KNN + Spark MLlib</footer>
     </>}
-  </main>;
+  </section>;
 }
