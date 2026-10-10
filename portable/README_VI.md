@@ -2,6 +2,8 @@
 
 Production Compose **chỉ chạy ứng dụng**. Máy nhận phải có Neo4j, Kafka, HDFS và Airflow đang chạy; không format NameNode, không tạo Hadoop mới. Không chạy Compose CI trên máy người dùng: CI được phép dùng dịch vụ tạm trên GitHub runner.
 
+Nếu chạy trực tiếp mã nguồn với container hạ tầng đã có, dùng `scripts/start-frontend`, `scripts/start-backend`, `scripts/start-kafka`, `scripts/start-airflow` hoặc `scripts/start-all` (`.ps1` trên Windows, `.sh` trên Linux). Hướng dẫn dependency, biến `LOCAL_*`, tên container và kiểm tra `--check` ở [README gốc](../README.md). Các script này không build/pull hay tạo container; chỉ dùng `docker start` cho Kafka/Airflow. `portable/start.*` dưới đây chạy Compose ứng dụng và publication, có thể tạo container ứng dụng.
+
 ## Cấu hình địa chỉ
 
 Giải nén sang đường dẫn bất kỳ. Từ thư mục gốc:
@@ -36,7 +38,7 @@ Hai DAG trong `portable/airflow/dags` dùng Airflow 3.3.2 và provider standard.
 
 Nếu image Airflow hiện có đã đáp ứng phiên bản/runtime thì tái sử dụng. Dockerfile.airflow là lựa chọn đóng gói runtime worker khi cần, và được CI kiểm tra import; Compose production không tạo thêm Airflow. Tạo pool `spark_serial` một slot trên Airflow hiện có (`airflow pools set spark_serial 1 'Serial Spark jobs'`), tránh chạy đồng thời nhiều job Spark. Không yêu cầu SSH/WSL hoặc Docker socket trong DAG.
 
-`football_pipeline`: preflight → snapshot nguồn → identity → Silver → kiểm tra → công bố Silver → KNN → model trận → lưu model/KNN → công bố tất cả báo cáo Neo4j. `football_kafka_analytics` đọc ba topic theo thứ tự, dùng checkpoint bền vững trên HDFS. API `/pipeline` đọc trạng thái lần chạy thật từ PLJob; không dùng danh sách PASS cố định của dashboard nguồn.
+`football_pipeline`: preflight → snapshot nguồn → identity → Silver → kiểm tra → công bố Silver → KNN → model trận v1 → huấn luyện/hiệu chỉnh/đánh giá v2 → lưu model/KNN → công bố tất cả báo cáo Neo4j. `football_kafka_analytics` đọc ba topic theo thứ tự, dùng checkpoint bền vững trên HDFS. API `/pipeline` đọc trạng thái lần chạy thật từ PLJob; không dùng danh sách PASS cố định của dashboard nguồn.
 
 ## Seed, package và kiểm chứng
 

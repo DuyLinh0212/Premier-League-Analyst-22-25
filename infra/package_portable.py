@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDE = {".git","node_modules",".next",".venv","__pycache__","artifacts","pipeline_runs","wheels","evidence","evidence-local","versions","hadoop"}
-FOLDERS = ["analytics","data","jobs","tests","validation","Generate_LeagueTable_Api","FBref_Data","Transfermark_Data","portable","infra","Premier Leauge Club Analyst/web-next",".github"]
+FOLDERS = ["analytics","data","jobs","tests","validation","scripts","Generate_LeagueTable_Api","FBref_Data","Transfermark_Data","portable","infra","Premier Leauge Club Analyst/web-next",".github"]
 
 def included():
     for folder in FOLDERS:
@@ -17,7 +17,7 @@ def included():
                 if path.stat().st_size > 95 * 1024 * 1024 or name == ".env" or name.startswith(".env.") and name != ".env.example" or path.suffix in {".pyc",".log",".zip",".tar"}:
                     continue
                 yield path
-    for name in ["README.md","README_BAN_GIAO.md","README_MERGED.md","LICENSE",".dockerignore",".gitignore",".gitattributes"]:
+    for name in ["README.md","LICENSE",".dockerignore",".gitignore",".gitattributes"]:
         if (ROOT/name).exists():
             yield ROOT/name
 

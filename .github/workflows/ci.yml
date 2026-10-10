@@ -21,6 +21,7 @@ jobs:
         run: |
           docker compose --env-file portable/.env.example -f portable/compose.yaml config --quiet
           docker compose -f portable/compose.ci.yaml config --quiet
+          for script in scripts/start-*.sh; do bash -n "$script"; done
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -72,6 +73,7 @@ jobs:
         run: |
           python infra/package_portable.py
           python portable/verify_bundle.py --archive artifacts/PremierLeague_Docker.zip
+          python -c "import zipfile; z=zipfile.ZipFile('artifacts/PremierLeague_Docker.zip'); n=set(z.namelist()); assert all('scripts/start-'+s+ext in n for s in ('frontend','backend','kafka','airflow','all') for ext in ('.ps1','.sh')); assert 'scripts/run.py' in n; assert not {'README_BAN_GIAO.md','README_MERGED.md'} & n"
       - uses: actions/upload-artifact@v4
         with:
           name: PremierLeague-verified-delivery

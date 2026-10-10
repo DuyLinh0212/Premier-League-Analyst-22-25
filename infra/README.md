@@ -1,13 +1,15 @@
-# Công cụ đóng gói và chuyển HDFS
+# Công cụ dữ liệu và đóng gói
 
-Hệ thống hiện tại chạy hoàn toàn bằng Docker Compose trong portable, gồm Airflow LocalExecutor, Spark, Kafka, Neo4j, PostgreSQL và HDFS 1 NameNode + 3 DataNode. Không cần SSH hoặc runtime WSL riêng.
+Kiến trúc và cách chạy nằm ở [README gốc](../README.md). Hạ tầng Kafka, Airflow, Neo4j và Hadoop được tái sử dụng; Compose production chỉ chứa ứng dụng. Script mã nguồn ở `scripts/` chỉ khởi động container hạ tầng đã có.
 
-Xem portable/README_VI.md để khởi động và sử dụng. Model, Silver và kết quả KNN đã nằm trong gói; khởi động không yêu cầu huấn luyện lại.
+- `package_portable.py`: tạo `artifacts/PremierLeague_Docker.zip`, manifest và SHA256; gồm script chạy, seed/model và mã nguồn, loại secret/cache/image tar/archive Hadoop.
+- `export_portable_seed.py`: xuất Silver, model và KNN làm seed bootstrap.
+- `expand_raw.py`: giải nén nguồn lớn từ gzip và đối chiếu checksum trước import/build.
+- `integrate_sources.py`: đối chiếu schema/checksum và tích hợp dữ liệu từ các thư mục nguồn.
 
-- package_portable.py: tạo ZIP dữ liệu, mã nguồn, cấu hình và bằng chứng nghiệm thu; loại bí mật và bản sao lưu hệ cũ.
-- export_images.py: xuất các image đã nghiệm thu thành delivery/football-images.tar.gz, ghi SHA-256 và ID image trong images_manifest.json.
-- export_portable_seed.py: xuất Silver/model/KNN thành seed phục vụ bootstrap.
-- migrate_blocks.py: chuyển file HDFS sang block 64 MiB, replication 2, kiểm tra SHA-256/schema/số dòng và giữ journal phục hồi.
-- retire_legacy.ps1: chuyển nguồn cũ vào bản sao lưu sau khi nghiệm thu stack mới hoàn tất; kiểm tra checksum KNN được giữ.
+```bash
+python infra/package_portable.py
+python portable/verify_bundle.py --archive artifacts/PremierLeague_Docker.zip
+```
 
-Nguồn cũ, lịch sử Airflow và Neo4j thuộc đồ án được sao lưu ngoài gói bàn giao trong _legacy_backup trước khi dọn. Các công cụ SSH và phân tích cũ đã được nghỉ sử dụng.
+Đóng gói tìm root theo vị trí script, chạy được từ thư mục làm việc khác và không sinh `delivery/delivery`. Xem [hướng dẫn triển khai](../portable/README_VI.md) và [giới hạn nghiệm thu](../validation/README.md).
