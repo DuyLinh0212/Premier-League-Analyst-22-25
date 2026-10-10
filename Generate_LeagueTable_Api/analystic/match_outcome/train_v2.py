@@ -83,6 +83,12 @@ def goal_events(csv_path):
 
 
 def train(rows, goals, output):
+    fingerprint=hashlib.sha256(json.dumps({'matches':rows,'goal_events':goals},sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+    # Raw source parameters are already preserved in the dataset/matches report.
+    # Keep inference inputs and lineage keys here instead of duplicating that lake.
+    keep=('match_id','season','match_date','home_team','away_team','home_name','away_name','label','home_goals','away_goals','home_stats','away_stats')
+    rows=[{k:r[k] for k in keep} for r in rows]
+    goals=[{k:g.get(k) for k in ('match_id','club_id','minute','stoppage_minutes','minute_label','is_own_goal','event_id')} for g in goals]
     rows=sorted(rows,key=lambda r:(r['match_date'],r['match_id']))
     if len({r['match_id'] for r in rows})!=len(rows): raise ValueError('Duplicate matches')
     event_ids=set(); events={r['match_id']:[] for r in rows}
@@ -155,8 +161,7 @@ def train(rows, goals, output):
     _,sk,sw,stat_test=min(stat_options,key=lambda x:x[:3])
     print('v2 live score states and similarity fitted',flush=True)
     train_through=max(rows[i]['match_date'] for i in ci)
-    fingerprint=hashlib.sha256(json.dumps({'matches':rows,'goal_events':goals},sort_keys=True,ensure_ascii=False).encode()).hexdigest()
-    recipe={'implementation':'forecast-v2.1','half_life':half,'poisson':model,'k':k,'alpha':alpha,'temperature':temperature,'live':live,'stat_k':sk,'stat_weight':sw}
+    recipe={'implementation':'forecast-v2.2','half_life':half,'poisson':model,'k':k,'alpha':alpha,'temperature':temperature,'live':live,'stat_k':sk,'stat_weight':sw}
     version='wdl2_'+hashlib.sha256((fingerprint+json.dumps(recipe,sort_keys=True)).encode()).hexdigest()[:20]
     artifact={'schema_version':2,'model_version':version,'dataset_fingerprint':fingerprint,'trained_through':train_through,
               'data_through':max(r['match_date'] for r in rows),'history':rows,'goal_events':goals,'feature_names':FEATURES,

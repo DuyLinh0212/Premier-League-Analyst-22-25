@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "container": "existing spark-master",
+  "hadoop": "existing WSL",
+  "goals": 3445,
+  "scores_reconciled": 1140,
+  "artifacts": [
+    {
+      "file": "forecast_v2.json",
+      "hdfs_path": "hdfs://host.docker.internal:9000/bigdata/processed/forecast_v2_acceptance/wdl2_3729b499ca7814c8a942/forecast_v2",
+      "sha256": "308cd282224873dce2bd51e1e9f544089f5a44b836494c4f4549356d780a9288"
+    },
+    {
+      "file": "forecast_v2_metrics.json",
+      "hdfs_path": "hdfs://host.docker.internal:9000/bigdata/processed/forecast_v2_acceptance/wdl2_3729b499ca7814c8a942/forecast_v2_metrics",
+      "sha256": "c1d76f859ef7f9f90b1d7924f0252c5f6420dc777505031383a04dbb72ccfdd8"
+    }
+  ]
+}
