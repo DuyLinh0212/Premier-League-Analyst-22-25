@@ -13,7 +13,7 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-WEB = ROOT / "Premier Leauge Club Analyst" / "web-next"
+WEB = ROOT / "apps" / "web"
 AIRFLOW = (
     "airflow-docker-postgres-1", "airflow-docker-redis-1",
     "airflow-docker-airflow-apiserver-1", "airflow-docker-airflow-scheduler-1",
@@ -48,7 +48,7 @@ def environment(path):
     values.update(os.environ)  # Explicit shell configuration takes precedence.
     for key in ("NEO4J_HTTP_URI", "KAFKA_BOOTSTRAP_SERVERS", "HDFS_URI", "NAMENODE_HTTP_URI"):
         values[key] = values.get("LOCAL_" + key) or values.get(key, "").replace("host.docker.internal", "127.0.0.1")
-    paths = [str(ROOT), str(ROOT / "jobs"), str(ROOT / "Generate_LeagueTable_Api" / "analystic")]
+    paths = [str(ROOT), str(ROOT / "pipelines/spark"), str(ROOT / "apps/football" / "analytics")]
     if values.get("PYTHONPATH"):
         paths.append(values["PYTHONPATH"])
     values["PYTHONPATH"] = os.pathsep.join(paths)
@@ -107,16 +107,16 @@ def app_command(service, env, args):
     else:
         node = shutil.which("node")
         if not node:
-            raise RuntimeError("Node.js is missing. Install Node.js >=20.9 and run npm ci in web-next.")
+            raise RuntimeError("Node.js is missing. Install Node.js >=20.9 and run npm ci in apps/web.")
         version = tuple(int(item) for item in checked([node, "--version"]).lstrip("v").split(".")[:2])
         if version < (20, 9):
             raise RuntimeError("Next.js requires Node.js >=20.9.")
         cli = WEB / "node_modules" / "next" / "dist" / "bin" / "next"
         if not cli.is_file():
-            raise RuntimeError("Frontend dependencies are missing. Run npm ci in web-next first.")
+            raise RuntimeError("Frontend dependencies are missing. Run npm ci in apps/web first.")
         standalone = WEB / ".next" / "standalone"
         if args.production and not (standalone / "server.js").is_file():
-            raise RuntimeError("Production Web build is missing. Run npm run build in web-next first.")
+            raise RuntimeError("Production Web build is missing. Run npm run build in apps/web first.")
         host = env.get("LOCAL_WEB_HOST", "127.0.0.1")
         number = port(args.web_port if args.web_port is not None else env.get("WEB_PORT", "3000"))
         api_port = port(args.api_port if args.api_port is not None else env.get("API_PORT", "8000"))

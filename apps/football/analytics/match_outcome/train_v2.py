@@ -197,7 +197,7 @@ def train(rows, goals, output):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(); parser.add_argument('--output',default=str(Path(__file__).parent/'outputs')); parser.add_argument('--goals',default=str(Path(__file__).resolve().parents[3]/'data/silver/csv/facts/fact_goal_event.csv'))
+    parser=argparse.ArgumentParser(); parser.add_argument('--output',default=str(Path(__file__).parent/'outputs')); parser.add_argument('--goals',default=str(Path(__file__).resolve().parents[4]/'data/silver/csv/facts/fact_goal_event.csv'))
     args=parser.parse_args(); rows=[json.loads(line) for line in (Path(args.output)/'matches.jsonl').read_text(encoding='utf-8').splitlines()]
     result=train(rows,goal_events(args.goals),args.output)
     print(json.dumps({k:result[k] for k in ('model_version','selected','pregame','venue_baseline','live')},ensure_ascii=True))

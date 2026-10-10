@@ -69,7 +69,7 @@ def main():
            .config('spark.driver.memory','512m').config('spark.ui.enabled','false')
            .config('spark.jars',','.join(glob.glob(os.getenv('SPARK_EXTRA_JARS','/opt/kafka-jars/*.jar')))).getOrCreate())
     try:
-        output=Path('/opt/project/Generate_LeagueTable_Api/analystic/match_outcome/outputs')
+        output=Path('/opt/project/apps/football/analytics/match_outcome/outputs')
         with tempfile.TemporaryDirectory() as target:
             process_events(spark,match_events,output,Path(target).as_uri())
             process_events(spark,match_events,output,Path(target).as_uri())
@@ -117,7 +117,7 @@ def main():
     assert store.report('rfm_gmm')[0] == old
     store.fail_run(run, 'intentional recovery test')
     # Serving must be independent of local source/report files, even after API restart.
-    root = Path('/opt/project/Generate_LeagueTable_Api/analystic/match_outcome/outputs')
+    root = Path('/opt/project/apps/football/analytics/match_outcome/outputs')
     hidden = root.with_name('outputs_disabled_for_test')
     root.rename(hidden)
     try:

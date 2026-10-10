@@ -16,7 +16,7 @@ def build_dataset(root):
     clubs = {cid: name for cid, name, _, _ in CLUBS}
     teams, catalog = {}, {}
     for season in SEASONS:
-        for directory in sorted((Path(root) / "FBref_Data" / season / "04_teams").iterdir()):
+        for directory in sorted((Path(root) / "data/bronze/fbref" / season / "04_teams").iterdir()):
             if not directory.is_dir():
                 continue
             cid = aliases[normalize(directory.name)]

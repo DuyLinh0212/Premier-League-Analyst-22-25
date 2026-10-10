@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDE = {".git","node_modules",".next",".venv","__pycache__","artifacts","pipeline_runs","wheels","evidence","evidence-local","versions","hadoop","NeonKey.txt"}
-FOLDERS = ["analytics","data","jobs","tests","validation","scripts","Generate_LeagueTable_Api","FBref_Data","Transfermark_Data","portable","infra","Premier Leauge Club Analyst/web-next",".github"]
+FOLDERS = ["analytics", "apps", "data", "pipelines", "tests", "docs", "scripts", "portable", "infra", ".github"]
 
 def included():
     for folder in FOLDERS:

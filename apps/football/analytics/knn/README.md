@@ -30,14 +30,14 @@ láng giềng từng nằm Top 4), nhóm dự đoán và danh sách các đội 
 Bật HDFS đủ ba DataNode trước:
 
 ```bash
-cd /mnt/d/BigData/Generate_LeagueTable_Api
+cd /mnt/d/BigData/apps/football
 bash hdfs_start_3nodes.sh
 ```
 
 Chạy KNN trong WSL bằng môi trường Spark của dự án:
 
 ```bash
-cd /mnt/d/BigData/Generate_LeagueTable_Api/analystic/knn
+cd /mnt/d/BigData/apps/football/analytics/knn
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 export SPARK_LOCAL_IP=127.0.0.1
 export PYSPARK_PYTHON=/home/linh/.venvs/league-table/bin/python
@@ -67,11 +67,11 @@ outputs/knn_league_table.html
 Mở biểu đồ trên Windows:
 
 ```bash
-explorer.exe 'D:\BigData\Generate_LeagueTable_Api\analystic\knn\outputs\knn_league_table.html'
+explorer.exe 'D:\BigData\apps/football\analytics\knn\outputs\knn_league_table.html'
 ```
 
 Hoặc mở trực tiếp file
-`D:\BigData\Generate_LeagueTable_Api\analystic\knn\outputs\knn_league_table.html`.
+`D:\BigData\apps/football\analytics\knn\outputs\knn_league_table.html`.
 
 HTML có danh sách chọn đội, thanh xác suất Top 4 cho cả mùa và bảng các đội/mùa
 gần nhất của đội đang chọn.

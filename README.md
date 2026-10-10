@@ -22,13 +22,13 @@ flowchart LR
 
 | Thành phần | Vai trò | Mã chính |
 | --- | --- | --- |
-| Frontend | Dashboard trắng–xanh, bộ lọc, biểu đồ, dự đoán và lịch sử | `Premier Leauge Club Analyst/web-next/` |
-| Backend | API Neon, dự đoán trận, định giá, tương đồng và mô phỏng | `Generate_LeagueTable_Api/analystic/match_outcome/api.py`, `analytics/api.py` |
-| Spark | Chuẩn hóa Raw/Silver, phân tích batch, huấn luyện và xử lý sự kiện | `jobs/`, `analytics/`, `Generate_LeagueTable_Api/` |
-| Airflow | Điều phối pipeline và consumer Kafka, trạng thái lần chạy thực | `portable/airflow/dags/football.py`, `portable/runtime.py` |
+| Frontend | Dashboard trắng–xanh, bộ lọc, biểu đồ, dự đoán và lịch sử | `apps/web/` |
+| Backend | API Neon, dự đoán trận, định giá, tương đồng và mô phỏng | `apps/football/analytics/match_outcome/api.py`, `analytics/api.py` |
+| Spark | Chuẩn hóa Raw/Silver, phân tích batch, huấn luyện và xử lý sự kiện | `pipelines/spark/`, `analytics/`, `apps/football/` |
+| Airflow | Điều phối pipeline và consumer Kafka, trạng thái lần chạy thực | `pipelines/airflow/dags/football.py`, `portable/runtime.py` |
 | Kafka | Sự kiện dự đoán, chuyển nhượng và chuẩn hóa giải đấu | `match_outcome/stream.py`, `analytics/streaming.py` |
 | Neon PostgreSQL | Báo cáo JSONB, phiên bản phân tích, bộ lọc, lịch sử chạy và trạng thái pipeline | `analytics/neon_store.py`, `analytics/publish.py` |
-| HDFS | Bronze CSV, 21 bảng Silver Parquet, Gold, model và checkpoint | `jobs/pl_pipeline/`, `portable/hdfs` |
+| HDFS | Bronze CSV, 21 bảng Silver Parquet, Gold, model và checkpoint | `pipelines/spark/pl_pipeline/`, `portable/hdfs` |
 
 Kafka, Airflow và Hadoop là **hạ tầng ngoài đã có**; Neon là dịch vụ PostgreSQL từ xa. Compose production chỉ đóng gói API/Web/runtime. Script mã nguồn trong `scripts/` dùng `docker start` cho container Kafka/Airflow hiện có, không build/pull image, tạo container hoặc tạo Hadoop.
 
@@ -70,29 +70,31 @@ Neon không nhận bản sao của các dòng Bronze/Silver. `pl_analysis_runs` 
 
 ```text
 .
-├── analytics/                          # Phân tích, serving Neon và công bố báo cáo
-├── data/                               # Manifest, Silver CSV, DataMB, nguồn nén
-├── FBref_Data/                         # Nguồn FBref
-├── Transfermark_Data/                  # Nguồn Transfermarkt
-├── jobs/                               # Raw → identity → Silver → audit
-├── Generate_LeagueTable_Api/
-│   ├── analystic/knn/                  # Bảng xếp hạng và láng giềng KNN
-│   └── analystic/match_outcome/        # FastAPI, model v1/v2, inference, streaming
-├── Premier Leauge Club Analyst/
-│   └── web-next/                      # Next.js, React, biểu đồ và proxy API
-├── scripts/                            # Chạy từng dịch vụ / toàn bộ Windows/Linux
-├── portable/                           # Dockerfile, Compose, dependency lock, seed, DAG
-├── infra/                              # Đóng gói, xuất seed, giải nén nguồn
-├── tests/                              # Unit, Database/Kafka, trình duyệt
-├── validation/                         # Phương pháp, số liệu, giới hạn nghiệm thu
-└── .github/workflows/ci.yml             # Build, test, HDFS 3-node, Airflow, Neon và artifact
+├── apps/
+│   ├── web/                            # React/Next.js UI và proxy API
+│   └── football/analytics/             # API trận đấu, KNN, model và streaming
+├── analytics/                          # Báo cáo, API serving, Neon store
+├── pipelines/
+│   ├── airflow/dags/                   # DAG điều phối batch và Kafka
+│   └── spark/                          # Ingest, identity, Silver, validation
+├── data/
+│   ├── bronze/fbref/                   # CSV nguồn FBref theo mùa
+│   ├── bronze/transfermarkt/           # CSV nguồn Transfermarkt
+│   ├── silver/                         # Fixture/seed đã chuẩn hóa
+│   └── gold/                           # Thư mục dành cho fixture nhỏ; Gold chuẩn ở HDFS
+├── portable/                           # Dockerfile, Compose, dependency, seed
+├── scripts/                            # Launcher Windows/Linux cho app và dịch vụ
+├── tests/                              # Kiểm thử tích hợp, API và trình duyệt
+├── docs/validation/                    # Phương pháp, evidence và giới hạn
+├── infra/                              # Đóng gói, manifest và mở rộng nguồn nén
+└── .github/workflows/ci.yml             # Build/test, HDFS tạm, Airflow và Neon
 ```
 
 ## 5. Chạy frontend, backend, Kafka và Airflow
 
 ### Chuẩn bị một lần
 
-Chạy mã nguồn bằng Python **3.11**, Node.js **>=20.9**, Docker engine hoạt động và container Kafka/Airflow đã có. Runtime phân tích đóng gói dùng Java **17**, Spark **3.5.1**, Scala **2.12**, Kafka connector tương ứng và Airflow **3.3.2**. Dependency khóa trong `portable/requirements-*.txt` và `web-next/package-lock.json`.
+Chạy mã nguồn bằng Python **3.11**, Node.js **>=20.9**, Docker engine hoạt động và container Kafka/Airflow đã có. Runtime phân tích đóng gói dùng Java **17**, Spark **3.5.1**, Scala **2.12**, Kafka connector tương ứng và Airflow **3.3.2**. Dependency khóa trong `portable/requirements-*.txt` và `apps/web/package-lock.json`.
 
 Windows PowerShell, tại root repository:
 
@@ -102,7 +104,7 @@ if (-not (Test-Path portable/.env)) { Copy-Item portable/.env.example portable/.
 py -3.11 -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -r portable/requirements-api.txt
-Push-Location 'Premier Leauge Club Analyst/web-next'
+Push-Location 'apps/web'
 npm ci
 Pop-Location
 ```
@@ -114,7 +116,7 @@ test -f portable/.env || cp portable/.env.example portable/.env
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r portable/requirements-api.txt
-(cd 'Premier Leauge Club Analyst/web-next' && npm ci)
+(cd 'apps/web' && npm ci)
 ```
 
 Chỉnh `portable/.env` theo dịch vụ thực tế và đặt `NEON_DATABASE_URL` bằng nội dung file local `NeonKey.txt`. Cả hai file đều bị Git bỏ qua; không đưa connection string vào source hay log. `NEON_DATABASE_URL`, `KAFKA_BOOTSTRAP_SERVERS`, `HDFS_URI` dùng cho runtime/container. Launcher trên host hỗ trợ override địa chỉ dịch vụ `LOCAL_*`. Nếu không override, launcher đổi `host.docker.internal` thành `127.0.0.1`, giữ nguyên cổng và các địa chỉ khác. Kafka phải khớp **published port và advertised listeners**; `plca-kafka` trên máy tác giả dùng host port **29092**.
@@ -150,7 +152,7 @@ Mặc định Web: **http://127.0.0.1:3000**, API docs: **http://127.0.0.1:8000/
 
 [Hướng dẫn triển khai](portable/README_VI.md) mô tả Compose ứng dụng, mạng HDFS/DataNode và mount project/DAG vào Airflow hiện có. `portable/start.ps1` / `portable/start.sh` chạy **gói ứng dụng Docker**, có thể tạo container ứng dụng và chạy publication; chỉ dùng khi chọn cách triển khai đó. Build ứng dụng là lựa chọn riêng, không phải hành vi của `scripts/start-*`.
 
-Khởi động Airflow không đồng nghĩa đã cài DAG project. Worker/DAG processor cần `portable/airflow/dags`, mã project tại `/opt/project`, runtime Spark/JAR, biến môi trường và pool `spark_serial` theo hướng dẫn. Script giữ nguyên mount, command và credential của container hiện có.
+Khởi động Airflow không đồng nghĩa đã cài DAG project. Worker/DAG processor cần `pipelines/airflow/dags`, mã project tại `/opt/project`, runtime Spark/JAR, biến môi trường và pool `spark_serial` theo hướng dẫn. Script giữ nguyên mount, command và credential của container hiện có.
 
 ## 6. Pipeline, Database và replay
 
@@ -176,14 +178,14 @@ Neon chỉ giữ kết quả phân tích và provenance gọn; dữ liệu thô/
 
 Trước trận chỉ dùng lịch sử **trước ngày dự đoán**, tối đa ba mùa: Poisson regularized, phong độ, sân nhà/khách, đối đầu có shrinkage và cosine. Trong trận bổ sung tỉ số, phút/bù giờ; trường trống không bị coi là 0. Phút 0, tỉ số 0–0, chưa nhập thống kê trả kết quả trước trận; chọn **Đã kết thúc** trả 100% theo tỉ số. Phút 90 không tự kết thúc.
 
-Dữ liệu đến **25/05/2025**, ngày dự đoán mặc định **26/05/2025**, không phải dữ liệu live. Trên 380 trận mùa 2024/25: trước trận accuracy **51,3%**, baseline **40,8%**, model chỉ lịch sử **50,8%**; tỉ số/phút **70,8%** trên 9 trạng thái mỗi trận. Nhận diện hòa trước trận còn yếu. Thống kê nhập so với thống kê tổng kết, chưa kiểm chứng bằng dữ liệu trực tiếp theo phút. Xem [phương pháp và giới hạn](validation/FORECAST_V2.md).
+Dữ liệu đến **25/05/2025**, ngày dự đoán mặc định **26/05/2025**, không phải dữ liệu live. Trên 380 trận mùa 2024/25: trước trận accuracy **51,3%**, baseline **40,8%**, model chỉ lịch sử **50,8%**; tỉ số/phút **70,8%** trên 9 trạng thái mỗi trận. Nhận diện hòa trước trận còn yếu. Thống kê nhập so với thống kê tổng kết, chưa kiểm chứng bằng dữ liệu trực tiếp theo phút. Xem [phương pháp và giới hạn](docs/validation/FORECAST_V2.md).
 
 ## 8. Kiểm thử, CI/CD và bàn giao
 
 ```bash
-export PYTHONPATH="$PWD:$PWD/Generate_LeagueTable_Api/analystic"
+export PYTHONPATH="$PWD:$PWD/apps/football/analytics"
 python -m unittest discover -s tests -v
-python -m unittest discover -s Generate_LeagueTable_Api/analystic/match_outcome/tests -v
+python -m unittest discover -s apps/football/analytics/match_outcome/tests -v
 python -m analytics.outlook.verify_outlook
 python -m analytics.outlook.verify_club_phases
 python infra/package_portable.py
@@ -194,14 +196,14 @@ GitHub [Actions](https://github.com/DuyLinh0212/Premier-League-Analyst-22-25/act
 
 ZIP gồm mã nguồn, script chạy, seed, model, dependency lock và manifest checksum; loại secret, cache, image tar và archive Hadoop. Đóng gói tìm root theo vị trí script, không tạo `delivery/delivery`. `appearances.csv.gz` được giải nén và kiểm tra checksum khi import/build.
 
-CI tạo Hadoop chỉ trên runner tạm; máy laptop và máy nhận tiếp tục dùng HDFS hiện có, không format hay dựng Hadoop mới. Luồng Neon chỉ chạy trên push sau khi secret đã được cấu hình. Kiểm tra local trước đây và giới hạn triển khai ghi ở [validation/README.md](validation/README.md); chuyển máy thực tế vẫn cần nghiệm thu riêng.
+CI tạo Hadoop chỉ trên runner tạm; máy laptop và máy nhận tiếp tục dùng HDFS hiện có, không format hay dựng Hadoop mới. Luồng Neon chỉ chạy trên push sau khi secret đã được cấu hình. Kiểm tra local trước đây và giới hạn triển khai ghi ở [docs/validation/README.md](docs/validation/README.md); chuyển máy thực tế vẫn cần nghiệm thu riêng.
 
 ## 9. Tài liệu liên quan
 
 - [Triển khai với hạ tầng ngoài](portable/README_VI.md)
-- [Dự đoán trước và trong trận](validation/FORECAST_V2.md)
+- [Dự đoán trước và trong trận](docs/validation/FORECAST_V2.md)
 - [Dữ liệu Silver](data/silver/README_VI.md)
 - [Công cụ đóng gói](infra/README.md)
-- [Evidence và giới hạn](validation/README.md)
+- [Evidence và giới hạn](docs/validation/README.md)
 
 Giấy phép: [LICENSE](LICENSE).

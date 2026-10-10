@@ -17,7 +17,7 @@ def audit_outputs(ctx):
     expected_members, expected_core = set(), set()
     for season in SEASONS:
         for kind in ["standard", "shooting", "miscellaneous", "playing_time", "gk"]:
-            with (ROOT / "FBref_Data" / season / "03_player" / ("player_"+kind+".csv")).open(encoding="utf-8-sig", newline="") as file:
+            with (ROOT / "data/bronze/fbref" / season / "03_player" / ("player_"+kind+".csv")).open(encoding="utf-8-sig", newline="") as file:
                 for item in csv.DictReader(file):
                     if not item.get("Player") or item["Player"] == "Player":
                         continue

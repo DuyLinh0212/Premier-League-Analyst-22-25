@@ -65,7 +65,7 @@ def import_sources(directory=None):
         raise ValueError('RAW_FIXTURE_LIMIT is reserved for explicit ci-* namespaces')
     silver = list(silver_tables(directory))
     inputs = []
-    for folder in ('FBref_Data', 'Transfermark_Data'):
+    for folder in ('data/bronze/fbref', 'data/bronze/transfermarkt'):
         for path in sorted((ROOT / folder).rglob('*.csv')):
             relative = path.relative_to(ROOT).as_posix()
             inputs.append((path, relative, sha(path)))

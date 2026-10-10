@@ -15,7 +15,7 @@ from .core import ROOT, json_write, now
 
 
 def preflight(ctx):
-    files = list((ROOT / "FBref_Data").rglob("*.csv")) + list((ROOT / "Transfermark_Data").glob("*.csv"))
+    files = list((ROOT / "data/bronze/fbref").rglob("*.csv")) + list((ROOT / "data/bronze/transfermarkt").glob("*.csv"))
     if len(files) != 585:
         raise RuntimeError(f"Expected 585 source CSVs, found {len(files)}")
     hdfs_uri = urlparse(ctx.uri)
@@ -37,7 +37,7 @@ def preflight(ctx):
 
 def _partition_transfermarkt(ctx, staging):
     """Keep immutable source CSVs and add season-partitioned Bronze extracts."""
-    source = ROOT / "Transfermark_Data"
+    source = ROOT / "data/bronze/transfermarkt"
     seasons = {"2022": "2022-23", "2023": "2023-24", "2024": "2024-25"}
     game_season = {}
     with (source / "games.csv").open(encoding="utf-8-sig", newline="") as stream:
@@ -81,7 +81,7 @@ def _partition_transfermarkt(ctx, staging):
 def register_raw_snapshot(ctx):
     ctx.require("preflight")
     entries = []
-    for folder, prefix in [(ROOT / "FBref_Data", "fbref"), (ROOT / "Transfermark_Data", "transfermarkt")]:
+    for folder, prefix in [(ROOT / "data/bronze/fbref", "fbref"), (ROOT / "data/bronze/transfermarkt", "transfermarkt")]:
         for path in sorted(folder.rglob("*.csv")):
             digest = hashlib.sha256()
             with path.open("rb") as stream:
@@ -110,7 +110,7 @@ def register_raw_snapshot(ctx):
         staging = f"{ctx.uri}{ctx.base}/bronze_staging_{dataset_id}"
         ctx.hdfs("-rm", "-r", "-f", staging, check=False)
         ctx.hdfs("-mkdir", "-p", staging + "/fbref", staging + "/transfermarkt/_source")
-        for folder in sorted((ROOT / "FBref_Data").iterdir()):
+        for folder in sorted((ROOT / "data/bronze/fbref").iterdir()):
             if not folder.is_dir():
                 continue
             year = folder.name.split("-")[0]
@@ -121,7 +121,7 @@ def register_raw_snapshot(ctx):
             contents = sorted(folder.iterdir())
             if contents:
                 ctx.hdfs("-put", *map(str, contents), destination)
-        tm_sources = sorted((ROOT / "Transfermark_Data").glob("*.csv"))
+        tm_sources = sorted((ROOT / "data/bronze/transfermarkt").glob("*.csv"))
         if tm_sources:
             ctx.hdfs("-put", *map(str, tm_sources), staging + "/transfermarkt/_source")
         _partition_transfermarkt(ctx, staging)

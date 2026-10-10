@@ -19,7 +19,7 @@ from pyspark.sql.types import StringType
 
 from .config import CLUBS, LOGIC_VERSION, SEASONS
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 
 def now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")

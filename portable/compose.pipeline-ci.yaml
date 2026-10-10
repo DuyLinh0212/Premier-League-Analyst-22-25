@@ -64,7 +64,7 @@ services:
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow-ci-only@airflow-db:5432/airflow
       AIRFLOW__API__SECRET_KEY: ci-only-ephemeral-airflow-key
       AIRFLOW__WEBSERVER__SECRET_KEY: ci-only-ephemeral-web-key
-      PYTHONPATH: /opt/project:/opt/project/jobs:/opt/project/Generate_LeagueTable_Api/analystic
+      PYTHONPATH: /opt/project:/opt/project/pipelines/spark:/opt/project/apps/football/analytics
       HDFS_URI: hdfs://namenode:9000
       HDFS_BASE_PATH: /premier-league
       NAMENODE_HTTP_URI: http://namenode:9870

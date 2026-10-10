@@ -4,7 +4,7 @@ import traceback
 import subprocess
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[0]))
 from pl_pipeline.core import Context, now
 from pl_pipeline.ingest import preflight, register_raw_snapshot
 from pl_pipeline.identity import build_identity

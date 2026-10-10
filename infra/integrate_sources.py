@@ -12,8 +12,8 @@ SOURCE = ROOT.parent
 def main():
     sql = {}
     inputs = []
-    for relative in ['Danh/jobs/step_05_spark_sql_analysis.py', 'Danh/jobs/step_07_save_analytics_hdfs.py',
-                     'Danh/jobs/step_06_rfm_clustering.py', 'Danh/jobs/generate_visual_dashboard.py']:
+    for relative in ['Danh/pipelines/spark/step_05_spark_sql_analysis.py', 'Danh/pipelines/spark/step_07_save_analytics_hdfs.py',
+                     'Danh/pipelines/spark/step_06_rfm_clustering.py', 'Danh/pipelines/spark/generate_visual_dashboard.py']:
         path = SOURCE / relative
         source = path.read_text(encoding='utf-8-sig')
         inputs.append({'source': relative, 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})

@@ -12,4 +12,4 @@ python infra/package_portable.py
 python portable/verify_bundle.py --archive artifacts/PremierLeague_Docker.zip
 ```
 
-Đóng gói tìm root theo vị trí script, chạy được từ thư mục làm việc khác và không sinh `delivery/delivery`. Xem [hướng dẫn triển khai](../portable/README_VI.md) và [giới hạn nghiệm thu](../validation/README.md).
+Đóng gói tìm root theo vị trí script, chạy được từ thư mục làm việc khác và không sinh `delivery/delivery`. Xem [hướng dẫn triển khai](../portable/README_VI.md) và [giới hạn nghiệm thu](../docs/validation/README.md).

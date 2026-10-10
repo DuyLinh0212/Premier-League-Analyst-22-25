@@ -8,8 +8,8 @@ import subprocess
 from pathlib import Path
 from pl_pipeline.core import Context, ROOT
 
-OUTPUT = Path(os.getenv("MATCH_MODEL_DIR", str(ROOT / "Generate_LeagueTable_Api/analystic/match_outcome/outputs")))
-KNN = Path(os.getenv("KNN_OUTPUT_DIR", str(ROOT / "Generate_LeagueTable_Api/analystic/knn/outputs")))
+OUTPUT = Path(os.getenv("MATCH_MODEL_DIR", str(ROOT / "apps/football/analytics/match_outcome/outputs")))
+KNN = Path(os.getenv("KNN_OUTPUT_DIR", str(ROOT / "apps/football/analytics/knn/outputs")))
 
 def hdfs(*args, check=True):
     return subprocess.run([os.getenv("HDFS_BIN", "hdfs"), "dfs", "-Ddfs.blocksize=67108864", "-Ddfs.replication=2", *map(str, args)], check=check)
@@ -32,7 +32,7 @@ def stage(name, run_id=None):
         ctx.require("publish_silver")
         subprocess.run(["spark-submit", "--master", "local[2]", "--driver-memory", "512m",
                         "--conf", "spark.hadoop.dfs.blocksize=67108864", "--conf", "spark.hadoop.parquet.block.size=67108864", "--conf", "spark.hadoop.dfs.replication=2", "--conf", "spark.hadoop.dfs.client.use.datanode.hostname=true",
-                        str(ROOT / "Generate_LeagueTable_Api/analystic/knn/knn_league_table.py"),
+                        str(ROOT / "apps/football/analytics/knn/knn_league_table.py"),
                         "--input-path", ctx.silver_table_path("fact_team_season"), "--output-dir", str(KNN),
                         "--checkpoint-location", ctx.uri + ctx.base + "/checkpoints/analytics/knn_league_table"], check=True)
         ctx.completed("knn")

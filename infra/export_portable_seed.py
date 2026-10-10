@@ -41,7 +41,7 @@ try:
     shutil.rmtree(season_path)
     staging.rename(season_path)
     for name, relative in [("match_outcome", "match_outcome/outputs"), ("knn", "knn/outputs")]:
-        shutil.copytree(ROOT / "Generate_LeagueTable_Api/analystic" / relative, seed / name, dirs_exist_ok=True,
+        shutil.copytree(ROOT / "apps/football/analytics" / relative, seed / name, dirs_exist_ok=True,
                         ignore=shutil.ignore_patterns("__pycache__", ".*.crc"))
     counts = {table: spark.read.parquet((seed / "silver/facts" / table).as_uri()).count() for table in ["fact_team_season", "fact_team_match", "fact_match_enriched"]}
     manifest = {"source_run": RUN, "source_files_64mib": files, "counts": counts, "blocksize": 67108864, "replication": 2}

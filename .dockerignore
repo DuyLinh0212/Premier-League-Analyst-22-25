@@ -7,7 +7,7 @@ artifacts
 portable/wheels
 portable/evidence-local
 portable/evidence-ci
-Transfermark_Data/appearances.csv
+data/bronze/transfermarkt/appearances.csv
 **/.venv
 **/venv
 **/runtime_dependencies
@@ -36,25 +36,8 @@ exports
 **/*.pptx
 *.rar
 *.log
-Generate_LeagueTable_Api/analystic/club_radar
-Generate_LeagueTable_Api/analystic/kmeans
-Generate_LeagueTable_Api/analystic/player_similarity
-Generate_LeagueTable_Api/analystic/_radar*
-Generate_LeagueTable_Api/analystic/_transfer*
-Premier Leauge Club Analyst/analystic
-Premier Leauge Club Analyst/web-next/app/cach-phan-tich
-Premier Leauge Club Analyst/web-next/app/api/catalog
-Premier Leauge Club Analyst/web-next/app/api/data
-Premier Leauge Club Analyst/web-next/app/api/runs
-Premier Leauge Club Analyst/web-next/app/api/query
-Premier Leauge Club Analyst/web-next/app/api/dashboard
-Premier Leauge Club Analyst/web-next/app/api/results
-Premier Leauge Club Analyst/web-next/lib
-Premier Leauge Club Analyst/web-next/tests
-Premier Leauge Club Analyst/web-next/scripts
-Premier Leauge Club Analyst/web-next/app/ui/dashboard.jsx
-Premier Leauge Club Analyst/web-next/app/ui/methodology.jsx
-Premier Leauge Club Analyst/web-next/app/ui/sidebar.jsx
-jobs/pl_pipeline/analysis.py
-jobs/pl_pipeline/neo4j_export.py
-jobs/generate_visual_dashboard.py
+apps/football/analytics/club_radar
+apps/football/analytics/kmeans
+apps/football/analytics/player_similarity
+apps/football/analytics/_radar*
+apps/football/analytics/_transfer*

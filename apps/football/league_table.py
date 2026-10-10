@@ -16,8 +16,8 @@ CSV_COLUMNS = [
     "Pts/MP", "Attendance", "Top Team Scorer", "Goalkeeper", "Notes",
 ]
 DEFAULT_BASELINE = (
-    Path(__file__).resolve().parent.parent
-    / "FBref_Data" / "2024-2025" / "01_league" / "league_table.csv"
+    Path(__file__).resolve().parents[2]
+    / "data/bronze/fbref" / "2024-2025" / "01_league" / "league_table.csv"
 )
 SEASON_PATTERN = re.compile(r"^(\d{4})-(\d{4})$")
 

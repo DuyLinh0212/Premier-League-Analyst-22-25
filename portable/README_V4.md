@@ -32,7 +32,7 @@ Sau khi Airflow ghi Gold và công bố báo cáo vào Neon, Web ở `http://loc
 
 ## Airflow hiện có
 
-Hai DAG trong `portable/airflow/dags` dùng Airflow 3.3.2 và provider standard. Copy/bind mount DAG vào **Airflow đã có**, mount mã dự án tại `/opt/project`, mount `pipeline_runs`/`STATE_DIR` bền vững và cấu hình biến môi trường kết nối giống `.env`. Worker cần Java17, Spark3.5.1, Python3.11 với dependencies khóa trong `requirements-*`, và JAR Scala2.12 của `portable/jars` tại `/opt/kafka-jars`. Cấu hình `SPARK_PYTHON`, `PYTHONPATH`, `HDFS_BIN`; wrapper `portable/hdfs` dùng Hadoop client JAR có sẵn của Spark, không chứa NameNode/DataNode.
+Hai DAG trong `pipelines/airflow/dags` dùng Airflow 3.3.2 và provider standard. Copy/bind mount DAG vào **Airflow đã có**, mount mã dự án tại `/opt/project`, mount `pipeline_runs`/`STATE_DIR` bền vững và cấu hình biến môi trường kết nối giống `.env`. Worker cần Java17, Spark3.5.1, Python3.11 với dependencies khóa trong `requirements-*`, và JAR Scala2.12 của `portable/jars` tại `/opt/kafka-jars`. Cấu hình `SPARK_PYTHON`, `PYTHONPATH`, `HDFS_BIN`; wrapper `portable/hdfs` dùng Hadoop client JAR có sẵn của Spark, không chứa NameNode/DataNode.
 
 Nếu image Airflow hiện có đã đáp ứng phiên bản/runtime thì tái sử dụng. Dockerfile.airflow là lựa chọn đóng gói runtime worker khi cần, và được CI kiểm tra import; Compose production không tạo thêm Airflow. Tạo pool `spark_serial` một slot trên Airflow hiện có (`airflow pools set spark_serial 1 'Serial Spark jobs'`), tránh chạy đồng thời nhiều job Spark. Không yêu cầu SSH/WSL hoặc Docker socket trong DAG.
 

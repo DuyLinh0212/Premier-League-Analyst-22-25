@@ -152,7 +152,7 @@ def train(root, output, silver=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", default=str(Path(__file__).resolve().parents[3]))
+    parser.add_argument("--root", default=str(Path(__file__).resolve().parents[4]))
     parser.add_argument("--output", default=str(Path(__file__).resolve().parent / "outputs"))
     parser.add_argument("--silver")
     args = parser.parse_args()

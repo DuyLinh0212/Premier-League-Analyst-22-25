@@ -5,12 +5,12 @@ COPY --from=runtime /opt/java/openjdk /opt/java/openjdk
 COPY --from=runtime /opt/spark /opt/spark
 COPY --from=runtime /opt/project /opt/project
 COPY --from=runtime /usr/local /opt/python-runtime
-COPY portable/airflow/dags /opt/airflow/dags
+COPY pipelines/airflow/dags /opt/airflow/dags
 COPY portable/hdfs /usr/local/bin/hdfs
 RUN chmod +x /usr/local/bin/hdfs
 ENV JAVA_HOME=/opt/java/openjdk SPARK_HOME=/opt/spark HDFS_BIN=/usr/local/bin/hdfs
 ENV SPARK_PYTHON=/opt/python-runtime/bin/python PYSPARK_PYTHON=/opt/python-runtime/bin/python PYSPARK_DRIVER_PYTHON=/opt/python-runtime/bin/python
-ENV PYTHONPATH=/opt/project:/opt/project/jobs:/opt/project/Generate_LeagueTable_Api/analystic:/opt/spark/python/lib/pyspark.zip:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
+ENV PYTHONPATH=/opt/project:/opt/project/pipelines/spark:/opt/project/apps/football/analytics:/opt/spark/python/lib/pyspark.zip:/opt/spark/python/lib/py4j-0.10.9.7-src.zip
 ENV PATH=/opt/spark/bin:/opt/java/openjdk/bin:$PATH LD_LIBRARY_PATH=/opt/python-runtime/lib
 RUN mkdir -p /opt/project/pipeline_runs /state && chown -R airflow:0 /opt/project/pipeline_runs /state
 USER airflow

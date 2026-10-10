@@ -12,8 +12,8 @@ from .outlook.club_phases import analyze as phases
 
 
 def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neon=False, pending_path=None):
-    output = Path(os.getenv('MATCH_MODEL_DIR', str(ROOT / 'Generate_LeagueTable_Api/analystic/match_outcome/outputs')))
-    knn = Path(os.getenv('KNN_OUTPUT_DIR', str(ROOT / 'Generate_LeagueTable_Api/analystic/knn/outputs')))
+    output = Path(os.getenv('MATCH_MODEL_DIR', str(ROOT / 'apps/football/analytics/match_outcome/outputs')))
+    knn = Path(os.getenv('KNN_OUTPUT_DIR', str(ROOT / 'apps/football/analytics/knn/outputs')))
     forecast_artifact = json.loads((output / 'forecast_v2.json').read_text(encoding='utf-8'))
     run_id = run_id or 'bundle_' + store.digest({'dataset': dataset_key, 'version': VERSION, 'model': json.loads((output / 'model.json').read_text(encoding='utf-8'))['model_version'], 'forecast_v2':forecast_artifact['model_version']})[:24]
     neon = None

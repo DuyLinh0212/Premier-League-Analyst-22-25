@@ -19,7 +19,7 @@ with DAG("football_pipeline", schedule=None, start_date=datetime(2026, 1, 1, tz=
 with DAG("football_kafka_analytics", schedule="* * * * *", start_date=datetime(2026, 1, 1, tz="Asia/Ho_Chi_Minh"),
          catchup=False, max_active_runs=1, max_active_tasks=1, default_args=DEFAULTS, tags=["kafka", "spark"]) as streaming:
     readiness = "$SPARK_PYTHON /opt/project/portable/wait_services.py && "
-    league = BashOperator(task_id="league_normalization", bash_command=readiness + "$SPARK_PYTHON /opt/project/Generate_LeagueTable_Api/streaming_spark.py --available-now")
+    league = BashOperator(task_id="league_normalization", bash_command=readiness + "$SPARK_PYTHON /opt/project/apps/football/streaming_spark.py --available-now")
     matches = BashOperator(task_id="match_statistics", bash_command=readiness + "$SPARK_PYTHON -m match_outcome.stream")
     league >> matches
     transfers = BashOperator(task_id="transfer_simulation", bash_command=readiness + "$SPARK_PYTHON -m analytics.streaming")

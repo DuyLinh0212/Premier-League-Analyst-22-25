@@ -18,9 +18,10 @@ portable/wheels/
 *.zip
 *.tar
 *.tar.gz
-Transfermark_Data/appearances.csv
+data/bronze/transfermarkt/appearances.csv
 *.log
 bundle_manifest.json
 delivery/
 portable/seed/match_outcome/versions/
-Generate_LeagueTable_Api/analystic/match_outcome/outputs/versions/
+apps/football/analytics/match_outcome/outputs/versions/
+**/evidence/

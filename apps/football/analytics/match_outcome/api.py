@@ -16,7 +16,7 @@ from .schema import feature_schema, validate_stats, METRICS
 from analytics import store
 from analytics.api import router, payload, save_user_analysis, get_report
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[4]
 OUTPUT = Path(os.getenv("MATCH_MODEL_DIR", str(Path(__file__).parent / "outputs")))
 KNN = Path(os.getenv("KNN_OUTPUT_DIR", str(Path(__file__).parent.parent / "knn" / "outputs")))
 

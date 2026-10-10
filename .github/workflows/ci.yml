@@ -27,12 +27,12 @@ jobs:
           python-version: '3.11'
       - name: Train chronological pregame and live score models from Silver fixture
         env:
-          PYTHONPATH: Generate_LeagueTable_Api/analystic
+          PYTHONPATH: apps/football/analytics
           OPENBLAS_NUM_THREADS: '1'
         run: |
           python -m pip install numpy==2.4.6
           python -m match_outcome.train_v2
-          cp Generate_LeagueTable_Api/analystic/match_outcome/outputs/forecast_v2*.json portable/seed/match_outcome/
+          cp apps/football/analytics/match_outcome/outputs/forecast_v2*.json portable/seed/match_outcome/
       - name: Build packaged runtime and API
         run: |
           docker build -f portable/Dockerfile.runtime --target runtime -t football-runtime:4.0 .
@@ -42,7 +42,7 @@ jobs:
           docker run --rm football-runtime:4.0 python -m unittest discover -s tests -v
           docker run --rm football-runtime:4.0 python -m analytics.outlook.verify_outlook
           docker run --rm football-runtime:4.0 python -m analytics.outlook.verify_club_phases
-          docker run --rm football-runtime:4.0 python -m unittest discover -s Generate_LeagueTable_Api/analystic/match_outcome/tests -v
+          docker run --rm football-runtime:4.0 python -m unittest discover -s apps/football/analytics/match_outcome/tests -v
       - name: Build Web and check packaged Airflow DAGs
         run: |
           docker build -f portable/Dockerfile.web -t football-web:4.0 .
@@ -67,7 +67,7 @@ jobs:
         run: |
           python -m pip install -r tests/requirements-web.txt
           python -m playwright install --with-deps chromium
-          docker compose -f portable/compose.ci.yaml exec -T api python -c "from pathlib import Path; p=Path('/opt/project'); paths=[p/'data/silver',p/'data/datamb_players_db.json',p/'Generate_LeagueTable_Api/analystic/match_outcome/outputs',p/'Generate_LeagueTable_Api/analystic/knn/outputs']; [r.rename(r.with_name(r.name+'_disabled_for_browser')) for r in paths]"
+          docker compose -f portable/compose.ci.yaml exec -T api python -c "from pathlib import Path; p=Path('/opt/project'); paths=[p/'data/silver',p/'data/datamb_players_db.json',p/'apps/football/analytics/match_outcome/outputs',p/'apps/football/analytics/knn/outputs']; [r.rename(r.with_name(r.name+'_disabled_for_browser')) for r in paths]"
           python tests/web_browser.py
       - name: Package verified delivery and browser screenshots
         run: |
