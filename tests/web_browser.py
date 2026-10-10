@@ -112,7 +112,7 @@ def main():
         capture('15-trong-tran.png','Trong trận · tỉ số, phút và thống kê tương đồng')
         page.get_by_label('Đã kết thúc',exact=True).check()
         page.get_by_role('button',name='Ước tính kết quả →').click()
-        expect(page.locator('.f-prob-values .home_win strong')).to_have_text('100.0%',timeout=30000)
+        expect(page.locator('.f-result > .f-prob-values .home_win strong')).to_have_text('100.0%',timeout=30000)
         page.set_viewport_size({'width':390,'height':844})
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         capture('16-du-doan-mobile.png','Dự đoán trong trận trên điện thoại')

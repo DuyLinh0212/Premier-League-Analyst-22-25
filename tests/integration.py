@@ -62,7 +62,12 @@ def main():
     consumer=KafkaConsumer('match_statistics',bootstrap_servers=os.environ['KAFKA_BOOTSTRAP_SERVERS'],auto_offset_reset='earliest',group_id=None,consumer_timeout_ms=10000,value_deserializer=lambda b:json.loads(b))
     match_events=[record.value for record in consumer]
     consumer.close()
-    spark=SparkSession.builder.appName('CI mixed match replay').master('local[2]').config('spark.driver.memory','512m').config('spark.ui.enabled','false').getOrCreate()
+    import glob
+    # The first gateway in this process must include the Kafka classpath, even
+    # though this batch uses Python Kafka. Later Structured Streaming reuses it.
+    spark=(SparkSession.builder.appName('CI mixed match replay').master('local[2]')
+           .config('spark.driver.memory','512m').config('spark.ui.enabled','false')
+           .config('spark.jars',','.join(glob.glob(os.getenv('SPARK_EXTRA_JARS','/opt/kafka-jars/*.jar')))).getOrCreate())
     try:
         output=Path('/opt/project/Generate_LeagueTable_Api/analystic/match_outcome/outputs')
         with tempfile.TemporaryDirectory() as target:

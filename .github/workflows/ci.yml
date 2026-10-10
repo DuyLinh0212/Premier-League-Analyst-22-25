@@ -51,6 +51,7 @@ jobs:
         run: docker compose -f portable/compose.ci.yaml up -d --wait --wait-timeout 1200
       - name: Database Kafka HTTP and recovery acceptance
         run: |
+          set -o pipefail
           mkdir -p portable/evidence-ci
           docker compose -f portable/compose.ci.yaml exec -T api python tests/integration.py | tee portable/evidence-ci/acceptance.log
           docker compose -f portable/compose.ci.yaml stop neo4j
