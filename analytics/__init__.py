@@ -1,2 +1,2 @@
 """Unified, versioned Premier League analytics."""
-VERSION = "football-merged-4.0.2"
+VERSION = "football-merged-4.1.0"

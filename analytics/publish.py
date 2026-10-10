@@ -14,7 +14,8 @@ from .outlook.club_phases import analyze as phases
 def publish(dataset_key, run_id=None, spark=None):
     output = Path(os.getenv('MATCH_MODEL_DIR', str(ROOT / 'Generate_LeagueTable_Api/analystic/match_outcome/outputs')))
     knn = Path(os.getenv('KNN_OUTPUT_DIR', str(ROOT / 'Generate_LeagueTable_Api/analystic/knn/outputs')))
-    run_id = run_id or 'bundle_' + store.digest({'dataset': dataset_key, 'version': VERSION, 'model': json.loads((output / 'model.json').read_text(encoding='utf-8'))['model_version']})[:24]
+    forecast_artifact = json.loads((output / 'forecast_v2.json').read_text(encoding='utf-8'))
+    run_id = run_id or 'bundle_' + store.digest({'dataset': dataset_key, 'version': VERSION, 'model': json.loads((output / 'model.json').read_text(encoding='utf-8'))['model_version'], 'forecast_v2':forecast_artifact['model_version']})[:24]
     run_key = store.begin_run(run_id, dataset_key)
     completed = store.query('MATCH (r:PLRun {key:$key,status:"complete"}) RETURN r.run_id AS id',{'key':run_key})
     if completed:
@@ -41,6 +42,8 @@ def publish(dataset_key, run_id=None, spark=None):
         reports.append(('clubs', [{'id': cid, 'name': name} for cid, name in sorted(data.clubs.items()) if any(cid in (m['home_team'], m['away_team']) for m in matches)], {}))
         reports.append(('model', json.loads((output / 'model.json').read_text(encoding='utf-8')), {}))
         reports.append(('model_metrics', json.loads((output / 'metrics.json').read_text(encoding='utf-8')), {}))
+        reports.append(('forecast_v2', forecast_artifact, {}))
+        reports.append(('forecast_v2_metrics', json.loads((output / 'forecast_v2_metrics.json').read_text(encoding='utf-8')), {}))
         for kind, filename in [('knn_predictions', 'knn_predictions.csv'), ('knn_neighbors', 'knn_neighbors.csv')]:
             with (knn / filename).open(encoding='utf-8-sig', newline='') as stream:
                 reports.append((kind, list(csv.DictReader(stream)), {}))

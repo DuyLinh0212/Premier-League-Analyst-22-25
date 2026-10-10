@@ -45,9 +45,28 @@ def stage(name, run_id=None):
         report = compare(OUTPUT)
         ctx.completed("match_outcome", {"model_version": report["model_version"], "test": report["test"]})
     elif name == "publish":
-        ctx.require("match_outcome")
+        ctx.require("match_forecast_v2")
         result = publish_bundle(OUTPUT, KNN, ctx.run_id)
         ctx.completed("publish", result)
+    elif name == 'match_forecast_v2':
+        ctx.require('match_outcome')
+        from match_outcome.train_v2 import train
+        from pl_pipeline.core import clean_json
+        spark=ctx.session('MatchForecastV2')
+        try:
+            goals=[clean_json(r.asDict()) for r in spark.read.parquet(ctx.silver+'/facts/fact_goal_event').collect()]
+            for g in goals:
+                g['stoppage_minutes']=int(g.get('stoppage_minutes') or 0)
+            matches=[json.loads(line) for line in (OUTPUT/'matches.jsonl').read_text(encoding='utf-8').splitlines()]
+            report=train(matches,goals,OUTPUT)
+            for filename in ('forecast_v2.json','forecast_v2_metrics.json'):
+                target=ctx.gold+'/models/'+report['model_version']+'/'+filename[:-5]
+                spark.createDataFrame([((OUTPUT/filename).read_text(encoding='utf-8'),)],'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
+                if spark.read.parquet(target).first()['payload_json']!=(OUTPUT/filename).read_text(encoding='utf-8'):
+                    raise RuntimeError('HDFS v2 model read-back mismatch')
+            ctx.completed('match_forecast_v2',{'model_version':report['model_version'],'pregame':report['pregame'],'live':report['live']})
+        finally:
+            spark.stop()
     elif name == "merged_publish":
         ctx.require("publish")
         from analytics.publish import publish_hdfs

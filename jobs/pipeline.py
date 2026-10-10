@@ -14,7 +14,7 @@ from pl_pipeline.silver import build_silver, validate_silver, publish_silver
 def stages():
     from portable.runtime import stage
     result = {f.__name__: f for f in [preflight, register_raw_snapshot, build_identity, build_silver, validate_silver, publish_silver]}
-    for name in ("knn", "match_outcome", "publish"):
+    for name in ("knn", "match_outcome", "match_forecast_v2", "publish", "merged_publish"):
         result[name] = lambda ctx, name=name: stage(name, ctx.run_id)
     return result
 

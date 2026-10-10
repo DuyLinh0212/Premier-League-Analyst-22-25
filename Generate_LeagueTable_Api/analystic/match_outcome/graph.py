@@ -38,6 +38,8 @@ def publish_predictions(items, run_id=None):
                           "match_date": event.get('match_date'),
                           "statistics_json": json.dumps({side:event[side+'_stats'] for side in ('home','away')},ensure_ascii=False,allow_nan=False),
                           "model_version": prediction["model_version"], **prediction["probabilities"],
+                          'request_json':json.dumps(event,ensure_ascii=False,allow_nan=False),
+                          'result_json':json.dumps(prediction,ensure_ascii=False,allow_nan=False),
                           "imputed_fields": prediction["imputed_fields"], "run_id": run_id or "kafka_" + event["event_id"]})
         query("""UNWIND $rows AS row
           MERGE (run:AnalysisRun {analysis_run_id:row.run_id}) ON CREATE SET run.status='processing',run.project='football-v3'

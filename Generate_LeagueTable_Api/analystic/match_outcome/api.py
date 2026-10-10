@@ -7,10 +7,12 @@ import uuid
 from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Literal
+from datetime import date, timedelta
 from kafka import KafkaProducer
 from .inference import predict
-from .schema import feature_schema, validate_stats
+from .schema import feature_schema, validate_stats, METRICS
 from analytics import store
 from analytics.api import router, payload, save_user_analysis
 
@@ -54,6 +56,64 @@ class PredictionRequest(BaseModel):
     away_team: str
     home_stats: dict
     away_stats: dict
+
+class PredictionRequestV2(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    mode: Literal['pregame', 'live'] = 'pregame'
+    home_team: str
+    away_team: str
+    prediction_date: date | None = None
+    home_goals: int = Field(0, ge=0, le=30, strict=True)
+    away_goals: int = Field(0, ge=0, le=30, strict=True)
+    minute: int = Field(0, ge=0, le=90, strict=True)
+    stoppage_minutes: int = Field(0, ge=0, le=30, strict=True)
+    finished: bool = False
+    home_stats: dict = Field(default_factory=dict)
+    away_stats: dict = Field(default_factory=dict)
+
+def send_prediction(event):
+    try:
+        if app.state.producer is None:
+            app.state.producer = KafkaProducer(bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:29092'),
+                acks='all', retries=3, max_block_ms=5000, request_timeout_ms=5000,
+                value_serializer=lambda x: json.dumps(x, ensure_ascii=False, allow_nan=False).encode())
+        app.state.producer.send('match_statistics', key=event['event_id'].encode(), value=event).get(timeout=10)
+    except Exception as exc:
+        raise HTTPException(503, 'Kafka chưa sẵn sàng. Hãy thử lại sau.') from exc
+
+@app.get('/prediction/config')
+def prediction_config():
+    from .forecast_v2 import STYLE
+    artifact, metadata = store.report('forecast_v2')
+    return {'model_version':artifact['model_version'],'data_through':artifact['data_through'],
+            'trained_through':artifact['trained_through'],
+            'minimum_date':(date.fromisoformat(artifact['trained_through'])+timedelta(days=1)).isoformat(),
+            'default_date':(date.fromisoformat(artifact['data_through'])+timedelta(days=1)).isoformat(),
+            'metrics':[{'key':k,'label':METRICS[k][0],'unit':METRICS[k][1],'max':METRICS[k][2] or 1000} for k in STYLE],
+            '_publication':metadata}
+
+@app.get('/model/metrics/v2')
+def prediction_metrics_v2():
+    return payload('forecast_v2_metrics')
+
+@app.post('/predict/v2')
+def forecast_v2(request: PredictionRequestV2):
+    from .forecast_v2 import forecast, validate_request
+    artifact, metadata = store.report('forecast_v2')
+    try:
+        params=validate_request(request.model_dump(mode='json'))
+        if params['prediction_date'] is None:
+            params['prediction_date']=(date.fromisoformat(artifact['data_through'])+timedelta(days=1)).isoformat()
+        result=forecast(params,artifact)
+    except ValueError as exc:
+        raise HTTPException(422,str(exc)) from exc
+    names={r[s+'_team']:r.get(s+'_name',r[s+'_team']) for r in artifact['history'] for s in ('home','away')}
+    event={**params,'event_id':uuid.uuid4().hex,'kind':'scenario','schema_version':2,'source':'manual' if params['mode']=='live' else 'as_of_history',
+           'is_simulated':params['mode']=='live','model_version':artifact['model_version'],'dataset_fingerprint':artifact['dataset_fingerprint'],
+           'home_name':names[params['home_team']],'away_name':names[params['away_team']]}
+    send_prediction(event)
+    saved=save_user_analysis('match_prediction_v2',event,result,params['mode']=='live')
+    return {**saved,'prediction_id':event['event_id'],'streaming':'queued','publication_run_id':metadata['run_id']}
 
 def matches():
     return payload('matches')

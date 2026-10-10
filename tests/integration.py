@@ -45,6 +45,34 @@ def main():
     assert http('/reports/' + valuation['run_id'] + '/valuation')[0]['payload']['estimated_fee_mil_eur'] == valuation['estimated_fee_mil_eur']
     prediction = http('/predict', {k:http('/matches')[0][k] for k in ['home_team','away_team','home_stats','away_stats']})
     assert prediction['persistence'] == 'saved' and abs(sum(prediction['probabilities'].values())-1) < 1e-10
+    config=http('/prediction/config')
+    params={'home_team':'LIV','away_team':'ARS','prediction_date':config['default_date']}
+    v2=http('/predict/v2',params)
+    assert v2['persistence']=='saved' and abs(sum(v2['probabilities'].values())-1)<1e-10
+    assert http('/reports/'+v2['run_id']+'/match_prediction_v2')[0]['payload']['probabilities']==v2['probabilities']
+    live=http('/predict/v2',{**params,'mode':'live','minute':60,'home_goals':1,'home_stats':{'possession':65,'shots':14,'shots_on_target':6},'away_stats':{'possession':35,'shots':4,'shots_on_target':0}})
+    assert live['statistics_source']=='manual_full_match_similarity' and live['neighbors']
+    assert all(n['match_date']<config['default_date'] for n in live['neighbors'])
+    ended=http('/predict/v2',{**params,'mode':'live','minute':90,'finished':True,'home_goals':2,'away_goals':1})
+    assert ended['probabilities']['home_win']==1
+    # Consume schema-v1 and schema-v2 events from real Kafka twice; no duplicate rows.
+    from kafka import KafkaConsumer
+    from match_outcome.stream import process_events
+    from pyspark.sql import SparkSession
+    consumer=KafkaConsumer('match_statistics',bootstrap_servers=os.environ['KAFKA_BOOTSTRAP_SERVERS'],auto_offset_reset='earliest',group_id=None,consumer_timeout_ms=10000,value_deserializer=lambda b:json.loads(b))
+    match_events=[record.value for record in consumer]
+    consumer.close()
+    spark=SparkSession.builder.appName('CI mixed match replay').master('local[2]').config('spark.driver.memory','512m').config('spark.ui.enabled','false').getOrCreate()
+    try:
+        output=Path('/opt/project/Generate_LeagueTable_Api/analystic/match_outcome/outputs')
+        with tempfile.TemporaryDirectory() as target:
+            process_events(spark,match_events,output,Path(target).as_uri())
+            process_events(spark,match_events,output,Path(target).as_uri())
+        for result in (v2,live,ended):
+            stored=store.query('MATCH (p:MatchPrediction {key:$key}) RETURN p.result_json AS result',{'key':result['prediction_id']+'_'+result['model_version']})
+            assert len(stored)==1 and json.loads(stored[0]['result'])['probabilities']==result['probabilities']
+    finally:
+        spark.stop()
     simulation = http('/transfers/simulate', {'batch_size':5,'season':'2025-2026','seed':42})
     events = simulation['records']
     # The packaged Spark client really consumes Kafka and writes the CI filesystem
@@ -91,6 +119,9 @@ def main():
         assert len(http('/matches')) == 1140
         assert http('/model/metrics')
         assert http('/features')
+        assert http('/prediction/config')
+        assert http('/model/metrics/v2')
+        assert http('/predict/v2',params)['persistence']=='saved'
         assert len(http('/knn/predictions')) == 20
         assert len(http('/outlook')['players']) == 562
         assert http('/phases')

@@ -23,18 +23,24 @@ def replay(output):
         producer.close()
 
 def process_events(spark, events, output, base):
-    artifact = load_published_artifact(output)
+    artifact = None
     fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(spark._jsc.hadoopConfiguration())
     path = spark._jvm.org.apache.hadoop.fs.Path
     prepared = {}
     for event in events:
-        if event.get("schema_version") != 1 or event.get("kind") not in {"historical", "scenario"}:
+        if event.get("schema_version") not in {1,2} or event.get("kind") not in {"historical", "scenario"}:
             raise ValueError("Unsupported Kafka schema/kind")
         event_id = event.get("event_id", "")
         if len(event_id) not in {32, 64} or any(c not in "0123456789abcdef" for c in event_id):
             raise ValueError("Invalid Kafka event id")
-        for side in ("home", "away"):
-            validate_stats(event[side + "_stats"])
+        if event['schema_version']==2:
+            from .forecast_v2 import validate_request
+            if event['kind']!='scenario':
+                raise ValueError('V2 scenarios cannot become historical training data')
+            validate_request(event)
+        else:
+            for side in ("home", "away"):
+                validate_stats(event[side + "_stats"])
         if event["kind"] == "historical" and (event.get("is_simulated") or event.get("season") not in {"2022-2023", "2023-2024", "2024-2025"}):
             raise ValueError("Simulated input cannot be historical training data")
         payload = json.dumps(event, sort_keys=True, ensure_ascii=False, allow_nan=False)
@@ -52,12 +58,25 @@ def process_events(spark, events, output, base):
                 raise ValueError("HDFS event conflict: " + event_id)
         else:
             pending.append((event_id, sha, payload, event))
-        requested_version = event.get("model_version", artifact["model_version"])
         import re
-        if not re.fullmatch(r"wdl_[0-9a-f]{20}", requested_version):
-            raise ValueError("Invalid model version")
-        selected = artifact if requested_version == artifact["model_version"] else load_artifact(Path(output) / "versions" / requested_version)
-        results.append((event, predict(event, selected)))
+        if event['schema_version']==2:
+            from analytics import store
+            from .forecast_v2 import forecast
+            requested_version=event.get('model_version','')
+            if not re.fullmatch(r'wdl2_[0-9a-f]{20}',requested_version):
+                raise ValueError('Invalid v2 model version')
+            # Read an immutable published version, never the latest local model.
+            selected=store.report_by_model('forecast_v2',requested_version)
+            if selected['dataset_fingerprint']!=event.get('dataset_fingerprint'):
+                raise ValueError('V2 dataset fingerprint conflict')
+            results.append((event,forecast(event,selected)))
+        else:
+            artifact=artifact or load_published_artifact(output)
+            requested_version=event.get('model_version',artifact['model_version'])
+            if not re.fullmatch(r'wdl_[0-9a-f]{20}',requested_version):
+                raise ValueError('Invalid model version')
+            selected=artifact if requested_version==artifact['model_version'] else load_artifact(Path(output)/'versions'/requested_version)
+            results.append((event,predict(event,selected)))
     if pending:
         batch_key = hashlib.sha256("".join(sorted(x[0] for x in pending)).encode()).hexdigest()
         staging = base + "/staging/" + batch_key

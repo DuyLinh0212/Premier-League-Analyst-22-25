@@ -121,8 +121,8 @@ def save_report(run_key, kind, payload, filters=None):
         if existing[0]['payload'] != encode(payload):
             raise ValueError('Completed reports are immutable')
         return key
-    query("MATCH (r:PLRun {key:$run}) MERGE (p:PLReport {key:$key}) SET p.namespace=$ns,p.kind=$kind,p.filters_json=$filters,p.payload_json=$payload,p.created_at=$now MERGE (r)-[:PRODUCED]->(p)",
-          {"run": run_key, "key": key, "ns": namespace(), "kind": kind, "filters": encode(filters), "payload": encode(payload), "now": now()})
+    query("MATCH (r:PLRun {key:$run}) MERGE (p:PLReport {key:$key}) SET p.namespace=$ns,p.kind=$kind,p.filters_json=$filters,p.payload_json=$payload,p.created_at=$now,p.model_version=$model MERGE (r)-[:PRODUCED]->(p)",
+          {"run": run_key, "key": key, "ns": namespace(), "kind": kind, "filters": encode(filters), "payload": encode(payload), "now": now(), 'model':payload.get('model_version') if isinstance(payload,dict) else None})
     return key
 
 
@@ -155,6 +155,13 @@ def report(kind, filters=None, run_id=None):
 
 def runs(limit=50):
     return query("MATCH (r:PLRun {namespace:$ns}) RETURN r.run_id AS run_id,r.status AS status,r.version AS version,r.created_at AS created_at,r.completed_at AS completed_at,r.is_simulated AS is_simulated,r.error AS error,r.parameters_json AS parameters ORDER BY r.created_at DESC LIMIT $limit", {"ns": namespace(), "limit": limit})
+
+def report_by_model(kind, model_version):
+    rows=query('MATCH (r:PLRun {namespace:$ns,status:"complete"})-[:PRODUCED]->(p:PLReport {kind:$kind,model_version:$model}) RETURN p.payload_json AS payload ORDER BY r.completed_at DESC LIMIT 1',
+               {'ns':namespace(),'kind':kind,'model':model_version})
+    if not rows:
+        raise LookupError('Không có phiên bản model đã công bố: '+model_version)
+    return json.loads(rows[0]['payload'])
 
 
 def catalog():

@@ -4,6 +4,8 @@
 
 Web Next.js dùng API FastAPI truy vấn Neo4j. Dữ liệu nguồn, 21 bảng Silver (73.075 dòng), 1.350 bản ghi DataMB, audit, đầu vào và kết quả phân tích được lưu dưới namespace cấu hình. Không gộp 13 ID DataMB trùng qua các CLB bằng cách làm mất bản ghi. JSON giữ phân biệt `null`, chuỗi rỗng và số 0; DECIMAL lưu chuỗi chính xác. HDFS giữ lakehouse và artifact model.
 
+Dự đoán trận có hai chế độ: trước trận dùng lịch sử trước ngày yêu cầu, đối đầu tối đa ba mùa và cosine; trong trận dùng tỉ số, phút/bù giờ và thống kê nhập để tìm trận tương đồng. API `/predict/v2` lưu toàn bộ đầu vào/kết quả vào Neo4j, Kafka replay đúng phiên bản; `/predict` cũ vẫn tương thích. Xem [phương pháp, giới hạn và kiểm thử](validation/FORECAST_V2.md). Thống kê nhập được so với thống kê tổng kết; không được quảng bá như dữ liệu trực tiếp theo phút.
+
 Các báo cáo gồm outlook cửa sổ 1–3 mùa, 60 đội–mùa / 240 giai đoạn, bảy truy vấn Spark SQL, thu–chi / chi phí trên điểm, RFM với GMM Spark MLlib thật (k=4, seed=42), phân nhóm theo ngưỡng mang tên riêng, dashboard tổng hợp / hồ sơ CLB / bàn thắng theo 15 phút, DataMB radar / cosine similarity, định giá và quỹ đạo theo công thức của Danh. Các tính năng chỉ được nhắc trong mô tả nguồn nhưng không có mã thực thi không được coi là đã có. Dữ liệu mô phỏng có nhãn riêng và không trộn vào mùa thật.
 
 Mỗi báo cáo có `run_id`, phiên bản logic, bộ lọc, thời điểm và trạng thái. Pointer công bố đổi trong cùng transaction với trạng thái hoàn tất, sau khi đủ báo cáo. Run lỗi / thiếu không thay thế bản tốt. Import dùng khóa và checksum; Kafka event có ID ổn định và checkpoint; ghi HDFS trước Neo4j và replay không ghi thêm bản trùng. Khi Database lỗi, API trả lỗi 503 và Web hiển thị lỗi, không báo lưu thành công.

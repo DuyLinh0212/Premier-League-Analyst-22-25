@@ -12,7 +12,14 @@ def load_published_artifact(directory):
         version = json.loads(pointer.read_text(encoding='utf-8'))['model_version']
         if not re.fullmatch(r'wdl_[0-9a-f]{20}',version):
             raise ValueError('Invalid published model version')
-        return load_artifact(directory / 'versions' / version)
+        folder = directory / 'versions' / version
+        if not (folder / 'model.json').exists():
+            # Portable bundles omit cache/version directories. The root is safe
+            # only if it is EXACTLY the frozen published version.
+            current=load_artifact(directory)
+            if current['model_version']==version:
+                return current
+        return load_artifact(folder)
     return load_artifact(directory)
 
 def vector(record, artifact):

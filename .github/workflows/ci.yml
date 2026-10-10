@@ -21,6 +21,17 @@ jobs:
         run: |
           docker compose --env-file portable/.env.example -f portable/compose.yaml config --quiet
           docker compose -f portable/compose.ci.yaml config --quiet
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Train chronological pregame and live score models from Silver fixture
+        env:
+          PYTHONPATH: Generate_LeagueTable_Api/analystic
+          OPENBLAS_NUM_THREADS: '1'
+        run: |
+          python -m pip install numpy==2.4.6
+          python -m match_outcome.train_v2
+          cp Generate_LeagueTable_Api/analystic/match_outcome/outputs/forecast_v2*.json portable/seed/match_outcome/
       - name: Build packaged runtime and API
         run: |
           docker build -f portable/Dockerfile.runtime --target runtime -t football-runtime:4.0 .
@@ -35,7 +46,7 @@ jobs:
         run: |
           docker build -f portable/Dockerfile.web -t football-web:4.0 .
           docker build -f portable/Dockerfile.airflow -t football-airflow:4.0 .
-          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.dag_processing.dagbag import DagBag; b=DagBag('/opt/airflow/dags'); assert not b.import_errors,b.import_errors; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'transfer_simulation' in b.dags['football_kafka_analytics'].task_dict"
+          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.dag_processing.dagbag import DagBag; b=DagBag('/opt/airflow/dags'); assert not b.import_errors,b.import_errors; assert 'match_forecast_v2' in b.dags['football_pipeline'].task_dict; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'transfer_simulation' in b.dags['football_kafka_analytics'].task_dict"
       - name: Start fixture services and packaged application
         run: docker compose -f portable/compose.ci.yaml up -d --wait --wait-timeout 1200
       - name: Database Kafka HTTP and recovery acceptance
