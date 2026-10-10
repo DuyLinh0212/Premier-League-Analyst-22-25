@@ -1,0 +1,40 @@
+Date,Time,Round,Day,Venue,Result,GF_match,GA_match,Opponent,SoTA,GA_gk,Saves,Save%,CS,PKatt,PKA,PKsv,PKm
+2022-08-06,15:00 (21:00),Matchweek 1,Sat,Away,L,0,2,Nottingham,9,2,7,77.8,0,0,0,0,0
+2022-08-13,15:00 (21:00),Matchweek 2,Sat,Home,D,0,0,Brighton,1,0,1,100.0,1,0,0,0,0
+2022-08-21,16:30 (22:30),Matchweek 3,Sun,Away,D,3,3,Manchester City,5,3,2,40.0,0,0,0,0,0
+2022-08-28,14:00 (20:00),Matchweek 4,Sun,Home,D,1,1,Wolves,6,1,5,83.3,0,0,0,0,0
+2022-08-31,20:00 (02:00),Matchweek 5,Wed,Home,W,2,1,Liverpool,2,1,1,50.0,0,0,0,0,0
+2022-09-03,15:00 (21:00),Matchweek 6,Sat,Away,D,0,0,Crystal Palace,5,0,5,100.0,1,0,0,0,0
+2022-09-17,15:00 (21:00),Matchweek 8,Sat,Away,D,1,1,Bournemouth,7,1,6,85.7,0,1,1,0,0
+2022-10-01,15:00 (21:00),Matchweek 9,Sat,Home,L,1,4,Fulham,10,4,6,60.0,0,0,0,0,0
+2022-10-08,15:00 (21:00),Matchweek 10,Sat,Away,L,1,5,Brentford,7,5,2,28.6,0,0,0,0,0
+2022-10-16,14:00 (20:00),Matchweek 11,Sun,Home,D,0,0,Manchester Utd,2,0,2,100.0,1,0,0,0,0
+2022-10-19,19:30 (01:30),Matchweek 12,Wed,Away,L,0,1,Everton,4,1,3,75.0,0,0,0,0,0
+2022-10-23,16:30 (22:30),Matchweek 13,Sun,Home,L,1,2,Tottenham,5,2,3,60.0,0,0,0,0,0
+2022-10-29,15:00 (21:00),Matchweek 14,Sat,Away,L,0,4,Aston Villa,7,4,3,42.9,0,1,1,0,0
+2022-11-06,14:00 (21:00),Matchweek 15,Sun,Home,L,1,4,Southampton,4,4,0,0.0,0,0,0,0,0
+2022-11-12,17:30 (00:30),Matchweek 16,Sat,Away,L,0,1,Chelsea,3,1,2,66.7,0,0,0,0,0
+2022-12-26,15:00 (22:00),Matchweek 17,Mon,Home,L,0,3,Leicester City,5,3,2,40.0,0,1,1,0,0
+2022-12-31,15:00 (22:00),Matchweek 18,Sat,Away,D,0,0,Leeds United,5,0,5,100.0,1,0,0,0,0
+2023-01-03,19:45 (02:45),Matchweek 19,Tue,Home,D,0,0,Arsenal,1,0,1,100.0,1,0,0,0,0
+2023-01-15,14:00 (21:00),Matchweek 20,Sun,Away,L,0,1,Fulham,5,1,4,80.0,0,0,0,0,0
+2023-01-21,17:30 (00:30),Matchweek 21,Sat,Home,D,0,0,Crystal Palace,7,0,7,100.0,1,0,0,0,0
+2023-02-04,17:30 (00:30),Matchweek 22,Sat,Away,D,1,1,West Ham,2,1,1,50.0,0,0,0,0,0
+2023-02-11,17:30 (00:30),Matchweek 23,Sat,Home,D,1,1,Bournemouth,7,1,6,85.7,0,0,0,0,0
+2023-02-18,17:30 (00:30),Matchweek 24,Sat,Away,W,2,0,Liverpool,4,0,4,100.0,1,0,0,0,0
+2023-03-04,12:30 (19:30),Matchweek 26,Sat,Home,W,2,0,Manchester City,2,0,2,100.0,1,0,0,0,0
+2023-03-12,16:30 (23:30),Matchweek 27,Sun,Away,L,1,2,Wolves,8,2,6,75.0,0,0,0,0,0
+2023-03-17,20:00 (03:00),Matchweek 28,Fri,Home,L,1,2,Nottingham,4,2,2,50.0,0,1,1,0,0
+2023-04-02,16:30 (22:30),Matchweek 29,Sun,Away,L,0,2,Manchester Utd,6,2,4,66.7,0,0,0,0,0
+2023-04-05,20:00 (02:00),Matchweek 7,Wed,Home,L,1,5,West Ham,7,5,2,28.6,0,0,0,0,0
+2023-04-08,15:00 (21:00),Matchweek 30,Sat,Home,L,1,2,Brentford,5,2,3,60.0,0,0,0,0,0
+2023-04-15,12:30 (18:30),Matchweek 31,Sat,Home,W,3,0,Aston Villa,2,0,2,100.0,1,0,0,0,0
+2023-04-23,14:00 (20:00),Matchweek 32,Sun,Away,L,1,6,Tottenham,8,6,2,25.0,0,0,0,0,0
+2023-04-27,19:45 (01:45),Matchweek 33,Thu,Home,L,1,4,Everton,7,4,3,42.9,0,0,0,0,0
+2023-04-30,14:00 (20:00),Matchweek 34,Sun,Away,L,1,3,Southampton,6,3,3,50.0,0,0,0,0,0
+2023-05-07,16:30 (22:30),Matchweek 35,Sun,Away,W,2,0,Arsenal,5,0,5,100.0,1,0,0,0,0
+2023-05-13,12:30 (18:30),Matchweek 36,Sat,Home,D,2,2,Leeds United,5,2,3,60.0,0,2,2,0,0
+2023-05-18,19:30 (01:30),Matchweek 25,Thu,Away,L,1,4,Brighton,9,4,5,55.6,0,0,0,0,0
+2023-05-22,20:00 (02:00),Matchweek 37,Mon,Away,D,0,0,Leicester City,3,0,3,100.0,1,0,0,0,0
+2023-05-28,16:30 (22:30),Matchweek 38,Sun,Home,D,1,1,Chelsea,4,1,3,75.0,0,0,0,0,0
+,,,,,19-14-5,33,68,,194,68,126,64.9,11,6,6,0,0

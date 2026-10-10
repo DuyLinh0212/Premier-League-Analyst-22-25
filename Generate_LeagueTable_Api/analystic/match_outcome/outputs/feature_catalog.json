@@ -1,0 +1,1066 @@
+[
+  {
+    "source": "score_fixtures",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Time",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Day",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Result",
+    "role": "label",
+    "feature": null,
+    "reason": "Nhãn kết quả"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "GF_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "GA_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Poss",
+    "role": "feature",
+    "feature": "possession",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Attendance",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Captain",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Formation",
+    "role": "feature",
+    "feature": "formation",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Opp Formation",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Referee",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "score_fixtures",
+    "column": "Notes",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Time",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Day",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Result",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_for",
+    "column": "GF_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_for",
+    "column": "GA_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Gls",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_for",
+    "column": "Sh",
+    "role": "feature",
+    "feature": "shots",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "shooting_for",
+    "column": "SoT",
+    "role": "feature",
+    "feature": "shots_on_target",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "shooting_for",
+    "column": "SoT%",
+    "role": "feature",
+    "feature": "shot_accuracy",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "shooting_for",
+    "column": "G/Sh",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_for",
+    "column": "G/SoT",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_for",
+    "column": "PK",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_for",
+    "column": "PKatt",
+    "role": "feature",
+    "feature": "penalties_attempted",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Time",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Day",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Result",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_against",
+    "column": "GF_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_against",
+    "column": "GA_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Gls",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_against",
+    "column": "Sh",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "SoT",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "SoT%",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "shooting_against",
+    "column": "G/Sh",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_against",
+    "column": "G/SoT",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_against",
+    "column": "PK",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "shooting_against",
+    "column": "PKatt",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Time",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Day",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Result",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "GF_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "GA_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "CrdY",
+    "role": "feature",
+    "feature": "yellow_cards",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "CrdR",
+    "role": "feature",
+    "feature": "red_cards",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "2CrdY",
+    "role": "feature",
+    "feature": "second_yellow_cards",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Fls",
+    "role": "feature",
+    "feature": "fouls_committed",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Fld",
+    "role": "feature",
+    "feature": "fouls_drawn",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Off",
+    "role": "feature",
+    "feature": "offsides",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Crs",
+    "role": "feature",
+    "feature": "crosses",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "Int",
+    "role": "feature",
+    "feature": "interceptions",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "TklW",
+    "role": "feature",
+    "feature": "tackles_won",
+    "reason": "Thống kê an toàn của từng đội"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "PKwon",
+    "role": "excluded",
+    "feature": "penalties_won",
+    "reason": "Hoàn toàn thiếu hoặc hằng số trong tập huấn luyện; xem removed_columns"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "PKcon",
+    "role": "excluded",
+    "feature": "penalties_conceded",
+    "reason": "Hoàn toàn thiếu hoặc hằng số trong tập huấn luyện; xem removed_columns"
+  },
+  {
+    "source": "miscellaneous_for",
+    "column": "OG",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Time",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Day",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Result",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "GF_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "GA_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "CrdY",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "CrdR",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "2CrdY",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Fls",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Fld",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Off",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Crs",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "Int",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "TklW",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "PKwon",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "PKcon",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "miscellaneous_against",
+    "column": "OG",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "Time",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "Day",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "Result",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "GF_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "GA_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "SoTA",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "GA_gk",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "Saves",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "Save%",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "CS",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "PKatt",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_for",
+    "column": "PKA",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "PKsv",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_for",
+    "column": "PKm",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "Time",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "Day",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "Result",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "GF_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "GA_match",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "SoTA",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "GA_gk",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "Saves",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "Save%",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "CS",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "PKatt",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "gk_against",
+    "column": "PKA",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "PKsv",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "gk_against",
+    "column": "PKm",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Rk",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Scorer",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Start",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Minute",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Score",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Goalkeeper",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Assist",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_scores",
+    "column": "Notes",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Rk",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Date",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Round",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Venue",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Scorer",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_against",
+    "column": "Opponent",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Start",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Minute",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_against",
+    "column": "Score",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_against",
+    "column": "Goalkeeper",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  },
+  {
+    "source": "goals_against",
+    "column": "Assist",
+    "role": "excluded",
+    "feature": null,
+    "reason": "Kết quả hoặc thông tin có thể tái dựng tỉ số"
+  },
+  {
+    "source": "goals_against",
+    "column": "Notes",
+    "role": "metadata",
+    "feature": null,
+    "reason": "Metadata / bản đối chiếu / sự kiện, không đưa vào model"
+  }
+]

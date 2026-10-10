@@ -1,0 +1,797 @@
+﻿club_id,tm_club_id,club_name
+LEI,1003,Leicester City
+tm:1029,1029,Club Atlético Vélez Sársfield
+tm:1030,1030,Asociación Atlética Argentinos Juniors
+tm:1053,1053,Aalborg BK
+tm:1059,1059,Hammarby IF
+tm:1063,1063,Viborg FF
+tm:10690,10690,Zorya Lugansk
+tm:1071,1071,Wigan Athletic
+tm:1085,1085,Vitória Setúbal FC
+tm:1090,1090,AZ Alkmaar
+tm:11126,11126,Mordovia Saransk (-2020)
+tm:1158,1158,FC Lorient
+tm:1159,1159,AS Nancy-Lorraine
+tm:1160,1160,Nîmes Olympique
+tm:120,120,Kocaelispor
+tm:12179,12179,Club Sportivo Independiente Rivadavia
+tm:12438,12438,Volga Nizhniy Novgorod (- 2016)
+tm:1269,1269,PEC Zwolle
+tm:130,130,Parma Calcio 1913
+tm:1304,1304,Heracles Almelo
+tm:1403,1403,Santos Laguna
+tm:1420,1420,Angers SCO
+tm:1426,1426,VVV-Venlo
+tm:1436,1436,SC Beira-Mar
+tm:1455,1455,FC Dordrecht
+tm:1467,1467,Göztepe
+tm:1496,1496,FK Pardubice
+tm:1531,1531,Elche CF
+tm:1533,1533,SD Eibar
+tm:157,157,KAA Gent
+tm:159,159,Red Star Belgrade
+tm:16247,16247,PFK Stal Kamyanske (-2018)
+tm:167,167,FC Augsburg
+tm:168,168,Zaglebie Lubin
+tm:18303,18303,FC Oleksandriya
+tm:18544,18544,Al-Nassr Football Club
+tm:1897,1897,FC Hradec Kralove
+tm:190,190,FC Copenhagen
+tm:2029,2029,Ceará Sporting Club
+tm:2063,2063,Club Atlético Huracán
+tm:209,209,Club Atlético River Plate
+tm:210,210,Grêmio Foot-Ball Porto Alegrense
+tm:2118,2118,Wisla Plock
+tm:2125,2125,Esporte Clube Vitória
+tm:2282,2282,Club Brugge KV
+tm:2311,2311,"SK Sigma Olomouc, a.s."
+tm:2323,2323,Orduspor
+tm:235,235,RKC Waalwijk
+tm:2350,2350,Millonarios FC
+tm:2352,2352,CD América de Cali
+tm:2362,2362,Slaven Belupo Koprivnica
+tm:239,239,Viking Fotballklubb
+tm:2407,2407,CF Monterrey
+tm:2439,2439,Kuban Krasnodar (-2018)
+tm:2440,2440,D.C. United
+tm:2446,2446,WSG Tirol
+tm:2521,2521,FC Alverca
+tm:25467,25467,Philadelphia Union
+tm:2578,2578,St. Johnstone FC
+tm:260,260,FC Zürich
+tm:266,266,SV Ried
+tm:267,267,Idrettsklubben Start
+tm:2672,2672,APO Levadiakos Football Club
+tm:2697,2697,Sanfrecce Hiroshima
+tm:2698,2698,FC Rubin Kazan
+tm:2703,2703,Spartak Vladikavkaz (-2020)
+tm:2715,2715,RFC Seraing
+tm:2740,2740,Vorskla Poltava
+tm:2741,2741,FK Baltika
+tm:2761,2761,FK Haugesund
+tm:2778,2778,FC Nordsjaelland
+tm:2790,2790,FC Lugano
+tm:2832,2832,Gaziantep FK
+tm:28643,28643,SK Beveren
+tm:288,288,Club Estudiantes de La Plata
+tm:28893,28893,Puszcza Niepolomice
+tm:28956,28956,AEL Kalloni
+tm:29228,29228,Royal Excel Mouscron (-2022)
+tm:29700,29700,AFC Unirea 04 Slobozia
+tm:29831,29831,FCV Farul Constanta
+tm:2996,2996,Incheon United Football Club
+tm:2999,2999,Hamilton Academical FC
+tm:3057,3057,Standard Liège
+tm:31008,31008,Al-Riyadh Saudi Club
+tm:312,312,FC Dinamo 1948
+tm:3137,3137,FK TSC Backa Topola
+tm:31622,31622,Suwon FC
+tm:321,321,FC Sion
+tm:32328,32328,Al-Najma Sport Club
+tm:324,324,Pogon Szczecin
+tm:333,333,Club Atlético Lanús
+tm:338,338,Dynamo Kyiv
+tm:3558,3558,GFC Ajaccio
+tm:3631,3631,CF América
+tm:3654,3654,Kalmar Fotbollförening
+tm:367,367,Rayo Vallecano
+tm:3690,3690,SKA Khabarovsk
+tm:3709,3709,Getafe CF
+tm:3714,3714,Enisey Krasnoyarsk
+tm:37624,37624,FC Metaloglobus Bucharest
+tm:377,377,FC Baník Ostrava a.s.
+tm:385,385,Fortuna Sittardia Combinatie
+tm:3901,3901,RAAL La Louvière
+tm:3911,3911,Stade Brestois 29
+tm:3938,3938,Club Atlético Talleres
+tm:3999,3999,PAS Lamia 1964
+tm:40188,40188,Atlético de San Luis
+tm:403,403,Willem II Tilburg
+tm:40426,40426,FC Tosno (-2018)
+tm:40812,40812,Universitatea Craiova
+tm:410,410,Udinese Calcio
+tm:415,415,FC Toulouse
+tm:4171,4171,Benevento Calcio
+tm:418,418,Real Madrid
+tm:43,43,Heart of Midlothian FC
+tm:4309,4309,Hamarkameratene
+tm:434,434,FC Luzern
+tm:44,44,Hertha BSC
+tm:44006,44006,Bodrum FK
+tm:443,443,Vejle Boldklub
+tm:4482,4482,Volyn Lutsk
+tm:45604,45604,Orlando City Soccer Club
+tm:4603,4603,Athlitiki Enosi Larisas
+tm:467,467,NEC Nijmegen
+tm:468,468,Sparta Rotterdam
+tm:472,472,UD Las Palmas
+tm:475,475,Sint-Truidense VV
+tm:501,501,Fotballklubben Bodø/Glimt
+tm:504,504,Grasshopper Club Zurich
+tm:506,506,Juventus FC
+tm:511,511,Dundee FC
+tm:5219,5219,AOK Kerkyra
+WOL,543,Wolverhampton Wanderers
+tm:553,553,Ionikos Nikeas
+tm:5551,5551,Newcastle United Jets
+tm:5689,5689,Cracovia
+tm:5817,5817,Sönderjyske Fodbold
+tm:5818,5818,Hobro IK
+tm:583,583,Paris Saint-Germain
+tm:585,585,São Paulo Futebol Clube
+tm:595,595,SC Bastia
+tm:599,599,NK Varazdin
+tm:603,603,Cardiff City
+tm:605,605,Aris Thessalonikis
+tm:609,609,Cruzeiro Esporte Clube
+tm:60949,60949,Volou Neos Podosferikos Syllogos
+tm:6107,6107,Morski Związkowy Klub Sportowy Arka Gdynia Spółka Akcyjna
+tm:61825,61825,FC Minaj
+tm:626,626,New England Revolution
+tm:6321,6321,Vancouver Whitecaps FC
+tm:6399,6399,Sandefjord Fotball
+tm:6495,6495,Atlético Bucaramanga
+tm:65,65,SpVgg Greuther Fürth
+tm:6574,6574,US Sassuolo
+tm:6711,6711,Deportivo Guadalajara
+tm:681,681,Real Sociedad
+tm:683,683,Olympiakos Syndesmos Filathlon Peiraios
+tm:6954,6954,Central Coast Mariners
+tm:6984,6984,Once Caldas
+tm:7055,7055,Tigres UANL
+tm:7097,7097,Club Atlético Unión
+tm:7160,7160,Eyüpspor
+tm:71665,71665,Al-Okhdood Club
+tm:723,723,Almere City FC
+tm:738,738,Le Havre AC
+tm:759,759,Slask Wroclaw
+tm:76,76,Vålerengens Idrettsforening
+tm:80,80,VfL Bochum
+tm:8023,8023,Al-Ittihad Football Club
+tm:814,814,FK Teplice
+tm:84122,84122,Epicentr Kamyanets-Podilskyi
+tm:8445,8445,Wellington Phoenix
+tm:86,86,SV Werder Bremen
+tm:862,862,Chievo Verona
+tm:86209,86209,Livyi Bereg Kyiv
+CRY,873,Crystal Palace
+tm:875,875,Adelaide United
+tm:8793,8793,Red Bull Bragantino
+tm:8819,8819,FK Javor-Matis Ivanjica
+tm:897,897,Deportivo de La Coruña
+tm:924,924,Istanbulspor
+tm:940,940,Celta de Vigo
+tm:979,979,Moreirense FC
+tm:10004,10004,Paris FC
+tm:10010,10010,Esporte Clube Bahia
+tm:10093,10093,Independiente Medellín
+LUT,1031,Luton Town
+tm:105,105,SV Darmstadt 98
+tm:10503,10503,Deportes Tolima
+tm:1096,1096,Royal Antwerp FC
+tm:1108,1108,Deportivo Alavés
+tm:1109,1109,BK Häcken
+tm:1110,1110,Huddersfield Town
+tm:1114,1114,Al-Hilal Saudi Football Club
+tm:1146,1146,Club Necaxa
+tm:1147,1147,AC Ajaccio
+tm:114977,114977,San Diego Football Club
+tm:1162,1162,SM Caen
+tm:11854,11854,Junior FC
+tm:1186,1186,Torpedo Moscow
+tm:1191,1191,Falkirk FC
+tm:1210,1210,US Livorno 1915
+tm:12301,12301,Club Atlético Aldosivi
+tm:1234,1234,Club Atlético Independiente de Avellaneda
+BHA,1237,Brighton & Hove Albion
+tm:12454,12454,Club Atlético Sarmiento
+tm:1247,1247,Colorado Rapids
+tm:127,127,SC Paderborn 07
+tm:1286,1286,Club Atlético Newell’s Old Boys
+tm:1301,1301,CS Marítimo
+tm:132,132,NAC Breda
+tm:133,133,SC Cambuur Leeuwarden
+tm:14,14,Austria Vienna
+tm:1411,1411,RAEC Mons (- 2015)
+tm:1416,1416,Amiens SC
+tm:142,142,Real Zaragoza
+tm:1429,1429,Cesena FC
+tm:1434,1434,SC Telstar
+tm:144,144,HNK Rijeka
+tm:14554,14554,Club Atlético Tucumán
+tm:14687,14687,Club Atlético Gimnasia y Esgrima de Mendoza
+tm:1506,1506,Kardemir Karabükspor
+tm:16,16,Borussia Dortmund
+tm:16245,16245,FK Sevastopol (- 2014)
+tm:169,169,Panionios Athens
+tm:17776,17776,Associação Chapecoense de Futebol
+tm:18,18,Borussia Mönchengladbach
+tm:18105,18105,PFK Lviv
+tm:19,19,Brescia Calcio
+tm:197,197,AC Sparta Prague
+tm:19771,19771,Akhisarspor
+tm:19775,19775,Asociación de Fomento Deportivo Riestra Barrio Colón
+tm:204,204,Lierse SK (- 2018)
+tm:20590,20590,Rionegro Águilas
+tm:20698,20698,Balikesirspor
+tm:2079,2079,Veria NPS
+tm:2227,2227,SK Tavriya Simferopol ( - 2022)
+tm:2239,2239,US Cremonese
+tm:2241,2241,Kashima Antlers FC
+tm:2292,2292,Elazigspor
+tm:2293,2293,Konyaspor
+tm:23184,23184,KFUM-Kameratene Oslo
+tm:23581,23581,V-Varen Nagasaki
+tm:23611,23611,Olimpik Donetsk
+tm:237,237,RCD Mallorca
+tm:2375,2375,Altay SK
+tm:23826,23826,RB Leipzig
+tm:2402,2402,Club Social y Deportivo Defensa y Justicia
+tm:2410,2410,PFK CSKA Moskva
+tm:2462,2462,Fluminense Football Club
+tm:2477,2477,Karpaty Lviv (-2021)
+tm:2497,2497,Real Oviedo
+tm:2503,2503,Boavista FC
+tm:2553,2553,Kilmarnock FC
+tm:26069,26069,Al-Qadsiah Saudi Football Club
+tm:265,265,Panathinaikos Athlitikos Omilos
+tm:2687,2687,Cádiz CF
+tm:273,273,Stade Rennais FC
+tm:276,276,Hellas Verona
+tm:2760,2760,Partick Thistle FC
+tm:28095,28095,FK Ufa
+MCI,281,Manchester City
+tm:2861,2861,KV Oostende
+tm:28844,28844,Al-Taawoun Football Club
+tm:289,289,Sunderland AFC
+tm:2919,2919,AC Monza
+tm:2944,2944,Ankaraspor
+tm:301,301,FCSB
+tm:316,316,Grazer AK 1902
+tm:317,317,FC Twente Enschede
+tm:3205,3205,Kayserispor
+tm:3216,3216,Mersin Talimyurdu SK
+tm:322,322,Yverdon Sport FC
+tm:3302,3302,UD Almería
+tm:331,331,CA Osasuna
+tm:3327,3327,FC Penafiel
+tm:3349,3349,CD Feirense
+tm:3368,3368,Levante UD
+tm:3426,3426,Esbjerg fB
+tm:34911,34911,Neom Sports Club
+tm:35,35,FC St. Pauli
+tm:3524,3524,Clermont Foot 63
+tm:3527,3527,Motor Lublin Spółka Akcyjna
+tm:353,353,Lillestrøm Sportsklubb
+tm:3535,3535,Ulsan Hyundai Football Club
+tm:354,354,KV Mechelen
+tm:3609,3609,Rotor Volgograd
+tm:36100,36100,Western Sydney Wanderers
+tm:3622,3622,IFK Värnamo
+tm:36922,36922,FK Tekstilac Odzaci
+tm:371,371,Celtic FC
+tm:3711,3711,CD Cruz Azul
+tm:3719,3719,FC Khimki (-2025)
+tm:3725,3725,RFK Akhmat Grozny
+tm:3729,3729,Arsenal Tula
+WHU,379,West Ham United
+tm:3840,3840,Adana Demirspor
+tm:3876,3876,Mirasol Futebol Clube
+tm:3948,3948,Union Saint-Gilloise
+tm:39536,39536,Al-Orobah FC
+tm:3958,3958,Rakuten Vissel Kobe
+tm:39722,39722,Erzurumspor FK
+tm:398,398,Società Sportiva Lazio S.p.A.
+LEE,399,Leeds United
+tm:4035,4035,CF Pachuca
+AVL,405,Aston Villa
+tm:41201,41201,PFK Tambov (-2021)
+tm:41231,41231,FK Sochi
+tm:450,450,FK Dukla Prague
+tm:4633,4633,FK Novi Pazar
+tm:4645,4645,FK Radnicki 1923 Kragujevac
+tm:48726,48726,Rukh Lviv
+tm:498,498,KSC Lokeren (- 2020)
+tm:5,5,AC Milan
+tm:512,512,Stoke City
+tm:51663,51663,Atlanta United Football Club
+tm:51772,51772,Football Club Cincinnati
+tm:520,520,Cercle Brugge
+tm:54189,54189,RWD Molenbeek
+tm:5544,5544,1.FC Slovacko
+tm:5545,5545,FC Zlin
+tm:5572,5572,Niki Volou
+tm:58,58,RSC Anderlecht
+tm:58049,58049,FC Hermannstadt
+tm:589,589,Antalyaspor
+tm:59358,59358,FK Zeleznicar Pancevo
+tm:596,596,Gamba Osaka
+tm:601,601,KV Kortrijk
+tm:614,614,Clube de Regatas do Flamengo
+tm:62,62,SK Slavia Prague
+tm:642,642,De Graafschap Doetinchem
+tm:6456,6456,GKS GieKSa Katowice Spółka Akcyjna
+tm:6502,6502,Jeonbuk Hyundai Motors
+tm:6600,6600,Sport Club Internacional
+tm:6622,6622,FK Mladost Lucani
+tm:6643,6643,Real Salt Lake
+tm:678,678,Aarhus GF
+tm:679,679,Clube Atlético Paranaense
+tm:68608,68608,CF Os Belenenses
+tm:6890,6890,Basaksehir FK
+tm:6894,6894,Kayseri Erciyesspor
+tm:6912,6912,FC Vizela
+tm:7006,7006,Melbourne Victory
+tm:7009,7009,Göteborgs Atlet- och Idrottssällskap
+tm:71084,71084,Western United FC
+tm:714,714,RCD Espanyol Barcelona
+tm:7179,7179,CD Tondela
+tm:7185,7185,Panthrakikos Komotini
+tm:71985,71985,Akron Togliatti
+tm:749,749,FC Empoli
+tm:7567,7567,FK Radnicki Nis
+NEW,762,Newcastle United
+tm:7633,7633,UNAM Pumas
+tm:776,776,Coritiba Foot Ball Club
+tm:7775,7775,Hatayspor
+tm:7831,7831,Brisbane Roar
+tm:78435,78435,Charlotte Football Club
+tm:798,798,Excelsior Rotterdam
+tm:800,800,Atalanta BC
+tm:801,801,Idrottsföreningen Kamraterna Göteborg
+tm:8024,8024,FC Arouca
+tm:81401,81401,SC Poltava
+tm:820,820,Gençlerbirliği Spor Kulübü
+tm:826,826,RC Lens
+tm:82686,82686,St. Louis City Soccer Club
+tm:830,830,Club Atlético Banfield
+tm:8590,8590,Atlas Guadalajara
+tm:865,865,FC Midtjylland
+tm:8718,8718,Sport Club do Recife
+tm:8816,8816,FC Dallas
+tm:8818,8818,FC Botosani
+tm:89,89,1.FC Union Berlin
+tm:8970,8970,Frosinone Calcio
+tm:9010,9010,FCV Dender EH
+tm:91427,91427,Al-Kholood Club
+tm:928,928,Club Atlético Platense
+FUL,931,Fulham
+tm:932,932,"""Футбольный клуб """"Локомотив"""" Москва"""
+tm:9465,9465,Petrolul Ploiesti
+tm:9598,9598,Kawasaki Frontale
+tm:9636,9636,Seattle Sounders FC
+tm:969,969,Montpellier HSC
+MUN,985,Manchester United
+tm:987,987,Motherwell FC
+tm:1005,1005,US Lecce
+tm:10090,10090,Asociación Deportivo Pasto
+tm:1010,1010,Watford FC
+tm:10217,10217,Sarpsborg 08 Fotballforening
+tm:1022,1022,Cerezo Osaka
+tm:1025,1025,Bologna Football Club 1909
+tm:1032,1032,Reading FC
+tm:1039,1039,Queens Park Rangers
+tm:1047,1047,Como 1907
+tm:1049,1049,Valencia CF
+tm:10492,10492,Esporte Clube Juventude
+tm:10511,10511,CA San Martín (San Juan)
+tm:1057,1057,Bryne FK
+tm:1062,1062,S-Pulse
+tm:1066,1066,Nagoya Grampus Eight
+tm:1082,1082,LOSC Lille
+tm:1084,1084,Málaga CF
+tm:1095,1095,ESTAC Troyes
+tm:10997,10997,Clube do Remo
+tm:11194,11194,NK Lokomotiva Zagreb
+tm:1123,1123,Norwich City
+tm:1124,1124,Fakel Voronezh
+tm:11380,11380,ASFC Buzau (2016-2025)
+BRE,1148,Brentford
+tm:11688,11688,Giresunspor
+tm:1177,1177,Silkeborg IF
+tm:11831,11831,Club Atlético Tigre
+tm:118373,118373,Auckland FC
+tm:12,12,Associazione Sportiva Roma
+tm:121,121,FK Dinamo Moskva
+tm:122,122,Sportklub Puntigamer Sturm Graz
+tm:1236,1236,Östers IF
+tm:1241,1241,Livingston FC
+tm:1244,1244,CD Leganés
+tm:126,126,Caykur Rizespor
+tm:1268,1268,ADO Den Haag
+tm:1283,1283,FC Emmen
+tm:1293,1293,Tromsø Idrettslag
+tm:131,131,FC Barcelona
+tm:13726,13726,MFK Karvina
+tm:1390,1390,Cagliari Calcio
+tm:14171,14171,Thonon Évian Grand Genève FC
+tm:1418,1418,Club Atlético Rosario Central
+tm:1423,1423,Valenciennes FC
+tm:1444,1444,Racing Club Asociación Civil de Avellaneda
+tm:14602,14602,Asociación Atlética Estudiantes
+tm:1465,1465,GD Estoril Praia
+tm:150,150,Real Betis Balompié
+tm:152,152,Samsunspor
+tm:15276,15276,FK Spartak Subotica
+tm:15906,15906,Termalica Bruk-Bet Nieciecza Klub Sportowy
+tm:172,172,Royal Charleroi Sporting Club
+tm:17425,17425,Internacional de Bogotá
+tm:189,189,Club Atlético Boca Juniors
+tm:1894,1894,Hvidovre IF
+tm:195,195,Rosenborg Ballklub
+tm:19684,19684,Jeju SK Football Club
+tm:19789,19789,Yeni Malatyaspor
+tm:199,199,Sport Club Corinthians Paulista
+tm:20,20,Bursaspor
+tm:200,200,FC Utrecht
+tm:202,202,FC Groningen
+tm:2036,2036,1. Fußballclub Heidenheim 1846
+tm:21101,21101,Kristiansund Ballklubb
+tm:2157,2157,FC Blau-Weiss Linz
+tm:218,218,San Jose Earthquakes
+tm:21957,21957,AO Platanias
+tm:21975,21975,Football Club Mito HollyHock
+tm:223,223,HNK Sibenik
+tm:22381,22381,Al-Raed SFC
+tm:2288,2288,Swansea City
+tm:2381,2381,Sivasspor
+tm:2414,2414,AC Horsens
+tm:2417,2417,Club Atlético Belgrano
+tm:2420,2420,Vitória Guimarães SC
+tm:2423,2423,CD Santa Clara
+tm:2425,2425,Rio Ave FC
+tm:2431,2431,CF Estrela Amadora
+tm:244,244,Olympique Marseille
+tm:2441,2441,Athlitiki Enosi Konstantinoupoleos
+tm:2448,2448,Sporting Gijón
+tm:2451,2451,Inverness Caledonian Thistle FC
+tm:2671,2671,PAS Giannina
+tm:269,269,Holstein Kiel
+tm:2696,2696,PFK Krylya Sovetov Samara
+tm:27,27,Bayern Munich
+tm:2700,2700,Anzhi Makhachkala ( -2022)
+tm:272,272,Allmänna Idrottsklubben
+tm:2722,2722,SPAL
+tm:27221,27221,Al-Fateh Club
+tm:2783,2783,Metalurg Donetsk (- 2015)
+tm:2817,2817,Strømsgodset IF
+EVE,29,Everton
+tm:290,290,AJ Auxerre
+tm:294,294,SL Benfica
+tm:2990,2990,Académica Coimbra
+tm:2995,2995,FC Paços de Ferreira
+tm:3,3,1.FC Köln
+tm:3008,3008,Hull City
+tm:3062,3062,Athens Kallithea
+tm:30925,30925,Gwangju Football Club
+LIV,31,Liverpool
+tm:3209,3209,Pendikspor
+tm:3268,3268,Casa Pia AC
+tm:327,327,NK Osijek
+tm:3325,3325,GD Chaves
+tm:3385,3385,Panserraikos Serres
+tm:339,339,Dnipro Dnipropetrovsk (-2020)
+tm:347,347,FC Metz
+tm:3508,3508,Zulte Waregem
+tm:3551,3551,Sportclub Rheindorf Altach
+tm:35759,35759,Bucheon Football Club 1995
+tm:3592,3592,Kryvbas Kryvyi Rig
+tm:36,36,Fenerbahce
+tm:3641,3641,Degerfors IF
+tm:370,370,Aberdeen FC
+tm:37255,37255,FK Csikszereda Miercurea Ciuc
+tm:380,380,US Salernitana 1919
+tm:3837,3837,Fredrikstad Fotballklubb
+tm:4,4,1.FC Nuremberg
+tm:4000,4000,Lechia Gdansk
+tm:4078,4078,Club de Foot Montréal
+tm:409,409,Fußballclub Red Bull Salzburg
+tm:4128,4128,Amkar Perm
+tm:413,413,LASK
+tm:4172,4172,Pisa Sporting Club
+tm:419,419,GNK Dinamo Zagreb
+tm:428,428,Górnik Zabrze
+tm:4284,4284,Sporting Kansas City
+tm:4291,4291,Portland Timbers
+tm:4441,4441,Wolfsberger AC
+tm:455,455,FC Rapid 1923
+tm:458,458,Palermo FC
+tm:47,47,Iraklis Thessaloniki
+tm:496,496,Malmö Fotbollförening
+tm:49702,49702,FK Nizhny Novgorod
+tm:499,499,Vitesse Arnhem
+tm:50531,50531,Al-Fayha FC
+tm:50532,50532,Damac Football Club
+tm:51828,51828,Los Angeles Football Club
+tm:5202,5202,Västerås Sportklubb FK
+tm:5220,5220,GS Ergotelis
+tm:524,524,Gaziantepspor (- 2020)
+tm:54585,54585,Sepsi OSK Sf. Gheorghe
+tm:5546,5546,FK Mlada Boleslav
+tm:5619,5619,Aalesunds Fotballklubb
+tm:5724,5724,Randers FC
+tm:60,60,SC Freiburg
+tm:6070,6070,Al-Khaleej Club (Saihat)
+tm:61,61,Servette FC
+tm:6110,6110,Korona Kielce
+tm:6112,6112,Piast Gliwice
+tm:618,618,AS Saint-Étienne
+tm:623,623,Red Bull New York
+tm:63007,63007,LNZ Cherkasy
+tm:641,641,Middlesbrough FC
+tm:6429,6429,FC Universitatea Cluj
+tm:6500,6500,Football Club Seoul
+tm:6504,6504,Daegu FC
+tm:6505,6505,Gimcheon Sangmu Football Club
+tm:653,653,Omilos Filathlon Irakliou FC
+tm:660,660,FC Shakhtar Donetsk
+tm:6632,6632,Hitachi Kashiwa Reysol
+tm:6646,6646,Fatih Karagümrük
+tm:6676,6676,A.G.S Asteras Tripolis
+IPS,677,Ipswich Town
+tm:6992,6992,Chornomorets Odesa
+tm:6993,6993,FK Mariupol
+tm:6996,6996,Goverla Uzhgorod (- 2016)
+NFO,703,Nottingham Forest
+tm:71085,71085,Macarthur FC
+tm:7136,7136,Envigado FC
+tm:715,715,"Bohemians Praha 1905, a.s."
+tm:720,720,FC Porto
+tm:724,724,FC Volendam
+tm:7378,7378,Portimonense SC
+tm:7732,7732,Al-Ettifaq Football Club
+tm:788,788,FK Napredak Krusevac
+tm:79,79,VfB Stuttgart
+tm:7945,7945,IK Sirius
+tm:8054,8054,Sydney FC
+tm:813,813,Columbus Crew
+tm:8172,8172,Atlético Nacional
+tm:825,825,Eskisehirspor
+tm:82696,82696,Mazatlán FC
+tm:828,828,Urawa Red Diamonds
+tm:833,833,Denizlispor
+tm:83678,83678,Metalist Kharkiv
+tm:868,868,MKE Ankaragücü
+tm:87883,87883,FC Kudrivka
+tm:9168,9168,Houston Dynamo
+tm:943,943,Yokohama FC
+tm:952,952,UTA Arad
+tm:9597,9597,Avispa Fukuoka
+tm:9644,9644,Raków Częstochowa
+tm:970,970,Perth Glory
+tm:976,976,CF União Madeira (-2021)
+tm:978,978,Club de Regatas Vasco da Gama
+tm:9811,9811,Deportivo Pereira
+tm:982,982,CD Nacional
+tm:984,984,West Bromwich Albion
+tm:9840,9840,Al-Shabab Club
+tm:995,995,FC Nantes
+tm:9961,9961,Deportivo Cali
+tm:10,10,Arminia Bielefeld
+tm:1011,1011,Halmstads BK
+tm:1023,1023,Sociedade Esportiva Palmeiras
+tm:1038,1038,UC Sampdoria
+tm:1041,1041,Olympique Lyon
+tm:1044,1044,Djurgårdens Idrottsförening
+tm:10484,10484,Kasimpasa
+tm:1050,1050,Villarreal CF
+tm:1061,1061,Los Angeles Galaxy
+tm:1075,1075,SC Braga
+tm:1083,1083,FK Rostov
+tm:10870,10870,Fortaleza Esporte Clube
+tm:1091,1091,Panthessalonikios Athlitikos Omilos Konstantinoupoliton
+tm:1092,1092,Idrottsföreningen  Brommapojkarna
+ARS,11,Arsenal
+tm:1100,1100,Sportsklubben Brann
+tm:1101,1101,Idrottsföreningen Elfsborg
+tm:110302,110302,Avs Futebol
+tm:1106,1106,Club de Gimnasia y Esgrima La Plata
+tm:11127,11127,Ural Yekaterinburg
+tm:11141,11141,Toronto FC
+tm:1118,1118,Örgryte IS
+tm:11282,11282,Alanyaspor
+BUR,1132,Burnley
+tm:114,114,Beşiktaş Jimnastik Kulübü
+tm:11648,11648,Independiente Santa Fe
+tm:1184,1184,KRC Genk
+tm:12321,12321,Girona FC
+tm:124,124,Rangers FC
+tm:1245,1245,KAS Eupen
+tm:12574,12574,CD Godoy Cruz Antonio Tomba
+tm:128,128,AO Xanthi
+tm:13,13,Atlético de Madrid
+tm:1321,1321,SK Dynamo Ceske Budejovice
+tm:1322,1322,FK Jablonec
+tm:13353,13353,Club Tijuana
+tm:1387,1387,Siena FC
+tm:141,141,Galatasaray
+tm:1421,1421,Stade Reims
+tm:1435,1435,Go Ahead Eagles
+tm:14589,14589,FC Orenburg
+tm:14649,14649,Boyacá Chicó FC
+tm:14680,14680,Unión Magdalena
+TOT,148,Tottenham Hotspur
+tm:15,15,Bayer 04 Leverkusen
+tm:1519,1519,Dundee United FC
+tm:162,162,AS Monaco
+tm:16239,16239,Desna Chernigiv
+tm:1627,1627,Catania FC
+tm:16704,16704,FK Krasnodar
+tm:16795,16795,Granada CF
+tm:170,170,Rapid Vienna
+tm:17209,17209,Al-Wehda FC
+tm:173,173,Odense Boldklub
+tm:1775,1775,Club Atlético San Lorenzo de Almagro
+SOU,180,Southampton
+tm:1804,1804,Deportivo Toluca
+tm:1829,1829,Instituto Atlético Central Córdoba
+tm:18487,18487,Al-Ahli Saudi Football Club
+tm:192,192,Roda JC Kerkrade
+tm:19657,19657,Vendsyssel FF
+tm:20100,20100,FC Vestsjaelland
+tm:206,206,Bröndby IF
+tm:20887,20887,FK Jedinstvo Ub
+tm:21459,21459,Gangwon Football Club
+tm:221,221,Santos Futebol Clube
+tm:22110,22110,FC Helsingör
+tm:22171,22171,Fagiano Okayama Sports Club
+tm:22431,22431,Stal Mielec
+tm:22902,22902,Alianza FC
+tm:23,23,Eintracht Braunschweig
+tm:2300,2300,Jagiellonia Bialystok
+tm:232,232,FK Spartak Moskva
+tm:234,234,Feyenoord Rotterdam
+tm:23568,23568,Zelvia
+tm:238,238,Lech Poznan
+tm:24,24,Eintracht Frankfurt
+tm:242,242,FC Winterthur
+tm:2424,2424,Gil Vicente FC
+tm:24245,24245,Ümraniyespor
+tm:2457,2457,B SAD
+tm:24575,24575,HNK Gorica
+tm:25184,25184,Club Atlético Barracas Central
+tm:252,252,Genoa CFC
+tm:255,255,Legia Warszawa
+tm:25580,25580,Melbourne City FC
+tm:257,257,FC St. Gallen 1879
+tm:26,26,FC Basel 1893
+tm:26459,26459,NK Veres Rivne
+tm:2719,2719,Mjällby Almänna Idrottsförening
+tm:2727,2727,Oud-Heverlee Leuven
+tm:2759,2759,Ross County FC
+tm:2844,2844,IFK Norrköping
+tm:28760,28760,SK Austria Klagenfurt
+tm:2921,2921,Delfino Pescara 1936
+tm:2969,2969,Dijon FCO
+tm:30120,30120,Athlitiki Enosi Kifisias
+tm:306,306,SC Heerenveen
+tm:3060,3060,APS Atromitos Athinon
+tm:311,311,Football Club Pohang Steelers
+tm:31284,31284,Club Atlético Central Córdoba
+tm:32041,32041,Fortaleza CEIF
+tm:32113,32113,FK IMT Belgrad
+tm:33,33,FC Schalke 04
+tm:330,330,Clube Atlético Mineiro
+tm:3329,3329,FC Famalicão
+tm:33328,33328,FK Radnik Surdulica
+tm:3336,3336,Desportivo Aves (- 2020)
+tm:336,336,Sporting CP
+tm:33966,33966,ACSM Politehnica Iasi
+SHU,350,Sheffield United
+tm:3522,3522,Spezia Calcio
+tm:366,366,Real Valladolid CF
+tm:368,368,Sevilla FC
+tm:369,369,Lyngby Boldklub
+tm:3691,3691,Tom Tomsk
+tm:3734,3734,Tokyo Verdy
+tm:38,38,Fortuna Düsseldorf
+tm:3828,3828,Yokohama Marinos
+tm:383,383,PSV Eindhoven
+tm:38628,38628,Llaneros FC
+tm:38898,38898,Football Club Anyang
+tm:39,39,1.FSV Mainz 05
+tm:39097,39097,Obolon Kyiv
+tm:40,40,FC Girondins Bordeaux
+tm:40058,40058,New York City Football Club
+tm:4083,4083,FC Crotone
+tm:41,41,Hamburger SV
+tm:4102,4102,AC Carpi
+tm:41274,41274,Beerschot VA
+tm:41278,41278,ACSC FC Arges
+tm:416,416,Torino FC
+tm:417,417,OGC Nice
+tm:42,42,Hannover 96
+tm:4294,4294,SC Farense
+tm:430,430,ACF Fiorentina
+tm:432,432,Chicago Fire Soccer Club
+tm:441,441,Apollon Smyrnis
+tm:4467,4467,TSV Hartberg
+tm:447,447,HNK Hajduk Split
+tm:448,448,FK Vojvodina Novi Sad
+tm:449,449,Trabzonspor
+tm:452,452,BSC Young Boys
+tm:456,456,HNK Vukovar 1991
+tm:46,46,Inter Milan
+tm:465,465,St. Mirren FC
+tm:4750,4750,SC Olhanense
+tm:4795,4795,FC Ingolstadt 04
+tm:48332,48332,Kolos Kovalivka
+tm:49283,49283,FC Juárez
+tm:49364,49364,Ingulets Petrove
+tm:4941,4941,Club León FC
+tm:4959,4959,SC Otelul Galati
+tm:4961,4961,Querétaro FC
+tm:527,527,Football Club Lausanne-Sport
+tm:53,53,OFK Beograd
+tm:533,533,TSG 1899 Hoffenheim
+tm:5358,5358,SD Huesca
+tm:53646,53646,FK Polissya Zhytomyr
+tm:537,537,S. A. F. Botafogo
+tm:55686,55686,TOV FK Metalist 1925 Kharkiv
+tm:56089,56089,Minnesota United FC
+tm:566,566,Beerschot AC
+tm:5662,5662,Puebla FC
+tm:5776,5776,FC Fredericia
+tm:593,593,Kyoto Purple Sanga
+tm:6,6,Adanaspor
+tm:60551,60551,SC Dnipro-1
+tm:607,607,Venezia FC
+tm:610,610,Ajax Amsterdam
+tm:6195,6195,SSC Napoli
+tm:621,621,Athletic Bilbao
+CHE,631,Chelsea
+tm:63966,63966,Nashville SC
+tm:6414,6414,Metalist Kharkiv (- 2016)
+tm:6418,6418,Panetolikos Agrinio
+tm:6499,6499,Foundation Coorperation Hana Financial Group Inc. Football Club
+tm:6621,6621,FK Cukaricki
+tm:6631,6631,Tokyo Football Club
+tm:667,667,RC Strasbourg Alsace
+tm:669,669,FK Partizan Belgrade
+tm:672,672,JEF United
+tm:687,687,Molde Fotballklubb
+tm:69261,69261,Club Internacional de Fútbol Miami
+tm:697,697,FC Slovan Liberec
+tm:6994,6994,Metalurg Zaporizhya (-2016)
+tm:7154,7154,Radomiak Radom
+tm:72309,72309,Austin FC
+tm:750,750,FC Sochaux-Montbéliard
+tm:75231,75231,Dinamo Makhachkala
+tm:7769,7769,CFR Cluj
+tm:82,82,VfL Wolfsburg
+tm:8344,8344,Albirex Niigata
+tm:8457,8457,Shonan Bellmare
+tm:85465,85465,Karpaty Lviv
+tm:855,855,EA Guingamp
+tm:88,88,Widzew Lodz
+tm:8838,8838,Zirka Kropyvnytskyi
+tm:9007,9007,Arsenal Kyiv
+tm:903,903,Hibernian FC
+tm:9131,9131,Al-Hazem Sport Club
+tm:938,938,FC Thun
+tm:941,941,FC Viktoria Plzen
+tm:964,964,AO FK Zenit Sankt-Peterburg
+tm:968,968,KVC Westerlo
+BOU,989,Bournemouth
+tm:993,993,Córdoba CF
+tm:999,999,NK Istra 1961

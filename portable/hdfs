@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "${SPARK_PYTHON:-python}" -m analytics.hdfs_cli "$@"

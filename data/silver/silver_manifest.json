@@ -1,0 +1,3987 @@
+{
+  "exported_at_utc": "2026-10-08T02:05:26+00:00",
+  "silver_run_id": "plca_954634acee6255faafab8270",
+  "dataset_id": "csv_59a3809d1bdcb12c",
+  "logic_version": "plca-v2.0.0",
+  "seasons": [
+    "2022-2023",
+    "2023-2024",
+    "2024-2025"
+  ],
+  "source_hdfs_root": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270",
+  "source_completed_at_utc": "2026-10-07T17:47:32+00:00",
+  "table_count": 21,
+  "total_rows_across_tables": 73075,
+  "csv_encoding": "UTF-8 with BOM",
+  "csv_delimiter": ",",
+  "csv_null_marker": "\\N",
+  "source_unchanged": true,
+  "tables": [
+    {
+      "table": "audit/goal_against_mirror",
+      "row_count": 3445,
+      "columns": 13,
+      "keys": [
+        "event_id"
+      ],
+      "source_tables": [
+        "goals_against"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/audit/goal_against_mirror",
+      "csv": "csv/audit/goal_against_mirror.csv",
+      "parquet": "parquet/audit/goal_against_mirror",
+      "season_counts": {
+        "2022-2023": 1084,
+        "2023-2024": 1246,
+        "2024-2025": 1115
+      },
+      "null_counts": {
+        "match_id": 0,
+        "club_id": 0,
+        "opponent_club_id": 0,
+        "season": 0,
+        "match_date": 0,
+        "scorer": 0,
+        "assist": 1054,
+        "minute_label": 0,
+        "minute": 0,
+        "stoppage_minutes": 3102,
+        "notes": 3317,
+        "is_own_goal": 0,
+        "event_id": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "match_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "match_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "scorer",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "assist",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "minute_label",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "minute",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "stoppage_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "notes",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "is_own_goal",
+            "type": "boolean",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "event_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "audit/identity_review",
+      "row_count": 332,
+      "columns": 7,
+      "keys": [
+        "player_id"
+      ],
+      "source_tables": [],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/audit/identity_review",
+      "csv": "csv/audit/identity_review.csv",
+      "parquet": "parquet/audit/identity_review",
+      "season_counts": {},
+      "null_counts": {
+        "player_id": 0,
+        "name_key": 0,
+        "player_name": 0,
+        "birth_year": 3,
+        "id_basis": 0,
+        "identity_status": 0,
+        "review_status": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "name_key",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "birth_year",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "id_basis",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "identity_status",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "review_status",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "bridges/bridge_fbref_player",
+      "row_count": 2171,
+      "columns": 5,
+      "keys": [
+        "name_key",
+        "club_id",
+        "season"
+      ],
+      "source_tables": [],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/bridges/bridge_fbref_player",
+      "csv": "csv/bridges/bridge_fbref_player.csv",
+      "parquet": "parquet/bridges/bridge_fbref_player",
+      "season_counts": {
+        "2022-2023": 723,
+        "2023-2024": 746,
+        "2024-2025": 702
+      },
+      "null_counts": {
+        "name_key": 0,
+        "birth_year": 3,
+        "club_id": 0,
+        "season": 0,
+        "player_id": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "name_key",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "birth_year",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "bridges/bridge_transfermarkt_player",
+      "row_count": 886,
+      "columns": 4,
+      "keys": [
+        "player_id"
+      ],
+      "source_tables": [],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/bridges/bridge_transfermarkt_player",
+      "csv": "csv/bridges/bridge_transfermarkt_player.csv",
+      "parquet": "parquet/bridges/bridge_transfermarkt_player",
+      "season_counts": {},
+      "null_counts": {
+        "player_id": 0,
+        "tm_player_id": 0,
+        "tm_name": 0,
+        "match_method": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "match_method",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "dimensions/dim_club",
+      "row_count": 796,
+      "columns": 3,
+      "keys": [
+        "club_id"
+      ],
+      "source_tables": [],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/dimensions/dim_club",
+      "csv": "csv/dimensions/dim_club.csv",
+      "parquet": "parquet/dimensions/dim_club",
+      "season_counts": {},
+      "null_counts": {
+        "club_id": 0,
+        "tm_club_id": 0,
+        "club_name": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "dimensions/dim_player",
+      "row_count": 1218,
+      "columns": 6,
+      "keys": [
+        "player_id"
+      ],
+      "source_tables": [],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/dimensions/dim_player",
+      "csv": "csv/dimensions/dim_player.csv",
+      "parquet": "parquet/dimensions/dim_player",
+      "season_counts": {},
+      "null_counts": {
+        "player_id": 0,
+        "name_key": 0,
+        "player_name": 0,
+        "birth_year": 3,
+        "id_basis": 0,
+        "identity_status": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "name_key",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "birth_year",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "id_basis",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "identity_status",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "dimensions/dim_transfermarkt_player",
+      "row_count": 1161,
+      "columns": 6,
+      "keys": [
+        "tm_player_id"
+      ],
+      "source_tables": [
+        "players"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/dimensions/dim_transfermarkt_player",
+      "csv": "csv/dimensions/dim_transfermarkt_player.csv",
+      "parquet": "parquet/dimensions/dim_transfermarkt_player",
+      "season_counts": {},
+      "null_counts": {
+        "tm_player_id": 0,
+        "player_name": 0,
+        "birth_date": 0,
+        "tm_position": 0,
+        "sub_position": 0,
+        "player_id": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "tm_player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "birth_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_position",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "sub_position",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_appearance",
+      "row_count": 34296,
+      "columns": 12,
+      "keys": [
+        "appearance_id"
+      ],
+      "source_tables": [
+        "appearances",
+        "games"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_appearance",
+      "csv": "csv/facts/fact_appearance.csv",
+      "parquet": "parquet/facts/fact_appearance",
+      "season_counts": {
+        "2022-2023": 11345,
+        "2023-2024": 11384,
+        "2024-2025": 11567
+      },
+      "null_counts": {
+        "appearance_id": 0,
+        "tm_player_id": 0,
+        "player_id": 0,
+        "game_id": 0,
+        "club_id": 0,
+        "season": 0,
+        "appearance_date": 0,
+        "minutes_played": 0,
+        "goals": 0,
+        "assists": 0,
+        "yellow_cards": 0,
+        "red_cards": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "appearance_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "game_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "appearance_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "minutes_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "assists",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_goal_event",
+      "row_count": 3445,
+      "columns": 13,
+      "keys": [
+        "event_id"
+      ],
+      "source_tables": [
+        "goals_scores"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_goal_event",
+      "csv": "csv/facts/fact_goal_event.csv",
+      "parquet": "parquet/facts/fact_goal_event",
+      "season_counts": {
+        "2022-2023": 1084,
+        "2023-2024": 1246,
+        "2024-2025": 1115
+      },
+      "null_counts": {
+        "match_id": 0,
+        "club_id": 0,
+        "opponent_club_id": 0,
+        "season": 0,
+        "match_date": 0,
+        "scorer": 0,
+        "assist": 1054,
+        "minute_label": 0,
+        "minute": 0,
+        "stoppage_minutes": 3102,
+        "notes": 3317,
+        "is_own_goal": 0,
+        "event_id": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "match_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "match_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "scorer",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "assist",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "minute_label",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "minute",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "stoppage_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "notes",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "is_own_goal",
+            "type": "boolean",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "event_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_match_enriched",
+      "row_count": 1140,
+      "columns": 89,
+      "keys": [
+        "match_id"
+      ],
+      "source_tables": [
+        "score_fixtures",
+        "games",
+        "shooting_for",
+        "shooting_against",
+        "gk_for",
+        "gk_against",
+        "miscellaneous_for",
+        "miscellaneous_against"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_match_enriched",
+      "csv": "csv/facts/fact_match_enriched.csv",
+      "parquet": "parquet/facts/fact_match_enriched",
+      "season_counts": {
+        "2022-2023": 380,
+        "2023-2024": 380,
+        "2024-2025": 380
+      },
+      "null_counts": {
+        "match_id": 0,
+        "tm_game_id": 0,
+        "season": 0,
+        "match_date": 0,
+        "home_club_id": 0,
+        "away_club_id": 0,
+        "home_goals": 0,
+        "away_goals": 0,
+        "tm_home_goals": 0,
+        "tm_away_goals": 0,
+        "home_manager": 0,
+        "away_manager": 0,
+        "stadium": 0,
+        "home_possession": 0,
+        "home_attendance": 1,
+        "home_formation": 0,
+        "home_referee": 0,
+        "home_shooting_goals": 0,
+        "home_shooting_shots": 0,
+        "home_shooting_shots_on_target": 0,
+        "home_shooting_sot_pct": 0,
+        "home_shooting_goals_per_shot": 0,
+        "home_shooting_goals_per_sot": 16,
+        "home_shooting_penalties": 0,
+        "home_shooting_penalties_attempted": 0,
+        "home_misc_yellow_cards": 0,
+        "home_misc_red_cards": 0,
+        "home_misc_second_yellow_cards": 0,
+        "home_misc_fouls_committed": 0,
+        "home_misc_fouls_drawn": 0,
+        "home_misc_offsides": 14,
+        "home_misc_crosses": 0,
+        "home_misc_interceptions": 0,
+        "home_misc_tackles_won": 0,
+        "home_misc_penalties_won": 1140,
+        "home_misc_penalties_conceded": 1140,
+        "home_misc_own_goals": 0,
+        "home_gk_goals_against": 0,
+        "home_gk_goals_against_per90": 1140,
+        "home_gk_shots_on_target_against": 3,
+        "home_gk_saves": 6,
+        "home_gk_save_pct": 32,
+        "home_gk_clean_sheets": 0,
+        "home_gk_clean_sheet_pct": 1140,
+        "home_gk_matches_played": 1140,
+        "home_gk_minutes": 1140,
+        "home_gk_penalties_attempted": 0,
+        "home_gk_penalties_against": 0,
+        "home_gk_penalties_saved": 0,
+        "home_gk_penalties_missed": 0,
+        "home_gk_penalty_save_pct": 1140,
+        "away_possession": 0,
+        "away_attendance": 1,
+        "away_formation": 0,
+        "away_referee": 0,
+        "away_shooting_goals": 0,
+        "away_shooting_shots": 0,
+        "away_shooting_shots_on_target": 0,
+        "away_shooting_sot_pct": 0,
+        "away_shooting_goals_per_shot": 0,
+        "away_shooting_goals_per_sot": 32,
+        "away_shooting_penalties": 0,
+        "away_shooting_penalties_attempted": 0,
+        "away_misc_yellow_cards": 0,
+        "away_misc_red_cards": 0,
+        "away_misc_second_yellow_cards": 0,
+        "away_misc_fouls_committed": 0,
+        "away_misc_fouls_drawn": 0,
+        "away_misc_offsides": 9,
+        "away_misc_crosses": 0,
+        "away_misc_interceptions": 0,
+        "away_misc_tackles_won": 0,
+        "away_misc_penalties_won": 1140,
+        "away_misc_penalties_conceded": 1140,
+        "away_misc_own_goals": 0,
+        "away_gk_goals_against": 0,
+        "away_gk_goals_against_per90": 1140,
+        "away_gk_shots_on_target_against": 3,
+        "away_gk_saves": 5,
+        "away_gk_save_pct": 18,
+        "away_gk_clean_sheets": 0,
+        "away_gk_clean_sheet_pct": 1140,
+        "away_gk_matches_played": 1140,
+        "away_gk_minutes": 1140,
+        "away_gk_penalties_attempted": 0,
+        "away_gk_penalties_against": 0,
+        "away_gk_penalties_saved": 0,
+        "away_gk_penalties_missed": 0,
+        "away_gk_penalty_save_pct": 1140
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "match_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_game_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "match_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_home_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_away_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_manager",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_manager",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "stadium",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_possession",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_attendance",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_formation",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_referee",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_shots",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_shots_on_target",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_sot_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_goals_per_shot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_goals_per_sot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_shooting_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_second_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_fouls_committed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_fouls_drawn",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_offsides",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_crosses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_interceptions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_tackles_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_penalties_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_penalties_conceded",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_misc_own_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_goals_against_per90",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_shots_on_target_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_saves",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_clean_sheets",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_clean_sheet_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_penalties_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_penalties_saved",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_penalties_missed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_gk_penalty_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_possession",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_attendance",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_formation",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_referee",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_shots",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_shots_on_target",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_sot_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_goals_per_shot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_goals_per_sot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_shooting_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_second_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_fouls_committed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_fouls_drawn",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_offsides",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_crosses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_interceptions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_tackles_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_penalties_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_penalties_conceded",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_misc_own_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_goals_against_per90",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_shots_on_target_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_saves",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_clean_sheets",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_clean_sheet_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_penalties_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_penalties_saved",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_penalties_missed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_gk_penalty_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_player_gk",
+      "row_count": 123,
+      "columns": 17,
+      "keys": [
+        "player_id",
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "player_gk"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_player_gk",
+      "csv": "csv/facts/fact_player_gk.csv",
+      "parquet": "parquet/facts/fact_player_gk",
+      "season_counts": {
+        "2022-2023": 39,
+        "2023-2024": 40,
+        "2024-2025": 44
+      },
+      "null_counts": {
+        "player_id": 0,
+        "club_id": 0,
+        "season": 0,
+        "gk_goals_against": 0,
+        "gk_goals_against_per90": 0,
+        "gk_shots_on_target_against": 0,
+        "gk_saves": 0,
+        "gk_save_pct": 1,
+        "gk_clean_sheets": 0,
+        "gk_clean_sheet_pct": 4,
+        "gk_matches_played": 0,
+        "gk_minutes": 0,
+        "gk_penalties_attempted": 0,
+        "gk_penalties_against": 0,
+        "gk_penalties_saved": 0,
+        "gk_penalties_missed": 0,
+        "gk_penalty_save_pct": 35
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against_per90",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_shots_on_target_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_saves",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheets",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheet_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_saved",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_missed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalty_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_player_miscellaneous",
+      "row_count": 1723,
+      "columns": 15,
+      "keys": [
+        "player_id",
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "player_miscellaneous"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_player_miscellaneous",
+      "csv": "csv/facts/fact_player_miscellaneous.csv",
+      "parquet": "parquet/facts/fact_player_miscellaneous",
+      "season_counts": {
+        "2022-2023": 569,
+        "2023-2024": 580,
+        "2024-2025": 574
+      },
+      "null_counts": {
+        "player_id": 0,
+        "club_id": 0,
+        "season": 0,
+        "misc_yellow_cards": 0,
+        "misc_red_cards": 0,
+        "misc_second_yellow_cards": 0,
+        "misc_fouls_committed": 0,
+        "misc_fouls_drawn": 0,
+        "misc_offsides": 0,
+        "misc_crosses": 0,
+        "misc_interceptions": 0,
+        "misc_tackles_won": 0,
+        "misc_penalties_won": 1723,
+        "misc_penalties_conceded": 1723,
+        "misc_own_goals": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "misc_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_second_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_committed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_drawn",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_offsides",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_crosses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_interceptions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_tackles_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_conceded",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_own_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_player_playing_time",
+      "row_count": 2171,
+      "columns": 17,
+      "keys": [
+        "player_id",
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "player_playing_time"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_player_playing_time",
+      "csv": "csv/facts/fact_player_playing_time.csv",
+      "parquet": "parquet/facts/fact_player_playing_time",
+      "season_counts": {
+        "2022-2023": 723,
+        "2023-2024": 746,
+        "2024-2025": 702
+      },
+      "null_counts": {
+        "player_id": 0,
+        "club_id": 0,
+        "season": 0,
+        "playing_matches_played": 0,
+        "playing_minutes": 448,
+        "playing_starts": 0,
+        "playing_completed_matches": 0,
+        "playing_substitutions": 0,
+        "playing_unused_substitutes": 0,
+        "playing_minutes_per_match": 448,
+        "playing_minutes_pct": 446,
+        "playing_minutes_per_start": 680,
+        "playing_minutes_per_sub": 700,
+        "playing_points_per_match": 446,
+        "playing_on_goals": 446,
+        "playing_on_goals_against": 446,
+        "playing_on_off": 464
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "playing_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_starts",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_completed_matches",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_substitutions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_unused_substitutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_match",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_start",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_sub",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_points_per_match",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_off",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_player_season",
+      "row_count": 1723,
+      "columns": 65,
+      "keys": [
+        "player_id",
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "player_standard",
+        "player_shooting",
+        "player_miscellaneous",
+        "player_playing_time",
+        "player_gk"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_player_season",
+      "csv": "csv/facts/fact_player_season.csv",
+      "parquet": "parquet/facts/fact_player_season",
+      "season_counts": {
+        "2022-2023": 569,
+        "2023-2024": 580,
+        "2024-2025": 574
+      },
+      "null_counts": {
+        "player_id": 0,
+        "club_id": 0,
+        "season": 0,
+        "player_name": 0,
+        "birth_year": 1,
+        "position": 0,
+        "age": 1,
+        "matches_played": 0,
+        "starts": 0,
+        "minutes": 0,
+        "goals": 0,
+        "assists": 0,
+        "non_penalty_goals": 0,
+        "penalties": 0,
+        "penalties_attempted": 0,
+        "yellow_cards": 0,
+        "red_cards": 0,
+        "shooting_goals": 0,
+        "shooting_shots": 0,
+        "shooting_shots_on_target": 0,
+        "shooting_sot_pct": 324,
+        "shooting_goals_per_shot": 324,
+        "shooting_goals_per_sot": 519,
+        "shooting_penalties": 0,
+        "shooting_penalties_attempted": 0,
+        "misc_yellow_cards": 0,
+        "misc_red_cards": 0,
+        "misc_second_yellow_cards": 0,
+        "misc_fouls_committed": 0,
+        "misc_fouls_drawn": 0,
+        "misc_offsides": 0,
+        "misc_crosses": 0,
+        "misc_interceptions": 0,
+        "misc_tackles_won": 0,
+        "misc_penalties_won": 1723,
+        "misc_penalties_conceded": 1723,
+        "misc_own_goals": 0,
+        "playing_matches_played": 0,
+        "playing_minutes": 0,
+        "playing_starts": 0,
+        "playing_completed_matches": 0,
+        "playing_substitutions": 0,
+        "playing_unused_substitutes": 0,
+        "playing_minutes_per_match": 0,
+        "playing_minutes_pct": 0,
+        "playing_minutes_per_start": 232,
+        "playing_minutes_per_sub": 252,
+        "playing_points_per_match": 0,
+        "playing_on_goals": 0,
+        "playing_on_goals_against": 0,
+        "playing_on_off": 16,
+        "gk_goals_against": 1600,
+        "gk_goals_against_per90": 1600,
+        "gk_shots_on_target_against": 1600,
+        "gk_saves": 1600,
+        "gk_save_pct": 1601,
+        "gk_clean_sheets": 1600,
+        "gk_clean_sheet_pct": 1604,
+        "gk_matches_played": 1600,
+        "gk_minutes": 1600,
+        "gk_penalties_attempted": 1600,
+        "gk_penalties_against": 1600,
+        "gk_penalties_saved": 1600,
+        "gk_penalties_missed": 1600,
+        "gk_penalty_save_pct": 1635
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "player_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "birth_year",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "position",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "age",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "starts",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "assists",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "non_penalty_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots_on_target",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_sot_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_shot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_sot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_second_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_committed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_drawn",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_offsides",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_crosses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_interceptions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_tackles_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_conceded",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_own_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_starts",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_completed_matches",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_substitutions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_unused_substitutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_match",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_start",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_sub",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_points_per_match",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_off",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against_per90",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_shots_on_target_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_saves",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheets",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheet_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_saved",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_missed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalty_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_player_shooting",
+      "row_count": 1723,
+      "columns": 11,
+      "keys": [
+        "player_id",
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "player_shooting"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_player_shooting",
+      "csv": "csv/facts/fact_player_shooting.csv",
+      "parquet": "parquet/facts/fact_player_shooting",
+      "season_counts": {
+        "2022-2023": 569,
+        "2023-2024": 580,
+        "2024-2025": 574
+      },
+      "null_counts": {
+        "player_id": 0,
+        "club_id": 0,
+        "season": 0,
+        "shooting_goals": 0,
+        "shooting_shots": 0,
+        "shooting_shots_on_target": 0,
+        "shooting_sot_pct": 324,
+        "shooting_goals_per_shot": 324,
+        "shooting_goals_per_sot": 519,
+        "shooting_penalties": 0,
+        "shooting_penalties_attempted": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots_on_target",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_sot_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_shot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_sot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_player_valuation",
+      "row_count": 10472,
+      "columns": 3,
+      "keys": [
+        "tm_player_id",
+        "valuation_date"
+      ],
+      "source_tables": [
+        "player_valuations"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_player_valuation",
+      "csv": "csv/facts/fact_player_valuation.csv",
+      "parquet": "parquet/facts/fact_player_valuation",
+      "season_counts": {},
+      "null_counts": {
+        "tm_player_id": 0,
+        "valuation_date": 0,
+        "market_value_eur": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "tm_player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "valuation_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "market_value_eur",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_player_wage",
+      "row_count": 1851,
+      "columns": 10,
+      "keys": [
+        "name_key",
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "player_wage"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_player_wage",
+      "csv": "csv/facts/fact_player_wage.csv",
+      "parquet": "parquet/facts/fact_player_wage",
+      "season_counts": {
+        "2022-2023": 576,
+        "2023-2024": 591,
+        "2024-2025": 684
+      },
+      "null_counts": {
+        "player_id": 174,
+        "name_key": 0,
+        "player_name": 0,
+        "club_id": 0,
+        "season": 0,
+        "annual_wage_gbp": 0,
+        "annual_wage_eur": 0,
+        "weekly_wage_gbp": 0,
+        "wage_notes": 759,
+        "wage_estimated": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "name_key",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "annual_wage_gbp",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "annual_wage_eur",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "weekly_wage_gbp",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "wage_notes",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "wage_estimated",
+            "type": "boolean",
+            "nullable": false,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_squad_wage",
+      "row_count": 60,
+      "columns": 5,
+      "keys": [
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "squad_wage"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_squad_wage",
+      "csv": "csv/facts/fact_squad_wage.csv",
+      "parquet": "parquet/facts/fact_squad_wage",
+      "season_counts": {
+        "2022-2023": 20,
+        "2023-2024": 20,
+        "2024-2025": 20
+      },
+      "null_counts": {
+        "club_id": 0,
+        "season": 0,
+        "annual_wage_gbp": 0,
+        "annual_wage_eur": 0,
+        "wage_estimated_pct": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "annual_wage_gbp",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "annual_wage_eur",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "wage_estimated_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_team_match",
+      "row_count": 2280,
+      "columns": 90,
+      "keys": [
+        "match_id",
+        "club_id"
+      ],
+      "source_tables": [
+        "score_fixtures",
+        "shooting_for",
+        "shooting_against",
+        "gk_for",
+        "gk_against",
+        "miscellaneous_for",
+        "miscellaneous_against",
+        "games"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_team_match",
+      "csv": "csv/facts/fact_team_match.csv",
+      "parquet": "parquet/facts/fact_team_match",
+      "season_counts": {
+        "2022-2023": 760,
+        "2023-2024": 760,
+        "2024-2025": 760
+      },
+      "null_counts": {
+        "season": 0,
+        "match_date": 0,
+        "home_club_id": 0,
+        "away_club_id": 0,
+        "club_id": 0,
+        "opponent_club_id": 0,
+        "venue": 0,
+        "result": 0,
+        "goals_for": 0,
+        "goals_against": 0,
+        "possession": 0,
+        "attendance": 2,
+        "formation": 0,
+        "opponent_formation": 0,
+        "referee": 0,
+        "shooting_goals": 0,
+        "shooting_shots": 0,
+        "shooting_shots_on_target": 0,
+        "shooting_sot_pct": 0,
+        "shooting_goals_per_shot": 0,
+        "shooting_goals_per_sot": 48,
+        "shooting_penalties": 0,
+        "shooting_penalties_attempted": 0,
+        "opponent_shooting_goals": 0,
+        "opponent_shooting_shots": 0,
+        "opponent_shooting_shots_on_target": 0,
+        "opponent_shooting_sot_pct": 0,
+        "opponent_shooting_goals_per_shot": 0,
+        "opponent_shooting_goals_per_sot": 48,
+        "opponent_shooting_penalties": 0,
+        "opponent_shooting_penalties_attempted": 0,
+        "misc_yellow_cards": 0,
+        "misc_red_cards": 0,
+        "misc_second_yellow_cards": 0,
+        "misc_fouls_committed": 0,
+        "misc_fouls_drawn": 0,
+        "misc_offsides": 23,
+        "misc_crosses": 0,
+        "misc_interceptions": 0,
+        "misc_tackles_won": 0,
+        "misc_penalties_won": 2280,
+        "misc_penalties_conceded": 2280,
+        "misc_own_goals": 0,
+        "opponent_misc_yellow_cards": 0,
+        "opponent_misc_red_cards": 0,
+        "opponent_misc_second_yellow_cards": 0,
+        "opponent_misc_fouls_committed": 0,
+        "opponent_misc_fouls_drawn": 0,
+        "opponent_misc_offsides": 23,
+        "opponent_misc_crosses": 0,
+        "opponent_misc_interceptions": 0,
+        "opponent_misc_tackles_won": 0,
+        "opponent_misc_penalties_won": 2280,
+        "opponent_misc_penalties_conceded": 2280,
+        "opponent_misc_own_goals": 0,
+        "gk_goals_against": 0,
+        "gk_goals_against_per90": 2280,
+        "gk_shots_on_target_against": 6,
+        "gk_saves": 11,
+        "gk_save_pct": 50,
+        "gk_clean_sheets": 0,
+        "gk_clean_sheet_pct": 2280,
+        "gk_matches_played": 2280,
+        "gk_minutes": 2280,
+        "gk_penalties_attempted": 0,
+        "gk_penalties_against": 0,
+        "gk_penalties_saved": 0,
+        "gk_penalties_missed": 0,
+        "gk_penalty_save_pct": 2280,
+        "opponent_gk_goals_against": 0,
+        "opponent_gk_goals_against_per90": 2280,
+        "opponent_gk_shots_on_target_against": 6,
+        "opponent_gk_saves": 11,
+        "opponent_gk_save_pct": 50,
+        "opponent_gk_clean_sheets": 0,
+        "opponent_gk_clean_sheet_pct": 2280,
+        "opponent_gk_matches_played": 2280,
+        "opponent_gk_minutes": 2280,
+        "opponent_gk_penalties_attempted": 0,
+        "opponent_gk_penalties_against": 0,
+        "opponent_gk_penalties_saved": 0,
+        "opponent_gk_penalties_missed": 0,
+        "opponent_gk_penalty_save_pct": 2280,
+        "match_id": 0,
+        "tm_game_id": 0,
+        "tm_home_goals": 0,
+        "tm_away_goals": 0,
+        "home_manager": 0,
+        "away_manager": 0,
+        "stadium": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "match_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "venue",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "result",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "goals_for",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "possession",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "attendance",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "formation",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_formation",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "referee",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots_on_target",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_sot_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_shot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_sot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_shots",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_shots_on_target",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_sot_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_goals_per_shot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_goals_per_sot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_shooting_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_second_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_committed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_drawn",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_offsides",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_crosses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_interceptions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_tackles_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_conceded",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_own_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_second_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_fouls_committed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_fouls_drawn",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_offsides",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_crosses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_interceptions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_tackles_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_penalties_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_penalties_conceded",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_misc_own_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against_per90",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_shots_on_target_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_saves",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheets",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheet_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_saved",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_missed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalty_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_goals_against_per90",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_shots_on_target_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_saves",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_clean_sheets",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_clean_sheet_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_penalties_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_penalties_saved",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_penalties_missed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "opponent_gk_penalty_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "match_id",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "tm_game_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_home_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "tm_away_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "home_manager",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "away_manager",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "stadium",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_team_season",
+      "row_count": 60,
+      "columns": 76,
+      "keys": [
+        "club_id",
+        "season"
+      ],
+      "source_tables": [
+        "league_table",
+        "squad_standard",
+        "squad_gk",
+        "squad_shooting",
+        "squad_miscellaneous",
+        "squad_playing_time",
+        "squad_wage"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_team_season",
+      "csv": "csv/facts/fact_team_season.csv",
+      "parquet": "parquet/facts/fact_team_season",
+      "season_counts": {
+        "2022-2023": 20,
+        "2023-2024": 20,
+        "2024-2025": 20
+      },
+      "null_counts": {
+        "club_id": 0,
+        "season": 0,
+        "rank": 0,
+        "matches_played": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0,
+        "goals_for": 0,
+        "goals_against": 0,
+        "points": 0,
+        "standard_matches_played": 0,
+        "standard_starts": 0,
+        "standard_minutes": 0,
+        "standard_goals": 0,
+        "standard_assists": 0,
+        "standard_non_penalty_goals": 0,
+        "standard_penalties": 0,
+        "standard_penalties_attempted": 0,
+        "standard_yellow_cards": 0,
+        "standard_red_cards": 0,
+        "standard_possession": 0,
+        "standard_squad_age": 0,
+        "standard_players_used": 0,
+        "shooting_goals": 0,
+        "shooting_shots": 0,
+        "shooting_shots_on_target": 0,
+        "shooting_sot_pct": 0,
+        "shooting_goals_per_shot": 0,
+        "shooting_goals_per_sot": 0,
+        "shooting_penalties": 0,
+        "shooting_penalties_attempted": 0,
+        "misc_yellow_cards": 0,
+        "misc_red_cards": 0,
+        "misc_second_yellow_cards": 0,
+        "misc_fouls_committed": 0,
+        "misc_fouls_drawn": 0,
+        "misc_offsides": 0,
+        "misc_crosses": 0,
+        "misc_interceptions": 0,
+        "misc_tackles_won": 0,
+        "misc_penalties_won": 0,
+        "misc_penalties_conceded": 0,
+        "misc_own_goals": 0,
+        "playing_matches_played": 0,
+        "playing_minutes": 0,
+        "playing_starts": 0,
+        "playing_completed_matches": 0,
+        "playing_substitutions": 0,
+        "playing_unused_substitutes": 0,
+        "playing_minutes_per_match": 0,
+        "playing_minutes_pct": 0,
+        "playing_minutes_per_start": 0,
+        "playing_minutes_per_sub": 0,
+        "playing_points_per_match": 0,
+        "playing_on_goals": 0,
+        "playing_on_goals_against": 0,
+        "playing_on_off": 60,
+        "gk_goals_against": 0,
+        "gk_goals_against_per90": 0,
+        "gk_shots_on_target_against": 0,
+        "gk_saves": 0,
+        "gk_save_pct": 0,
+        "gk_clean_sheets": 0,
+        "gk_clean_sheet_pct": 0,
+        "gk_matches_played": 0,
+        "gk_minutes": 0,
+        "gk_penalties_attempted": 0,
+        "gk_penalties_against": 0,
+        "gk_penalties_saved": 0,
+        "gk_penalties_missed": 0,
+        "gk_penalty_save_pct": 0,
+        "annual_wage_gbp": 0,
+        "annual_wage_eur": 0,
+        "wage_estimated_pct": 0,
+        "earned_points": 0,
+        "points_adjustment": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "rank",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "wins",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "draws",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "losses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "goals_for",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "points",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_starts",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_assists",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_non_penalty_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_possession",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_squad_age",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "standard_players_used",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_shots_on_target",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_sot_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_shot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_goals_per_sot",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "shooting_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_red_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_second_yellow_cards",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_committed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_fouls_drawn",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_offsides",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_crosses",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_interceptions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_tackles_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_won",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_penalties_conceded",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "misc_own_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_starts",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_completed_matches",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_substitutions",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_unused_substitutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_match",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_start",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_minutes_per_sub",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_points_per_match",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_goals",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "playing_on_off",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_goals_against_per90",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_shots_on_target_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_saves",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheets",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_clean_sheet_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_matches_played",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_minutes",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_attempted",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_against",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_saved",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalties_missed",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "gk_penalty_save_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "annual_wage_gbp",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "annual_wage_eur",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "wage_estimated_pct",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "earned_points",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "points_adjustment",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    },
+    {
+      "table": "facts/fact_transfer",
+      "row_count": 1999,
+      "columns": 17,
+      "keys": [
+        "transfer_id"
+      ],
+      "source_tables": [
+        "transfers",
+        "players",
+        "clubs"
+      ],
+      "source_hdfs_path": "hdfs://localhost:9000/bigdata/processed/plca_954634acee6255faafab8270/facts/fact_transfer",
+      "csv": "csv/facts/fact_transfer.csv",
+      "parquet": "parquet/facts/fact_transfer",
+      "season_counts": {
+        "2022-2023": 640,
+        "2023-2024": 702,
+        "2024-2025": 657
+      },
+      "null_counts": {
+        "tm_player_id": 0,
+        "player_id": 0,
+        "player_name": 0,
+        "birth_date": 0,
+        "transfer_date": 0,
+        "transfer_season": 0,
+        "from_club_id": 0,
+        "to_club_id": 0,
+        "from_club_name": 0,
+        "to_club_name": 0,
+        "fee_eur": 160,
+        "listed_market_value_eur": 36,
+        "season": 0,
+        "from_active_pl_season": 0,
+        "to_active_pl_season": 0,
+        "fee_status": 0,
+        "transfer_id": 0
+      },
+      "csv_roundtrip_verified": true,
+      "schema": {
+        "type": "struct",
+        "fields": [
+          {
+            "name": "tm_player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "player_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "birth_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "transfer_date",
+            "type": "date",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "transfer_season",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "from_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "to_club_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "from_club_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "to_club_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "fee_eur",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "listed_market_value_eur",
+            "type": "double",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "season",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "from_active_pl_season",
+            "type": "boolean",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "to_active_pl_season",
+            "type": "boolean",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "fee_status",
+            "type": "string",
+            "nullable": false,
+            "metadata": {}
+          },
+          {
+            "name": "transfer_id",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
+        ]
+      }
+    }
+  ]
+}

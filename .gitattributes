@@ -1,0 +1,11 @@
+* text=auto
+*.sh text eol=lf
+portable/hdfs text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.gz binary
+*.csv -text
+*.json -text
+*.jsonl -text
+data/** -text

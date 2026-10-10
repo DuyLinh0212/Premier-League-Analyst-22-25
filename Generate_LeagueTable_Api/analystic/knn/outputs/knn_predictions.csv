@@ -1,0 +1,21 @@
+﻿query_season,query_club_id,query_club_name,actual_rank,actual_points,actual_points_per_mp,actual_group,predicted_rank,predicted_points,predicted_points_per_mp,top4_probability,average_neighbor_distance,predicted_group,predicted_group_name
+2024-2025,LIV,Liverpool,1,84,2.210526,champion,1.8,87.0,2.289474,1.0,0.759699,champions_league,Nhóm dự Champions League
+2024-2025,ARS,Arsenal,2,74,1.947368,champions_league,4.2,71.4,1.878947,0.6,1.096341,champions_league,Nhóm dự Champions League
+2024-2025,MCI,Manchester City,3,71,1.868421,champions_league,4.4,68.6,1.805263,0.6,0.917201,champions_league,Nhóm dự Champions League
+2024-2025,CHE,Chelsea,4,69,1.815789,champions_league,5.4,66.8,1.757895,0.4,0.878223,mid_table,Nhóm giữa bảng
+2024-2025,NEW,Newcastle,5,66,1.736842,mid_table,4.6,67.6,1.778947,0.4,0.837785,mid_table,Nhóm giữa bảng
+2024-2025,AVL,Aston Villa,6,66,1.736842,mid_table,6.6,63.4,1.668421,0.2,0.813184,mid_table,Nhóm giữa bảng
+2024-2025,NFO,Nottingham,7,65,1.710526,mid_table,6.6,63.4,1.668421,0.2,0.818406,mid_table,Nhóm giữa bảng
+2024-2025,BHA,Brighton,8,61,1.605263,mid_table,6.6,62.2,1.636842,0.0,0.718093,mid_table,Nhóm giữa bảng
+2024-2025,BOU,Bournemouth,9,56,1.473684,mid_table,8.8,56.2,1.478947,0.0,0.729368,mid_table,Nhóm giữa bảng
+2024-2025,BRE,Brentford,10,56,1.473684,mid_table,8.4,56.6,1.489474,0.0,0.746052,mid_table,Nhóm giữa bảng
+2024-2025,FUL,Fulham,11,54,1.421053,relegation,10.0,53.4,1.405263,0.0,0.563884,mid_table,Nhóm giữa bảng
+2024-2025,CRY,Crystal Palace,12,53,1.394737,relegation,10.6,51.0,1.342105,0.0,0.708442,mid_table,Nhóm giữa bảng
+2024-2025,EVE,Everton,13,48,1.263158,relegation,12.4,44.2,1.163158,0.0,0.76368,relegation,Nhóm đua trụ hạng
+2024-2025,WHU,West Ham,14,43,1.131579,relegation,13.4,44.2,1.163158,0.0,0.630073,relegation,Nhóm đua trụ hạng
+2024-2025,MUN,Manchester Utd,15,42,1.105263,relegation,13.0,43.2,1.136842,0.0,0.520981,relegation,Nhóm đua trụ hạng
+2024-2025,WOL,Wolves,16,42,1.105263,relegation,14.2,43.0,1.131579,0.0,0.528423,relegation,Nhóm đua trụ hạng
+2024-2025,TOT,Tottenham,17,38,1.0,relegation,12.4,46.2,1.215789,0.0,0.820001,relegation,Nhóm đua trụ hạng
+2024-2025,LEI,Leicester City,18,25,0.657895,relegation,18.4,28.8,0.757895,0.0,0.992566,relegation,Nhóm đua trụ hạng
+2024-2025,IPS,Ipswich Town,19,22,0.578947,relegation,18.4,28.8,0.757895,0.0,1.038821,relegation,Nhóm đua trụ hạng
+2024-2025,SOU,Southampton,20,12,0.315789,relegation,19.2,24.4,0.642105,0.0,1.748891,relegation,Nhóm đua trụ hạng

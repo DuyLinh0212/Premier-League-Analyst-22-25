@@ -1,0 +1,68 @@
+name: Packaged application CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: packaged-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  packaged-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free runner disk for Spark and Airflow
+        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
+      - name: Validate production and CI Compose
+        run: |
+          docker compose --env-file portable/.env.example -f portable/compose.yaml config --quiet
+          docker compose -f portable/compose.ci.yaml config --quiet
+      - name: Build packaged runtime and API
+        run: |
+          docker build -f portable/Dockerfile.runtime --target runtime -t football-runtime:4.0 .
+          docker build -f portable/Dockerfile.runtime --target api -t football-api:4.0 .
+      - name: Unit and analytical contract tests
+        run: |
+          docker run --rm football-runtime:4.0 python -m unittest discover -s tests -v
+          docker run --rm football-runtime:4.0 python -m analytics.outlook.verify_outlook
+          docker run --rm football-runtime:4.0 python -m analytics.outlook.verify_club_phases
+          docker run --rm football-runtime:4.0 python -m unittest discover -s Generate_LeagueTable_Api/analystic/match_outcome/tests -v
+      - name: Build Web and check packaged Airflow DAGs
+        run: |
+          docker build -f portable/Dockerfile.web -t football-web:4.0 .
+          docker build -f portable/Dockerfile.airflow -t football-airflow:4.0 .
+          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.models.dagbag import DagBag; b=DagBag('/opt/airflow/dags',include_examples=False); assert not b.import_errors,b.import_errors; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'transfer_simulation' in b.dags['football_kafka_analytics'].task_dict"
+      - name: Start fixture services and packaged application
+        run: docker compose -f portable/compose.ci.yaml up -d --wait --wait-timeout 1200
+      - name: Database Kafka HTTP and recovery acceptance
+        run: |
+          mkdir -p portable/evidence-ci
+          docker compose -f portable/compose.ci.yaml exec -T api python tests/integration.py | tee portable/evidence-ci/acceptance.json
+          docker compose -f portable/compose.ci.yaml stop neo4j
+          docker compose -f portable/compose.ci.yaml exec -T api python -c "import urllib.request,urllib.error; exec('try:\n urllib.request.urlopen(\"http://localhost:8000/health\")\n raise AssertionError(\"DB loss was hidden\")\nexcept urllib.error.HTTPError as e:\n assert e.code==503')"
+          docker compose -f portable/compose.ci.yaml start neo4j
+          docker compose -f portable/compose.ci.yaml up -d --wait --wait-timeout 180
+          docker compose -f portable/compose.ci.yaml restart api
+          docker compose -f portable/compose.ci.yaml up -d --wait --wait-timeout 180
+          docker compose -f portable/compose.ci.yaml exec -T api python -c "import urllib.request,json; assert len(json.load(urllib.request.urlopen('http://localhost:8000/matches')))==1140"
+      - name: Package verified delivery
+        run: |
+          python infra/package_portable.py
+          python portable/verify_bundle.py --archive artifacts/PremierLeague_Docker.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PremierLeague-verified-delivery
+          path: |
+            artifacts/PremierLeague_Docker.zip
+            artifacts/PremierLeague_Docker.zip.sha256
+            portable/evidence-ci/
+      - name: Diagnostic logs
+        if: always()
+        run: docker compose -f portable/compose.ci.yaml logs --no-color --tail 100
+      - name: Clean fixture services
+        if: always()
+        run: docker compose -f portable/compose.ci.yaml down -v

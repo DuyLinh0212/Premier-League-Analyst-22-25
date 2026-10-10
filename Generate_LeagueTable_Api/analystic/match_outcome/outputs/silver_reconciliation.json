@@ -1,0 +1,6 @@
+{
+  "path": "hdfs://namenode:9000/bigdata/processed/football_c432fae12663b1fd3d7c15d6",
+  "matches": 1140,
+  "checked_fields": 38760,
+  "all_features_and_labels_equal": true
+}

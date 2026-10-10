@@ -1,0 +1,11 @@
+{
+  "source_run": "plca_954634acee6255faafab8270",
+  "source_files_64mib": 73,
+  "counts": {
+    "fact_team_season": 60,
+    "fact_team_match": 2280,
+    "fact_match_enriched": 1140
+  },
+  "blocksize": 67108864,
+  "replication": 2
+}

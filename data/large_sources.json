@@ -1,0 +1,8 @@
+[
+  {
+    "source": "Transfermark_Data/appearances.csv",
+    "compressed": "data/raw/Transfermark_Data/appearances.csv.gz",
+    "bytes": 198398405,
+    "sha256": "c4ba5327f9005e4a9914c0f78c3b07132ef2cf1a4babda379bbf54ffd207ebec"
+  }
+]

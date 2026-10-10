@@ -1,0 +1,59 @@
+**/node_modules
+.git
+.github
+artifacts
+*.zip
+*.tar.gz
+portable/wheels
+portable/evidence-local
+portable/evidence-ci
+Transfermark_Data/appearances.csv
+**/.venv
+**/venv
+**/runtime_dependencies
+**/.next
+**/__pycache__
+**/*.pyc
+**/.env
+**/secrets.env
+**/ssh
+_legacy_backup
+delivery
+docx_merge_work
+_sparkdeck_extract
+lo-*
+bigdata
+Tuan3
+Tuan4
+metastore_db
+pipeline_runs
+exports
+**/report_assets
+**/evidence
+**/*.docx
+**/*.pdf
+**/*.pptx
+*.rar
+*.log
+Generate_LeagueTable_Api/analystic/club_radar
+Generate_LeagueTable_Api/analystic/kmeans
+Generate_LeagueTable_Api/analystic/player_similarity
+Generate_LeagueTable_Api/analystic/_radar*
+Generate_LeagueTable_Api/analystic/_transfer*
+Premier Leauge Club Analyst/analystic
+Premier Leauge Club Analyst/web-next/app/cach-phan-tich
+Premier Leauge Club Analyst/web-next/app/api/catalog
+Premier Leauge Club Analyst/web-next/app/api/data
+Premier Leauge Club Analyst/web-next/app/api/runs
+Premier Leauge Club Analyst/web-next/app/api/query
+Premier Leauge Club Analyst/web-next/app/api/dashboard
+Premier Leauge Club Analyst/web-next/app/api/results
+Premier Leauge Club Analyst/web-next/lib
+Premier Leauge Club Analyst/web-next/tests
+Premier Leauge Club Analyst/web-next/scripts
+Premier Leauge Club Analyst/web-next/app/ui/dashboard.jsx
+Premier Leauge Club Analyst/web-next/app/ui/methodology.jsx
+Premier Leauge Club Analyst/web-next/app/ui/sidebar.jsx
+jobs/pl_pipeline/analysis.py
+jobs/pl_pipeline/neo4j_export.py
+jobs/generate_visual_dashboard.py

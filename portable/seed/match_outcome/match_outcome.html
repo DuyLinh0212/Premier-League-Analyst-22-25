@@ -1,0 +1,347 @@
+<!doctype html><html lang='vi'><meta charset='utf-8'><title>So sánh model kết quả trận</title><style>body{font:16px system-ui;max-width:1000px;margin:40px auto;padding:20px}pre{white-space:pre-wrap}</style><h1>Ước tính thắng – hòa – thua</h1><p>Model được chọn theo log loss validation, hiệu chỉnh trên tập calibration và kiểm thử riêng mùa 2024–2025. Đây là thống kê tổng kết trận; khả năng nhận diện hòa còn yếu.</p><pre>{
+  &quot;labels&quot;: [
+    &quot;home_win&quot;,
+    &quot;draw&quot;,
+    &quot;away_win&quot;
+  ],
+  &quot;model_version&quot;: &quot;wdl_b264a836c3d594b92e2c&quot;,
+  &quot;split_counts&quot;: {
+    &quot;train&quot;: 380,
+    &quot;tune&quot;: 190,
+    &quot;calibration&quot;: 190,
+    &quot;test&quot;: 380
+  },
+  &quot;splits&quot;: {
+    &quot;train&quot;: &quot;2022-2023&quot;,
+    &quot;tune&quot;: &quot;first 190 matches of 2023-2024 ordered by date/id&quot;,
+    &quot;calibration&quot;: &quot;last 190 matches of 2023-2024&quot;,
+    &quot;test&quot;: &quot;2024-2025 (untouched)&quot;
+  },
+  &quot;candidates&quot;: [
+    {
+      &quot;reg_param&quot;: 0.01,
+      &quot;samples&quot;: 190,
+      &quot;accuracy&quot;: 0.5421052631578948,
+      &quot;macro_f1&quot;: 0.45566633236977166,
+      &quot;log_loss&quot;: 1.1992131501996826,
+      &quot;brier_score&quot;: 0.638536125368613,
+      &quot;confusion_matrix&quot;: [
+        [
+          68,
+          14,
+          7
+        ],
+        [
+          23,
+          5,
+          8
+        ],
+        [
+          21,
+          14,
+          30
+        ]
+      ],
+      &quot;class_f1&quot;: {
+        &quot;home_win&quot;: 0.6766169154228856,
+        &quot;draw&quot;: 0.14492753623188406,
+        &quot;away_win&quot;: 0.5454545454545454
+      }
+    },
+    {
+      &quot;reg_param&quot;: 0.1,
+      &quot;samples&quot;: 190,
+      &quot;accuracy&quot;: 0.5736842105263158,
+      &quot;macro_f1&quot;: 0.4683396748036994,
+      &quot;log_loss&quot;: 0.9602247159335778,
+      &quot;brier_score&quot;: 0.5622570048629129,
+      &quot;confusion_matrix&quot;: [
+        [
+          73,
+          9,
+          7
+        ],
+        [
+          23,
+          4,
+          9
+        ],
+        [
+          22,
+          11,
+          32
+        ]
+      ],
+      &quot;class_f1&quot;: {
+        &quot;home_win&quot;: 0.7053140096618358,
+        &quot;draw&quot;: 0.13333333333333333,
+        &quot;away_win&quot;: 0.5663716814159292
+      }
+    },
+    {
+      &quot;reg_param&quot;: 1.0,
+      &quot;samples&quot;: 190,
+      &quot;accuracy&quot;: 0.6105263157894737,
+      &quot;macro_f1&quot;: 0.4358169724278511,
+      &quot;log_loss&quot;: 0.9077274256297783,
+      &quot;brier_score&quot;: 0.5310733773904888,
+      &quot;confusion_matrix&quot;: [
+        [
+          85,
+          0,
+          4
+        ],
+        [
+          32,
+          0,
+          4
+        ],
+        [
+          33,
+          1,
+          31
+        ]
+      ],
+      &quot;class_f1&quot;: {
+        &quot;home_win&quot;: 0.7112970711297071,
+        &quot;draw&quot;: 0.0,
+        &quot;away_win&quot;: 0.5961538461538461
+      }
+    }
+  ],
+  &quot;temperature&quot;: 0.697802349170766,
+  &quot;test&quot;: {
+    &quot;samples&quot;: 380,
+    &quot;accuracy&quot;: 0.5736842105263158,
+    &quot;macro_f1&quot;: 0.43032675321261954,
+    &quot;log_loss&quot;: 0.9124100327479726,
+    &quot;brier_score&quot;: 0.5371384252287331,
+    &quot;confusion_matrix&quot;: [
+      [
+        138,
+        0,
+        17
+      ],
+      [
+        55,
+        0,
+        38
+      ],
+      [
+        51,
+        1,
+        80
+      ]
+    ],
+    &quot;class_f1&quot;: {
+      &quot;home_win&quot;: 0.6917293233082706,
+      &quot;draw&quot;: 0.0,
+      &quot;away_win&quot;: 0.599250936329588
+    }
+  },
+  &quot;baseline&quot;: {
+    &quot;samples&quot;: 380,
+    &quot;accuracy&quot;: 0.40789473684210525,
+    &quot;macro_f1&quot;: 0.19314641744548286,
+    &quot;log_loss&quot;: 1.0904280476717052,
+    &quot;brier_score&quot;: 0.6627977839335181,
+    &quot;confusion_matrix&quot;: [
+      [
+        155,
+        0,
+        0
+      ],
+      [
+        93,
+        0,
+        0
+      ],
+      [
+        132,
+        0,
+        0
+      ]
+    ],
+    &quot;class_f1&quot;: {
+      &quot;home_win&quot;: 0.5794392523364486,
+      &quot;draw&quot;: 0.0,
+      &quot;away_win&quot;: 0.0
+    }
+  },
+  &quot;spark_numpy_max_absolute_error&quot;: 4.440892098500626e-16,
+  &quot;disabled_metrics&quot;: [
+    &quot;penalties_won&quot;,
+    &quot;penalties_conceded&quot;
+  ],
+  &quot;training_only_preprocessing&quot;: true,
+  &quot;all_source_parameters_preserved&quot;: true,
+  &quot;removed_columns&quot;: [
+    {
+      &quot;column&quot;: &quot;penalties_won&quot;,
+      &quot;reason&quot;: &quot;all_missing_on_one_or_both_sides&quot;
+    },
+    {
+      &quot;column&quot;: &quot;penalties_conceded&quot;,
+      &quot;reason&quot;: &quot;all_missing_on_one_or_both_sides&quot;
+    },
+    {
+      &quot;column&quot;: &quot;home_formation_unknown&quot;,
+      &quot;reason&quot;: &quot;constant_after_training_only_imputation&quot;
+    },
+    {
+      &quot;column&quot;: &quot;away_formation_unknown&quot;,
+      &quot;reason&quot;: &quot;constant_after_training_only_imputation&quot;
+    }
+  ],
+  &quot;algorithm&quot;: &quot;random_forest&quot;,
+  &quot;comparison&quot;: [
+    {
+      &quot;algorithm&quot;: &quot;logistic_regression&quot;,
+      &quot;parameters&quot;: {
+        &quot;reg_param&quot;: 0.01
+      },
+      &quot;validation_log_loss&quot;: 1.1992131501996826,
+      &quot;validation_accuracy&quot;: 0.5421052631578948,
+      &quot;validation_macro_f1&quot;: 0.45566633236977166
+    },
+    {
+      &quot;algorithm&quot;: &quot;logistic_regression&quot;,
+      &quot;parameters&quot;: {
+        &quot;reg_param&quot;: 0.1
+      },
+      &quot;validation_log_loss&quot;: 0.9602247159335778,
+      &quot;validation_accuracy&quot;: 0.5736842105263158,
+      &quot;validation_macro_f1&quot;: 0.4683396748036994
+    },
+    {
+      &quot;algorithm&quot;: &quot;logistic_regression&quot;,
+      &quot;parameters&quot;: {
+        &quot;reg_param&quot;: 1.0
+      },
+      &quot;validation_log_loss&quot;: 0.9077274256297783,
+      &quot;validation_accuracy&quot;: 0.6105263157894737,
+      &quot;validation_macro_f1&quot;: 0.4358169724278511
+    },
+    {
+      &quot;algorithm&quot;: &quot;knn_classifier&quot;,
+      &quot;parameters&quot;: {
+        &quot;k&quot;: 5,
+        &quot;smoothing&quot;: 3.0
+      },
+      &quot;validation_log_loss&quot;: 1.0133319923001884,
+      &quot;validation_accuracy&quot;: 0.5631578947368421,
+      &quot;validation_macro_f1&quot;: 0.4278729730558195
+    },
+    {
+      &quot;algorithm&quot;: &quot;knn_classifier&quot;,
+      &quot;parameters&quot;: {
+        &quot;k&quot;: 15,
+        &quot;smoothing&quot;: 3.0
+      },
+      &quot;validation_log_loss&quot;: 0.9726488149071336,
+      &quot;validation_accuracy&quot;: 0.5473684210526316,
+      &quot;validation_macro_f1&quot;: 0.37839068681866056
+    },
+    {
+      &quot;algorithm&quot;: &quot;knn_classifier&quot;,
+      &quot;parameters&quot;: {
+        &quot;k&quot;: 31,
+        &quot;smoothing&quot;: 3.0
+      },
+      &quot;validation_log_loss&quot;: 0.9320611669419305,
+      &quot;validation_accuracy&quot;: 0.5736842105263158,
+      &quot;validation_macro_f1&quot;: 0.4068326417704011
+    },
+    {
+      &quot;algorithm&quot;: &quot;knn_classifier&quot;,
+      &quot;parameters&quot;: {
+        &quot;k&quot;: 61,
+        &quot;smoothing&quot;: 3.0
+      },
+      &quot;validation_log_loss&quot;: 0.9523089024091375,
+      &quot;validation_accuracy&quot;: 0.5842105263157895,
+      &quot;validation_macro_f1&quot;: 0.4031187079638436
+    },
+    {
+      &quot;algorithm&quot;: &quot;random_forest&quot;,
+      &quot;parameters&quot;: {
+        &quot;num_trees&quot;: 64,
+        &quot;max_depth&quot;: 3,
+        &quot;min_instances&quot;: 8,
+        &quot;balanced&quot;: false,
+        &quot;seed&quot;: 2026
+      },
+      &quot;validation_log_loss&quot;: 0.9079941317746336,
+      &quot;validation_accuracy&quot;: 0.6263157894736842,
+      &quot;validation_macro_f1&quot;: 0.45110602593440124
+    },
+    {
+      &quot;algorithm&quot;: &quot;random_forest&quot;,
+      &quot;parameters&quot;: {
+        &quot;num_trees&quot;: 64,
+        &quot;max_depth&quot;: 3,
+        &quot;min_instances&quot;: 8,
+        &quot;balanced&quot;: true,
+        &quot;seed&quot;: 2026
+      },
+      &quot;validation_log_loss&quot;: 0.9463105721599883,
+      &quot;validation_accuracy&quot;: 0.6263157894736842,
+      &quot;validation_macro_f1&quot;: 0.49580447938112177
+    },
+    {
+      &quot;algorithm&quot;: &quot;random_forest&quot;,
+      &quot;parameters&quot;: {
+        &quot;num_trees&quot;: 64,
+        &quot;max_depth&quot;: 5,
+        &quot;min_instances&quot;: 8,
+        &quot;balanced&quot;: false,
+        &quot;seed&quot;: 2026
+      },
+      &quot;validation_log_loss&quot;: 0.8787207914837145,
+      &quot;validation_accuracy&quot;: 0.631578947368421,
+      &quot;validation_macro_f1&quot;: 0.45881913303437966
+    },
+    {
+      &quot;algorithm&quot;: &quot;random_forest&quot;,
+      &quot;parameters&quot;: {
+        &quot;num_trees&quot;: 64,
+        &quot;max_depth&quot;: 5,
+        &quot;min_instances&quot;: 8,
+        &quot;balanced&quot;: true,
+        &quot;seed&quot;: 2026
+      },
+      &quot;validation_log_loss&quot;: 0.9041643593135856,
+      &quot;validation_accuracy&quot;: 0.6157894736842106,
+      &quot;validation_macro_f1&quot;: 0.48124385613411075
+    },
+    {
+      &quot;algorithm&quot;: &quot;random_forest&quot;,
+      &quot;parameters&quot;: {
+        &quot;num_trees&quot;: 64,
+        &quot;max_depth&quot;: 7,
+        &quot;min_instances&quot;: 8,
+        &quot;balanced&quot;: false,
+        &quot;seed&quot;: 2026
+      },
+      &quot;validation_log_loss&quot;: 0.8665221635176812,
+      &quot;validation_accuracy&quot;: 0.6421052631578947,
+      &quot;validation_macro_f1&quot;: 0.46958270487682247
+    },
+    {
+      &quot;algorithm&quot;: &quot;random_forest&quot;,
+      &quot;parameters&quot;: {
+        &quot;num_trees&quot;: 64,
+        &quot;max_depth&quot;: 7,
+        &quot;min_instances&quot;: 8,
+        &quot;balanced&quot;: true,
+        &quot;seed&quot;: 2026
+      },
+      &quot;validation_log_loss&quot;: 0.8923107302582943,
+      &quot;validation_accuracy&quot;: 0.6263157894736842,
+      &quot;validation_macro_f1&quot;: 0.4856713601423996
+    }
+  ],
+  &quot;selection_rule&quot;: &quot;minimum first-half 2023-2024 validation log loss; test untouched&quot;,
+  &quot;selected_validation_log_loss&quot;: 0.8665221635176812,
+  &quot;logistic_baseline_reg_param&quot;: 1.0
+}</pre></html>
