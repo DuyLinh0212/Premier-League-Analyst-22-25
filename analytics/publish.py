@@ -1,4 +1,4 @@
-"""Compute and publish a full versioned serving bundle from Neo4j source data."""
+"""Compute reports from the lakehouse and publish only results to Neo4j."""
 import argparse
 import csv
 import json
