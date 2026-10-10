@@ -122,7 +122,7 @@ def consume(output):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default=os.getenv("MATCH_MODEL_DIR", str(Path(__file__).resolve().parents[2] / "data/models/match_outcome")))
+    parser.add_argument("--output", default=os.getenv("MATCH_MODEL_DIR", str(Path(__file__).resolve().parents[3] / "data/models/match_outcome")))
     parser.add_argument("--replay", action="store_true")
     args = parser.parse_args()
     replay(args.output) if args.replay else consume(args.output)

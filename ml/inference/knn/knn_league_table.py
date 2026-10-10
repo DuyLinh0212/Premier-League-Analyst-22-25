@@ -29,7 +29,7 @@ DEFAULT_SEASONS = ("2022-2023", "2023-2024", "2024-2025")
 DEFAULT_CHECKPOINT = (
     "hdfs://localhost:9000/bigdata/checkpoints/analytics/knn_league_table"
 )
-DEFAULT_OUTPUT_DIR = str(Path(__file__).resolve().parents[2] / "data/models/knn")
+DEFAULT_OUTPUT_DIR = str(Path(__file__).resolve().parents[3] / "data/models/knn")
 SIMULATED_START_YEAR = 2025
 FEATURE_COLUMNS = (
     "points_per_mp",
