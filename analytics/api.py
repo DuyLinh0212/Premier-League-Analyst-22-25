@@ -10,9 +10,23 @@ from .players import valuation, similar
 router = APIRouter()
 
 
+def _db():
+    if __import__('os').getenv('NEON_DATABASE_URL') or __import__('os').getenv('DATABASE_URL'):
+        from . import neon_store
+        return neon_store
+    return store
+
+
+def get_report(kind, filters=None, run_id=None):
+    try:
+        return _db().report(kind, filters, run_id)
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
 def payload(kind, filters=None, run_id=None):
     try:
-        data, meta = store.report(kind, filters, run_id)
+        data, meta = get_report(kind, filters, run_id)
         return {**data, '_publication': meta} if isinstance(data, dict) else data
     except LookupError as exc:
         raise HTTPException(404, str(exc)) from exc
@@ -47,6 +61,8 @@ def players(season: str | None = None, position: str | None = None, search: str 
 
 
 def save_user_analysis(kind, parameters, result, simulated=False):
+    if _db() is not store:
+        return _db().save_user_analysis(kind, parameters, result, simulated)
     store.schema()
     run_id = kind + '_' + uuid.uuid4().hex
     run_key = store.begin_run(run_id, None, parameters, simulated)
@@ -114,13 +130,19 @@ def simulate(request: SimulationRequest):
 
 @router.get('/streaming/transfers')
 def streamed_transfers(limit: int = Query(100, ge=1, le=1000)):
+    if _db() is not store:
+        try:
+            report, _ = _db().report('transfer_simulation', {})
+            return report.get('records', [])[:limit]
+        except LookupError:
+            return []
     rows = store.query('MATCH (e:PLEvent {namespace:$ns,kind:"transfer",status:"complete"}) RETURN e.payload_json AS payload ORDER BY e.completed_at DESC LIMIT $limit', {'ns': store.namespace(), 'limit': limit})
     return [json.loads(r['payload']) for r in rows]
 
 
 @router.get('/reports')
 def history(limit: int = Query(50, ge=1, le=200)):
-    return store.runs(limit)
+    return _db().runs(limit)
 
 
 @router.get('/dashboard')
@@ -130,7 +152,10 @@ def dashboard(run_id: str | None = None):
 
 @router.get('/pipeline')
 def pipeline():
-    return store.query('MATCH (j:PLJob {namespace:$ns}) RETURN j.run_id AS run_id,j.stage AS stage,j.status AS status,j.started_at AS started_at,j.completed_at AS completed_at,j.error AS error ORDER BY j.started_at DESC LIMIT 100',{'ns':store.namespace()})
+    db = _db()
+    if db is store:
+        return store.query('MATCH (j:PLJob {namespace:$ns}) RETURN j.run_id AS run_id,j.stage AS stage,j.status AS status,j.started_at AS started_at,j.completed_at AS completed_at,j.error AS error ORDER BY j.started_at DESC LIMIT 100',{'ns':store.namespace()})
+    return db.pipeline(100)
 
 
 @router.get('/reports/{run_id}/{kind}')

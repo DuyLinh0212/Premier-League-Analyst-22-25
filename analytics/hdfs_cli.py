@@ -42,7 +42,11 @@ def main(argv=None):
                 present = fs.getFileStatus(path(target)).isFile()
             return 0 if present else 1
         elif command == '-put':
-            fs.copyFromLocalFile(False, force, path(argv[0]), path(argv[1]))
+            if len(argv) < 2:
+                raise ValueError('-put requires one or more source paths and a destination')
+            destination = path(argv[-1])
+            for source in argv[:-1]:
+                fs.copyFromLocalFile(False, force, path(source), destination)
         elif command == '-get':
             fs.copyToLocalFile(False, path(argv[0]), path(argv[1]), True)
         elif command == '-mv':

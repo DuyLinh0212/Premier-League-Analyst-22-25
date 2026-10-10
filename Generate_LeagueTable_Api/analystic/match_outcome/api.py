@@ -14,7 +14,7 @@ from kafka import KafkaProducer
 from .inference import predict
 from .schema import feature_schema, validate_stats, METRICS
 from analytics import store
-from analytics.api import router, payload, save_user_analysis
+from analytics.api import router, payload, save_user_analysis, get_report
 
 ROOT = Path(__file__).resolve().parents[3]
 OUTPUT = Path(os.getenv("MATCH_MODEL_DIR", str(Path(__file__).parent / "outputs")))
@@ -40,7 +40,7 @@ async def unavailable(request, exception):
     return JSONResponse(status_code=503, content={'detail': 'Database hoặc dịch vụ phân tích chưa sẵn sàng. Hãy kiểm tra kết nối và chạy lại.'})
 
 def refresh():
-    artifact, metadata = store.report('model')
+    artifact, metadata = get_report('model')
     app.state.artifact = artifact
     app.state.published_version = metadata['run_id']
     return app.state.artifact
@@ -84,7 +84,7 @@ def send_prediction(event):
 @app.get('/prediction/config')
 def prediction_config():
     from .forecast_v2 import STYLE
-    artifact, metadata = store.report('forecast_v2')
+    artifact, metadata = get_report('forecast_v2')
     return {'model_version':artifact['model_version'],'data_through':artifact['data_through'],
             'trained_through':artifact['trained_through'],
             'minimum_date':(date.fromisoformat(artifact['trained_through'])+timedelta(days=1)).isoformat(),
@@ -99,7 +99,7 @@ def prediction_metrics_v2():
 @app.post('/predict/v2')
 def forecast_v2(request: PredictionRequestV2):
     from .forecast_v2 import forecast, validate_request
-    artifact, metadata = store.report('forecast_v2')
+    artifact, metadata = get_report('forecast_v2')
     try:
         params=validate_request(request.model_dump(mode='json'))
         if params['prediction_date'] is None:

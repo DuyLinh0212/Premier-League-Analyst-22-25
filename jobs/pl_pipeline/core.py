@@ -81,7 +81,7 @@ class Context:
             raise ValueError("run_id must contain only letters, numbers, hyphens and underscores")
         self.run_id = run_id
         self.uri = (hdfs_uri or os.getenv("HDFS_URI", "hdfs://localhost:9000")).rstrip("/")
-        self.base = (base or os.getenv("HDFS_BASE_PATH", "/bigdata")).rstrip("/")
+        self.base = (base or os.getenv("HDFS_BASE_PATH", "/premier-league")).rstrip("/")
         self.local = ROOT / "pipeline_runs" / run_id
         self.local.mkdir(parents=True, exist_ok=True)
         self.manifest_path = self.local / "manifest.json"
@@ -89,8 +89,8 @@ class Context:
             "analysis_run_id": run_id, "silver_run_id": run_id, "started_at_utc": now(),
             "logic_version": LOGIC_VERSION, "seasons": list(SEASONS), "stages": {}, "tables": {},
         }
-        self.silver = f"{self.uri}{self.base}/processed/{run_id}"
-        self.gold = f"{self.uri}{self.base}/analytics/{run_id}"
+        self.silver = f"{self.uri}{self.base}/silver"
+        self.gold = f"{self.uri}{self.base}/gold"
 
     @property
     def raw(self):
@@ -124,10 +124,34 @@ class Context:
         return spark
 
     def read(self, spark, name, kind="facts"):
-        return spark.read.parquet(f"{self.silver}/{kind}/{name}")
+        return spark.read.parquet(self.silver_table_path(name, kind))
+
+    def silver_table_path(self, name, kind="facts"):
+        if name == "dim_club":
+            group = "teams"
+        elif name.startswith("fact_team_season") or name == "fact_squad_wage":
+            group = "team_season_stats"
+        elif name.startswith("fact_player_"):
+            group = "player_season_stats"
+        elif name.startswith("fact_transfer"):
+            group = "transfers"
+        elif name.startswith("fact_team_match") or name.startswith("fact_match") or name in {"fact_goal_event", "goal_against_mirror"}:
+            group = "matches"
+        elif name in {"dim_player", "dim_transfermarkt_player", "bridge_fbref_player", "bridge_transfermarkt_player"}:
+            group = "players"
+        else:
+            group = "players" if kind in {"dimensions", "bridges"} else "matches"
+        return f"{self.silver}/{group}/{name}/runs/{self.run_id}"
+
+    def gold_table_path(self, group, name):
+        return f"{self.gold}/{group}/{name}/runs/{self.run_id}"
 
     def gold_read(self, spark, name):
-        return spark.read.parquet(f"{self.gold}/{name}")
+        for group in ("team_performance", "player_performance", "season_comparison", "league_standings", "transfer_impact", "tactical_insights", "prediction_features"):
+            path = f"{self.gold}/{group}/{name}/runs/{self.run_id}"
+            if self.hdfs("-test", "-e", path, check=False).returncode == 0:
+                return spark.read.parquet(path)
+        raise FileNotFoundError("Gold table not found for this run: " + name)
 
     def table(self, df, name, kind="facts", gold=False, keys=(), sources=()):
         cached = df.cache()
@@ -146,7 +170,7 @@ class Context:
                 df = df.withColumn("status", F.lit("computed"))
             if "coverage_pct" not in df.columns:
                 df = df.withColumn("coverage_pct", F.lit(100.0))
-        target = f"{self.gold}/{name}" if gold else f"{self.silver}/{kind}/{name}"
+        target = self.gold_table_path("team_performance", name) if gold else self.silver_table_path(name, kind)
         staging = target + "_staging"
         jvm = df.sparkSession._jvm
         fs = jvm.org.apache.hadoop.fs.FileSystem.get(jvm.java.net.URI(self.uri), df.sparkSession._jsc.hadoopConfiguration())
@@ -211,10 +235,12 @@ def club_views(spark):
                           "club_id string, club_name string, tm_club_id string").createOrReplaceTempView("tracked_clubs")
 
 def raw_fbref(ctx, spark, table, section, player=False, match=False):
-    glob = f"{ctx.raw}/fbref/*/{section}/" + ("*/" if section == "04_teams" else "") + table + ".csv"
+    glob = f"{ctx.raw}/fbref/season=*/{section}/" + ("*/" if section == "04_teams" else "") + table + ".csv"
     df = spark.read.option("header", True).option("encoding", "UTF-8").option("mode", "FAILFAST").csv(glob)
     df = (df.withColumn("source_file", F.input_file_name())
-          .withColumn("season", F.regexp_extract("source_file", r"/fbref/(\d{4}-\d{4})/", 1))
+          .withColumn("season_key", F.regexp_extract("source_file", r"/fbref/season=(\d{4})-(\d{2})/", 1))
+          .withColumn("season_suffix", F.regexp_extract("source_file", r"/fbref/season=(\d{4})-(\d{2})/", 2))
+          .withColumn("season", F.concat(F.col("season_key"), F.lit("-20"), F.col("season_suffix")))
           .filter(F.col("season").isin(*SEASONS)))
     if player:
         df = (df.filter(F.col("Player").isNotNull() & (F.col("Player") != "Player"))
@@ -231,7 +257,7 @@ def raw_fbref(ctx, spark, table, section, player=False, match=False):
     return df.join(spark.table("club_aliases"), "club_name_key", "left")
 
 def raw_tm(ctx, spark, name):
-    return spark.read.option("header", True).option("encoding", "UTF-8").option("mode", "FAILFAST").csv(f"{ctx.raw}/transfermarkt/{name}.csv")
+    return spark.read.option("header", True).option("encoding", "UTF-8").option("mode", "FAILFAST").csv(f"{ctx.raw}/transfermarkt/_source/{name}.csv")
 
 def metric_columns(df, mapping, prefix=""):
     return [numeric(header, kind).alias(prefix + target) if header in df.columns

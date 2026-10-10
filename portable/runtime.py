@@ -7,7 +7,6 @@ import shutil
 import subprocess
 from pathlib import Path
 from pl_pipeline.core import Context, ROOT
-from match_outcome.graph import publish_bundle
 
 OUTPUT = Path(os.getenv("MATCH_MODEL_DIR", str(ROOT / "Generate_LeagueTable_Api/analystic/match_outcome/outputs")))
 KNN = Path(os.getenv("KNN_OUTPUT_DIR", str(ROOT / "Generate_LeagueTable_Api/analystic/knn/outputs")))
@@ -34,8 +33,8 @@ def stage(name, run_id=None):
         subprocess.run(["spark-submit", "--master", "local[2]", "--driver-memory", "512m",
                         "--conf", "spark.hadoop.dfs.blocksize=67108864", "--conf", "spark.hadoop.parquet.block.size=67108864", "--conf", "spark.hadoop.dfs.replication=2", "--conf", "spark.hadoop.dfs.client.use.datanode.hostname=true",
                         str(ROOT / "Generate_LeagueTable_Api/analystic/knn/knn_league_table.py"),
-                        "--input-path", ctx.silver + "/facts/fact_team_season", "--output-dir", str(KNN),
-                        "--checkpoint-location", ctx.uri + "/bigdata/checkpoints/analytics/knn_league_table"], check=True)
+                        "--input-path", ctx.silver_table_path("fact_team_season"), "--output-dir", str(KNN),
+                        "--checkpoint-location", ctx.uri + ctx.base + "/checkpoints/analytics/knn_league_table"], check=True)
         ctx.completed("knn")
     elif name == "match_outcome":
         ctx.require("knn")
@@ -46,7 +45,11 @@ def stage(name, run_id=None):
         ctx.completed("match_outcome", {"model_version": report["model_version"], "test": report["test"]})
     elif name == "publish":
         ctx.require("match_forecast_v2")
-        result = publish_bundle(OUTPUT, KNN, ctx.run_id)
+        # The following merged_publish stage atomically stores the complete
+        # report bundle in Neon; do not require or populate a Neo4j graph here.
+        result = {"model_version": json.loads((OUTPUT / "model.json").read_text(encoding="utf-8"))["model_version"],
+                  "forecast_version": json.loads((OUTPUT / "forecast_v2.json").read_text(encoding="utf-8"))["model_version"],
+                  "target": "Neon PostgreSQL"}
         ctx.completed("publish", result)
     elif name == 'match_forecast_v2':
         ctx.require('match_outcome')
@@ -54,13 +57,13 @@ def stage(name, run_id=None):
         from pl_pipeline.core import clean_json
         spark=ctx.session('MatchForecastV2')
         try:
-            goals=[clean_json(r.asDict()) for r in spark.read.parquet(ctx.silver+'/facts/fact_goal_event').collect()]
+            goals=[clean_json(r.asDict()) for r in spark.read.parquet(ctx.silver_table_path('fact_goal_event')).collect()]
             for g in goals:
                 g['stoppage_minutes']=int(g.get('stoppage_minutes') or 0)
             matches=[json.loads(line) for line in (OUTPUT/'matches.jsonl').read_text(encoding='utf-8').splitlines()]
             report=train(matches,goals,OUTPUT)
             for filename in ('forecast_v2.json','forecast_v2_metrics.json'):
-                target=ctx.gold+'/models/'+report['model_version']+'/'+filename[:-5]
+                target=ctx.gold+'/prediction_features/models/'+report['model_version']+'/'+filename[:-5]
                 spark.createDataFrame([((OUTPUT/filename).read_text(encoding='utf-8'),)],'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
                 if spark.read.parquet(target).first()['payload_json']!=(OUTPUT/filename).read_text(encoding='utf-8'):
                     raise RuntimeError('HDFS v2 model read-back mismatch')
@@ -89,12 +92,25 @@ if __name__ == "__main__":
         else:
             from analytics import store
             run_id = "football_" + hashlib.sha256(os.getenv("PIPELINE_RUN_ID", "manual").encode()).hexdigest()[:24]
-            job_key = store.namespace() + ":job:" + run_id + ":" + args.stage
-            store.schema()
-            store.query("MERGE (j:PLJob {key:$key}) SET j.namespace=$ns,j.run_id=$run,j.stage=$stage,j.status='running',j.started_at=$now,j.error=null", {"key":job_key,"ns":store.namespace(),"run":run_id,"stage":args.stage,"now":store.now()})
+            use_neon = bool(os.getenv("NEON_DATABASE_URL") or os.getenv("DATABASE_URL"))
+            if use_neon:
+                from analytics import neon_store
+                db = neon_store
+                db.set_job(run_id, args.stage, "running")
+            else:
+                db = store
+                job_key = store.namespace() + ":job:" + run_id + ":" + args.stage
+                store.schema()
+                store.query("MERGE (j:PLJob {key:$key}) SET j.namespace=$ns,j.run_id=$run,j.stage=$stage,j.status='running',j.started_at=$now,j.error=null", {"key":job_key,"ns":store.namespace(),"run":run_id,"stage":args.stage,"now":store.now()})
             try:
                 stage(args.stage, run_id)
-                store.query("MATCH (j:PLJob {key:$key}) SET j.status='success',j.completed_at=$now,j.manifest_json=$manifest", {"key":job_key,"now":store.now(),"manifest":store.encode(Context(run_id).manifest)})
+                if use_neon:
+                    db.set_job(run_id, args.stage, "success", Context(run_id).manifest)
+                else:
+                    store.query("MATCH (j:PLJob {key:$key}) SET j.status='success',j.completed_at=$now,j.manifest_json=$manifest", {"key":job_key,"now":store.now(),"manifest":store.encode(Context(run_id).manifest)})
             except Exception as exc:
-                store.query("MATCH (j:PLJob {key:$key}) SET j.status='failed',j.completed_at=$now,j.error=$error", {"key":job_key,"now":store.now(),"error":str(exc)[:1000]})
+                if use_neon:
+                    db.set_job(run_id, args.stage, "failed", error=str(exc)[:1000])
+                else:
+                    store.query("MATCH (j:PLJob {key:$key}) SET j.status='failed',j.completed_at=$now,j.error=$error", {"key":job_key,"now":store.now(),"error":str(exc)[:1000]})
                 raise

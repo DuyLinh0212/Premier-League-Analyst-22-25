@@ -16,6 +16,7 @@ Transfermark_Data/appearances.csv
 **/*.pyc
 **/.env
 **/secrets.env
+NeonKey.txt
 **/ssh
 _legacy_backup
 delivery

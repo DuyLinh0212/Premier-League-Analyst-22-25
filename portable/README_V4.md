@@ -1,6 +1,6 @@
 # Bàn giao ứng dụng với hạ tầng ngoài
 
-Production Compose **chỉ chạy ứng dụng**. Máy nhận phải có Neo4j, Kafka, HDFS và Airflow đang chạy; không format NameNode, không tạo Hadoop mới. Không chạy Compose CI trên máy người dùng: CI được phép dùng dịch vụ tạm trên GitHub runner.
+Production Compose **chỉ chạy ứng dụng**. Máy nhận phải có Neon PostgreSQL, Kafka, HDFS và Airflow đang chạy; không format NameNode, không tạo Hadoop mới. Không chạy Compose CI trên máy người dùng: CI được phép dùng dịch vụ tạm trên GitHub runner.
 
 ## Cấu hình địa chỉ
 
@@ -22,13 +22,13 @@ bash portable/start.sh
 
 Script mặc định `--no-build --pull never`: tái sử dụng `RUNTIME_IMAGE`, `API_IMAGE`, `WEB_IMAGE` trong `.env`. Các image này phải tương thích với ứng dụng, Spark 3.5.1 / Scala 2.12 / Java 17 / Python 3.11. Một image bất kỳ có Airflow hoặc Spark không tự động chứa API và Web. Khi chưa có image ứng dụng, máy nhận có thể dùng `start.ps1 -Build` hoặc `start.sh --build` để build ba image ứng dụng. Nó vẫn không build hay dựng lại hạ tầng.
 
-`NEO4J_HTTP_URI` là HTTP Query API của Neo4j 5.26 (ví dụ 7474), không phải Bolt 7687. Dùng tài khoản và Database hiện có; không ghi mật khẩu vào Git. `APP_NAMESPACE` tách dữ liệu dự án với dữ liệu hiện có. Không có lệnh xóa Database trong bootstrap.
+`NEON_DATABASE_URL` là connection string PostgreSQL của Neon, cần bật SSL (`sslmode=require`). API dùng schema `pl_analysis_*`; chỉ báo cáo JSONB, trạng thái và lịch sử phân tích được lưu ở Neon.
 
 `KAFKA_BOOTSTRAP_SERVERS` và **tất cả advertised.listeners** phải truy cập được từ container ứng dụng / worker. HDFS NameNode RPC cùng mọi địa chỉ DataNode trả về cũng phải truy cập được. `localhost` trong container chỉ container đó. Windows/WSL có thể dùng `host.docker.internal` nếu các cổng được forward và DataNode quảng bá hostname tương ứng. Client dùng `dfs.client.use.datanode.hostname=true`. Cần kiểm tra mạng thực tế trước khi chạy pipeline; cấu hình DHCP/IP của máy nhận có thể khác.
 
-`HADOOP_USER_NAME` chỉ dùng khi HDFS ở chế độ simple authentication và đã được quản trị hạ tầng cho phép. Hệ thống Kerberos cần cung cấp cấu hình/credential riêng của hạ tầng hiện có. `NAMENODE_HTTP_URI` trỏ HTTP JMX NameNode; `HDFS_MIN_DATANODES` là số node tối thiểu mong đợi, mặc định 1 (máy tác giả có 3).
+`HADOOP_USER_NAME` chỉ dùng khi HDFS ở chế độ simple authentication và đã được quản trị hạ tầng cho phép. Hệ thống Kerberos cần cung cấp cấu hình/credential riêng của hạ tầng hiện có. `NAMENODE_HTTP_URI` trỏ HTTP JMX NameNode; pipeline yêu cầu ba DataNode và block size 64 MiB.
 
-Sau bootstrap công bố báo cáo và provenance vào Neo4j, Web ở `http://localhost:3000`, API ở `http://localhost:8000/docs` (cổng có thể đổi). Dữ liệu nguồn/Silver vẫn ở HDFS/lakehouse; sau công bố, endpoint báo cáo đọc Neo4j và không cần file báo cáo cục bộ để phục vụ.
+Sau khi Airflow ghi Gold và công bố báo cáo vào Neon, Web ở `http://localhost:3000`, API ở `http://localhost:8000/docs` (cổng có thể đổi). Endpoint báo cáo đọc Neon.
 
 ## Airflow hiện có
 
@@ -36,17 +36,17 @@ Hai DAG trong `portable/airflow/dags` dùng Airflow 3.3.2 và provider standard.
 
 Nếu image Airflow hiện có đã đáp ứng phiên bản/runtime thì tái sử dụng. Dockerfile.airflow là lựa chọn đóng gói runtime worker khi cần, và được CI kiểm tra import; Compose production không tạo thêm Airflow. Tạo pool `spark_serial` một slot trên Airflow hiện có (`airflow pools set spark_serial 1 'Serial Spark jobs'`), tránh chạy đồng thời nhiều job Spark. Không yêu cầu SSH/WSL hoặc Docker socket trong DAG.
 
-`football_pipeline`: preflight → snapshot nguồn → identity → Silver → kiểm tra → công bố Silver → KNN → model trận → lưu model/KNN → công bố tất cả báo cáo Neo4j. `football_kafka_analytics` đọc ba topic theo thứ tự, dùng checkpoint bền vững trên HDFS. API `/pipeline` đọc trạng thái lần chạy thật từ PLJob; không dùng danh sách PASS cố định của dashboard nguồn.
+`football_pipeline`: preflight ba DataNode → nhập Bronze theo mùa → identity → Silver → kiểm định → KNN/model → ghi Gold → công bố báo cáo Neon. `football_kafka_analytics` dùng checkpoint bền vững trên HDFS. API `/pipeline` đọc trạng thái từ `pl_pipeline_jobs`.
 
 ## Seed, package và kiểm chứng
 
-Gói có nguồn, 21 bảng Silver CSV với manifest/schema/keys/checksum, DataMB, model và Kafka connector. `appearances.csv.gz` được giải nén có kiểm tra checksum bởi `infra/expand_raw.py` khi build/import. Không cần archive Hadoop hoặc image tar. Mỗi dòng dữ liệu thô được giữ trong Neo4j dưới dạng JSON array cùng header/line để không làm mất cột trùng tên.
+Gói có nguồn, 21 bảng Silver CSV với manifest/schema/keys/checksum, DataMB, model và Kafka connector. `appearances.csv.gz` được giải nén có kiểm tra checksum bởi `infra/expand_raw.py` khi build/import. File nguồn và các dòng Silver chỉ ở HDFS.
 
 ```sh
 python infra/package_portable.py
 python portable/verify_bundle.py --archive artifacts/PremierLeague_Docker.zip
 ```
 
-CI kiểm tra Dockerfile, DAG import, Neo4j/Kafka thật trên runner, unit / schema / tổng số / import hai lần / replay / run thiếu / mất Neo4j / restart API / Web proxy và tạo artifact ZIP + SHA256. HDFS trong CI là filesystem fixture; nghiệm thu HDFS thật phải kiểm tra read-back Parquet và cổng DataNode ở môi trường triển khai.
+Khi push `main`, CI dựng HDFS tạm ba DataNode, chạy Airflow, nạp Bronze, chuẩn hóa 21 bảng Silver, ghi Gold và xác minh 23 báo cáo trên Neon. Cần cấu hình GitHub secret `NEON_DATABASE_URL`; HDFS chỉ tồn tại trên runner CI.
 
-Ảnh ở `artifacts/screenshots` chỉ là xem trước bằng kết quả tính trực tiếp, có banner ghi rõ chưa kết nối Neo4j. Không coi ảnh này là bằng chứng Database hay CI thành công. Chưa có máy nhận nên việc chạy thực tế trên máy khác chưa được kiểm chứng; kiểm tra ZIP khi giải nén sang đường dẫn khác chỉ xác nhận cấu trúc/checksum.
+Chưa có máy nhận nên việc chạy thực tế trên máy khác chưa được kiểm chứng; kiểm tra ZIP khi giải nén sang đường dẫn khác chỉ xác nhận cấu trúc/checksum.

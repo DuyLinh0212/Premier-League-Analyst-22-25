@@ -5,7 +5,7 @@ import os
 import zipfile
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
-EXCLUDE = {".git","node_modules",".next",".venv","__pycache__","artifacts","pipeline_runs","wheels","evidence","evidence-local","versions","hadoop"}
+EXCLUDE = {".git","node_modules",".next",".venv","__pycache__","artifacts","pipeline_runs","wheels","evidence","evidence-local","versions","hadoop","NeonKey.txt"}
 FOLDERS = ["analytics","data","jobs","tests","validation","scripts","Generate_LeagueTable_Api","FBref_Data","Transfermark_Data","portable","infra","Premier Leauge Club Analyst/web-next",".github"]
 
 def included():
@@ -14,7 +14,7 @@ def included():
             dirs[:] = [d for d in dirs if d not in EXCLUDE]
             for name in names:
                 path = Path(current)/name
-                if path.stat().st_size > 95 * 1024 * 1024 or name == ".env" or name.startswith(".env.") and name != ".env.example" or path.suffix in {".pyc",".log",".zip",".tar"}:
+                if path.stat().st_size > 95 * 1024 * 1024 or name in {".env", "NeonKey.txt"} or name.startswith(".env.") and name != ".env.example" or path.suffix in {".pyc",".log",".zip",".tar"}:
                     continue
                 yield path
     for name in ["README.md","LICENSE",".dockerignore",".gitignore",".gitattributes"]:

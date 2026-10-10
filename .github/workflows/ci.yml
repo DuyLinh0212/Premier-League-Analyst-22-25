@@ -87,3 +87,55 @@ jobs:
       - name: Clean fixture services
         if: always()
         run: docker compose -f portable/compose.ci.yaml down -v
+
+  hdfs-airflow-neon:
+    if: github.event_name != 'pull_request'
+    needs: packaged-runtime
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+      PIPELINE_RUN_ID: ci_${{ github.run_id }}_${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require Neon connection secret
+        run: test -n "$NEON_DATABASE_URL"
+      - name: Validate HDFS and Airflow Compose
+        run: docker compose -f portable/compose.pipeline-ci.yaml config --quiet
+      - name: Build existing Spark and Airflow runtime
+        run: |
+          docker build -f portable/Dockerfile.runtime --target runtime -t football-runtime:4.0 .
+          docker build -f portable/Dockerfile.airflow -t football-airflow:4.0 .
+      - name: Start ephemeral CI NameNode, three DataNodes and Airflow metadata DB
+        run: docker compose -f portable/compose.pipeline-ci.yaml up -d --wait --wait-timeout 300 namenode datanode1 datanode2 datanode3 airflow-db
+      - name: Wait for all three live DataNodes
+        run: |
+          for attempt in $(seq 1 90); do
+            live=$(curl -fsS 'http://localhost:9870/jmx?qry=Hadoop:service=NameNode,name=NameNodeInfo' | python -c 'import json,sys; print(len(json.loads(json.load(sys.stdin)["beans"][0].get("LiveNodes","{}"))))' 2>/dev/null || true)
+            if [ "$live" = 3 ]; then echo "HDFS reports three live DataNodes"; exit 0; fi
+            sleep 5
+          done
+          docker compose -f portable/compose.pipeline-ci.yaml logs --no-color namenode datanode1 datanode2 datanode3
+          exit 1
+      - name: Migrate Airflow metadata and execute the complete DAG
+        run: |
+          docker compose -f portable/compose.pipeline-ci.yaml run --rm airflow-cli /opt/python-runtime/bin/python -m analytics.neon_store
+          docker compose -f portable/compose.pipeline-ci.yaml run --rm airflow-cli airflow db migrate
+          docker compose -f portable/compose.pipeline-ci.yaml run --rm airflow-cli airflow pools set spark_serial 1 'Serial Spark jobs'
+          docker compose -f portable/compose.pipeline-ci.yaml run --rm airflow-cli airflow dags test football_pipeline 2026-10-11 --use-executor
+      - name: Verify HDFS layout and Neon reports
+        run: |
+          mkdir -p portable/evidence-ci
+          docker compose -f portable/compose.pipeline-ci.yaml run --rm airflow-cli /opt/python-runtime/bin/python /opt/project/portable/verify_pipeline_hdfs.py | tee portable/evidence-ci/hdfs-run.json
+          docker compose -f portable/compose.pipeline-ci.yaml run --rm airflow-cli /opt/python-runtime/bin/python -m analytics.verify_neon --expected-reports 23 | tee portable/evidence-ci/neon-run.json
+      - name: Upload pipeline verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: PremierLeague-HDFS-Airflow-Neon-${{ github.run_id }}
+          path: portable/evidence-ci/
+      - name: HDFS and Airflow diagnostic logs
+        if: always()
+        run: docker compose -f portable/compose.pipeline-ci.yaml logs --no-color --tail 120
+      - name: Clean ephemeral CI services
+        if: always()
+        run: docker compose -f portable/compose.pipeline-ci.yaml down -v

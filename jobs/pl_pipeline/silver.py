@@ -192,5 +192,6 @@ def validate_silver(ctx, inject_failure=False):
 
 def publish_silver(ctx):
     ctx.require("validate_silver")
-    ctx.hdfs("-touchz", ctx.silver + "/_VALIDATED")
+    ctx.hdfs("-mkdir", "-p", ctx.silver + "/_runs/" + ctx.run_id)
+    ctx.hdfs("-touchz", ctx.silver + "/_runs/" + ctx.run_id + "/_VALIDATED")
     ctx.completed("publish_silver")
