@@ -52,6 +52,7 @@ class ForecastV2Tests(unittest.TestCase):
         for h,a,label in [(2,1,'home_win'),(0,0,'draw'),(1,2,'away_win')]:
             result=forecast({**self.request,'mode':'live','minute':90,'finished':True,'home_goals':h,'away_goals':a},self.artifact)
             self.assertEqual(result['probabilities'][label],1)
+            self.assertEqual(result['statistics_source'],'final_score')
 
     def test_stats_match_partial_fields_and_zero_is_observed(self):
         blank=forecast({**self.request,'mode':'live','minute':60},self.artifact)

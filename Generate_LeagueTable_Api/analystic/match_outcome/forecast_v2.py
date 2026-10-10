@@ -233,7 +233,7 @@ def forecast(request, artifact):
             'expected_goals':{'home':float(lam[0]),'away':float(lam[1])}, 'score':{'home':r['home_goals'],'away':r['away_goals'],'minute':r['minute'],'stoppage_minutes':r['stoppage_minutes'],'finished':r['finished']},
             'context':details,'features':dict(zip(FEATURES,map(float,values))), 'factors':sorted(contributions,key=lambda x:abs(x['home_log_rate']-x['away_log_rate']),reverse=True),
             'neighbors':stat_shown if stat_shown else shown,'pregame_neighbors':shown,
-            'statistics_source':'manual_full_match_similarity' if used else 'historical_pregame',
+            'statistics_source':'final_score' if r['finished'] else 'manual_full_match_similarity' if used else 'historical_pregame',
             'statistics_adjustment':{'fields':used,'projected_per90':dict(zip([s+'_'+k for s in ('home','away') for k in STYLE],map(float,projected))),'weight':adjustment,'neighbor_probabilities':dict(zip(LABELS,map(float,stats_probability))) if stats_probability is not None else None,
-             'validation':'Thống kê nhập được so với thống kê tổng kết trận; chưa được kiểm chứng bằng thống kê trực tiếp theo phút.' if used else None},
+             'validation':'Thống kê nhập được so với thống kê tổng kết trận; chưa được kiểm chứng bằng thống kê trực tiếp theo phút.' if used and not r['finished'] else None},
             'is_simulated':r['mode']=='live', 'dataset_fingerprint':artifact['dataset_fingerprint']}
