@@ -64,7 +64,14 @@ def main():
     count = store.query('MATCH (n:PLEvent {namespace:$ns,kind:"transfer"}) RETURN count(n) AS count', {'ns':store.namespace()})[0]['count']
     assert count == 5
     assert len(http('/pipeline')) == 0  # No Airflow run has been performed by this fixture.
-    assert http('/dashboard')['season_metrics']['all']['matches'] == 1140
+    dashboard=http('/dashboard')
+    assert dashboard['season_metrics']['all']['matches'] == 1140
+    assert len(dashboard['match_results']) == 1140
+    results=[r for r in dashboard['match_results'] if r['season']=='2024-2025']
+    assert sum(r['home_goals']+r['away_goals'] for r in results)==1115
+    assert [sum(r['home_goals']>r['away_goals'] for r in results),sum(r['home_goals']==r['away_goals'] for r in results),sum(r['home_goals']<r['away_goals'] for r in results)]==[155,93,132]
+    assert all('home_goals' not in r and 'away_goals' not in r for r in http('/matches'))
+
     # Real DB: partial and failed runs must not replace the previous complete report.
     old, _ = store.report('rfm_gmm')
     run = store.begin_run('integration_partial', first)

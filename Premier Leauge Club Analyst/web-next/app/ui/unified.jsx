@@ -12,6 +12,11 @@ const metricNames={assists_p90:"Kiến tạo /90",crosses_p90:"Tạt bóng /90",
 const fmt = v => v == null ? "—" : typeof v === "number" ? v.toLocaleString("vi-VN",{maximumFractionDigits:2}) : Array.isArray(v)&&v.every(x=>typeof x==="number") ? v.map(x=>`${number(x*100,1)}%`).join(" · ") : typeof v === "object" ? JSON.stringify(v) : String(v);
 function Icon({id="home"}) {const paths={home:"M3 10 12 3l9 7M5 9v11h5v-7h4v7h5V9",standings:"M4 20V10h4v10m2 0V4h4v16m2 0v-7h4v7",club:"M3 8 12 3l9 5v11l-9 3-9-3V8Zm0 0 9 5 9-5m-9 5v9",comparison:"M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4",players:"M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-6 9v-2a6 6 0 0 1 12 0v2m3-16a4 4 0 0 1 0 8m1 3a5 5 0 0 1 4 5",match:"M12 3 3 7v10l9 5 9-5V7l-9-4Zm0 6 4 3-2 5h-4l-2-5 4-3",history:"M4 4h16v16H4V4Zm5 4v8m4-8v8m4-8v8",phases:"M3 20h18M5 16l4-6 5 3 6-9",outlook:"M3 20h18M5 15l5-5 4 3 6-9",transfers:"M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4",rfm:"M12 3 3 8v9l9 5 9-5V8l-9-5Zm-9 5 9 5 9-5m-9 5v9",simulation:"M9 3h6m-5 0v7L4 20h16l-6-10V3M7 16h10",dashboard:"M3 20h18M5 16l4-6 5 3 6-9"};return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[id]||paths.home}/></svg>;}
 function Logo(){return <svg viewBox="0 0 24 24" aria-hidden="true">{[0,1,2].flatMap(y=>[0,1,2].map(x=><rect key={`${x}${y}`} x={2+x*7} y={2+y*7} width="5" height="5" rx="1" fill="currentColor" opacity={x===1 && y===1 ? .4 : 1}/>))}</svg>;}
+function matchHistory(dashboard,features) {
+  const results=new Map((dashboard.match_results||[]).map(r=>[r.match_id,r]));
+  if(results.size!==features.length||features.some(m=>{const r=results.get(m.match_id);return !r||!Number.isFinite(r.home_goals)||!Number.isFinite(r.away_goals);})) throw new Error("Báo cáo chưa có kết quả trận đầy đủ. Hãy chạy lại bước công bố dữ liệu.");
+  return features.map(m=>({...m,...results.get(m.match_id)}));
+}
 async function api(path,body) {
   const r=await fetch(`/api/football/${path}`,body?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}:{});
   const data=await r.json(); if(!r.ok) throw new Error(typeof data.detail==="string"?data.detail:"Kiểm tra dữ liệu và thử lại."); return data;
@@ -26,7 +31,7 @@ function Table({rows=[],columns}) {
 function Radar({a,b}) {
   const metrics=Object.keys(a.pct),point=(i,r)=>[120+Math.sin(i*2*Math.PI/metrics.length)*r,120-Math.cos(i*2*Math.PI/metrics.length)*r];
   const shape=pct=>metrics.map((m,i)=>point(i,85*(pct[m]??0)/100).join(",")).join(" ");
-  return <svg className="u-radar" viewBox="0 0 240 240" role="img" aria-label={`Radar ${a.name} và ${b?.name||"cầu thủ so sánh"}`}>{[25,50,75,100].map(n=><polygon key={n} points={shape(Object.fromEntries(metrics.map(m=>[m,n])))} fill="none" stroke="#c8d6e3"/>)}{metrics.map((m,i)=><text key={m} x={point(i,105)[0]} y={point(i,105)[1]} textAnchor="middle" fontSize="8">{metricNames[m]||m}</text>)}<polygon points={shape(a.pct)} fill="#3977ff25" stroke="#3977ff" strokeWidth="2"/>{b&&<polygon points={shape(b.pct)} fill="#ef667025" stroke="#ef6670" strokeWidth="2"/>}</svg>;
+  return <svg className="u-radar" viewBox="-45 -15 330 280" role="img" aria-label={`Radar ${a.name} và ${b?.name||"cầu thủ so sánh"}`}>{[25,50,75,100].map(n=><polygon key={n} points={shape(Object.fromEntries(metrics.map(m=>[m,n])))} fill="none" stroke="#c8d6e3"/>)}{metrics.map((m,i)=><text key={m} x={point(i,105)[0]} y={point(i,105)[1]} textAnchor="middle" fontSize="8">{metricNames[m]||m}</text>)}<polygon points={shape(a.pct)} fill="#3977ff25" stroke="#3977ff" strokeWidth="2"/>{b&&<polygon points={shape(b.pct)} fill="#ef667025" stroke="#ef6670" strokeWidth="2"/>}</svg>;
 }
 export default function Unified() {
   const [tab,setTab]=useState("home"),[season,setSeason]=useState(seasons[0]),[windowSize,setWindowSize]=useState(3),[method,setMethod]=useState("gmm"),[position,setPosition]=useState("");
@@ -39,7 +44,7 @@ export default function Unified() {
     let active=true;setLoading(true);setError("");setData(null);setSuggestions(null);setDetails(null);
     if(tab==="match"){setLoading(false);return;}
     const paths={dashboard:"dashboard",outlook:`outlook?season=${season}&window=${windowSize}`,phases:"phases",transfers:`transfers?season=${season}`,rfm:`rfm/${method}`,players:`players?season=${season}&position=${position}`,simulation:"streaming/transfers"};
-    const pending=["home","standings","club","comparison"].includes(tab)?Promise.all([api("dashboard"),api("matches"),api("knn/predictions")]).then(([dashboard,matches,knn])=>({dashboard,matches,knn,_publication:dashboard._publication})):tab==="history"?Promise.all([api("reports"),api("data/catalog"),api("pipeline")]).then(([runs,catalog,jobs])=>({runs,catalog,jobs})):api(paths[tab]);
+    const pending=["home","standings","club","comparison"].includes(tab)?Promise.all([api("dashboard"),api("matches"),api("knn/predictions")]).then(([dashboard,matches,knn])=>({dashboard,matches:matchHistory(dashboard,matches),knn,_publication:dashboard._publication})):tab==="history"?Promise.all([api("reports"),api("data/catalog"),api("pipeline")]).then(([runs,catalog,jobs])=>({runs,catalog,jobs})):api(paths[tab]);
     pending.then(x=>{if(active){if(tab==="players"&&Array.isArray(x)){if(!x.some(p=>p.id===first))setFirst(x.find(p=>p.name==="Erling Haaland")?.id||x[0]?.id||"");if(!x.some(p=>p.id===second))setSecond(x.find(p=>p.name==="Alexander Isak")?.id||x[1]?.id||"");}setData(x);setLoading(false);}}).catch(e=>{if(active){setError(e.message);setLoading(false);}});return()=>{active=false;};
   },[tab,season,windowSize,method,position,revision]);
   async function action(work){setBusy(true);setError("");try{await work();}catch(e){setError(e.message);}finally{setBusy(false);}}
