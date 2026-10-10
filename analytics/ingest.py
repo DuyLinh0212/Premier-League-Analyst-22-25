@@ -52,6 +52,9 @@ def silver_tables(directory=None):
 def import_sources(directory=None):
     from infra.expand_raw import main as expand_raw
     expand_raw()
+    fixture_limit = int(os.getenv('RAW_FIXTURE_LIMIT','0'))
+    if fixture_limit < 0 or fixture_limit and not store.namespace().startswith('ci-'):
+        raise ValueError('RAW_FIXTURE_LIMIT is reserved for explicit ci-* namespaces')
     silver = list(silver_tables(directory))
     inputs = []
     for folder in ('FBref_Data', 'Transfermark_Data'):
@@ -60,7 +63,7 @@ def import_sources(directory=None):
             inputs.append((path, relative, sha(path)))
     datamb = ROOT / 'data/datamb_players_db.json'
     metadata = {'silver': [{'name': n, 'rows': len(r), 'checksum': m['checksum'], 'schema': m['schema'], 'keys': m.get('keys',[])} for n, r, m in silver],
-                'raw': [{'name': r, 'checksum': h} for p, r, h in inputs], 'datamb_checksum': sha(datamb)}
+                'raw': [{'name': r, 'checksum': h} for p, r, h in inputs], 'datamb_checksum': sha(datamb), 'raw_fixture_limit':fixture_limit}
     dataset_id = 'dataset_' + store.digest(metadata)[:24]
     store.schema()
     dataset_key = store.begin_dataset(dataset_id, metadata)
@@ -71,12 +74,18 @@ def import_sources(directory=None):
             reader = csv.reader(stream)
             header = next(reader, [])
             row_count = sum(1 for row in reader)
+        original_count = row_count
+        if fixture_limit:
+            row_count = min(row_count,fixture_limit)
         with path.open(encoding='utf-8-sig', newline='') as stream:
             reader = csv.reader(stream)
             next(reader, [])
             rows = ({'line': i + 2, 'values': row} for i, row in enumerate(reader))
+            if fixture_limit:
+                from itertools import islice
+                rows = islice(rows,fixture_limit)
             store.import_table(dataset_key, 'raw/' + relative, rows,
-                               {'checksum': checksum, 'header': header, 'keys': ['line'], 'source': relative, 'row_count':row_count})
+                               {'checksum': checksum, 'header': header, 'keys': ['line'], 'source': relative, 'row_count':row_count,'source_row_count':original_count,'is_fixture':bool(fixture_limit)})
         print(json.dumps({'imported':relative,'rows':row_count}), flush=True)
     players = json.loads(datamb.read_text(encoding='utf-8'))
     store.import_table(dataset_key, 'datamb/players', players, {'checksum': sha(datamb), 'keys': [], 'source': 'Danh/data_silver/datamb_players_db.json', 'note': 'Original IDs can repeat across club spells; preserve every source row by ordinal.'})

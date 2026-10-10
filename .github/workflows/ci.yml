@@ -35,13 +35,13 @@ jobs:
         run: |
           docker build -f portable/Dockerfile.web -t football-web:4.0 .
           docker build -f portable/Dockerfile.airflow -t football-airflow:4.0 .
-          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.models.dagbag import DagBag; b=DagBag('/opt/airflow/dags',include_examples=False); assert not b.import_errors,b.import_errors; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'transfer_simulation' in b.dags['football_kafka_analytics'].task_dict"
+          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.dag_processing.dagbag import DagBag; b=DagBag('/opt/airflow/dags'); assert not b.import_errors,b.import_errors; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'transfer_simulation' in b.dags['football_kafka_analytics'].task_dict"
       - name: Start fixture services and packaged application
         run: docker compose -f portable/compose.ci.yaml up -d --wait --wait-timeout 1200
       - name: Database Kafka HTTP and recovery acceptance
         run: |
           mkdir -p portable/evidence-ci
-          docker compose -f portable/compose.ci.yaml exec -T api python tests/integration.py | tee portable/evidence-ci/acceptance.json
+          docker compose -f portable/compose.ci.yaml exec -T api python tests/integration.py | tee portable/evidence-ci/acceptance.log
           docker compose -f portable/compose.ci.yaml stop neo4j
           docker compose -f portable/compose.ci.yaml exec -T api python -c "import urllib.request,urllib.error; exec('try:\n urllib.request.urlopen(\"http://localhost:8000/health\")\n raise AssertionError(\"DB loss was hidden\")\nexcept urllib.error.HTTPError as e:\n assert e.code==503')"
           docker compose -f portable/compose.ci.yaml start neo4j

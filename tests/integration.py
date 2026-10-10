@@ -42,6 +42,12 @@ def main():
     assert prediction['persistence'] == 'saved' and abs(sum(prediction['probabilities'].values())-1) < 1e-10
     simulation = http('/transfers/simulate', {'batch_size':5,'season':'2025-2026','seed':42})
     events = simulation['records']
+    # The packaged Spark client really consumes Kafka and writes the CI filesystem
+    # fixture, then restarts with the same checkpoint. Real HDFS is a local audit.
+    from analytics.streaming import consume
+    consume()
+    consume()
+    assert len(http('/streaming/transfers')) == 5
     with tempfile.TemporaryDirectory() as folder:
         def sink(event, checksum):
             path = Path(folder) / event['event_id']
@@ -52,6 +58,8 @@ def main():
         persist_events(events, sink)
     count = store.query('MATCH (n:PLEvent {namespace:$ns,kind:"transfer"}) RETURN count(n) AS count', {'ns':store.namespace()})[0]['count']
     assert count == 5
+    assert len(http('/pipeline')) == 0  # No Airflow run has been performed by this fixture.
+    assert http('/dashboard')['season_metrics']['all']['matches'] == 1140
     # Real DB: partial and failed runs must not replace the previous complete report.
     old, _ = store.report('rfm_gmm')
     run = store.begin_run('integration_partial', first)

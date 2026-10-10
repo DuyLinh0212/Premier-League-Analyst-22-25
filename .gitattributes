@@ -5,7 +5,7 @@ portable/hdfs text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
 *.gz binary
-*.csv -text
+*.csv binary
 *.json -text
 *.jsonl -text
 data/** -text

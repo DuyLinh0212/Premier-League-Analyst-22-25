@@ -1,4 +1,4 @@
-const allowed = /^(health|features|clubs|matches|model\/metrics|predict|knn\/predictions|knn\/neighbors\/[A-Z]{3}|dashboard|pipeline|dashboard|pipeline|outlook|phases|transfers|transfers\/simulate|rfm\/(gmm|rules)|players|players\/similar|valuation|reports|reports\/[^/]+\/[^/]+|data\/catalog|data\/rows|streaming\/transfers)$/;
+const allowed = /^(health|features|clubs|matches|model\/metrics|predict|knn\/predictions|knn\/neighbors\/[A-Z]{3}|dashboard|pipeline|outlook|phases|transfers|transfers\/simulate|rfm\/(gmm|rules)|players|players\/similar|valuation|reports|reports\/[^/]+\/[^/]+|data\/catalog|data\/rows|streaming\/transfers)$/;
 async function proxy(request, context) {
   const { path } = await context.params;
   const endpoint = path.join("/");

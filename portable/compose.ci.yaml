@@ -7,6 +7,7 @@ x-env: &env
   HDFS_URI: file:///
   HDFS_BASE_PATH: /tmp/ci-hdfs
   APP_NAMESPACE: ci-premier-league
+  RAW_FIXTURE_LIMIT: '20'
 services:
   neo4j:
     image: neo4j:5.26-community
