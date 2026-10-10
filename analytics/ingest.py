@@ -1,4 +1,4 @@
-"""Import all source rows with schema, exact nulls and source checksums."""
+"""Read lakehouse snapshots; legacy graph row import is explicit opt-in only."""
 import csv
 import hashlib
 import json
