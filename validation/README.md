@@ -1,0 +1,11 @@
+# Evidence and limits
+
+Local acceptance on 2026-10-10 reused existing Spark 3.5.1, Kafka 4.3.1, Airflow 3.3.2 containers. No image was built/pulled and no local container was created. Hadoop was the existing WSL installation, with its existing NameNode metadata and three DataNode storage directories; it was not formatted or recreated.
+
+`hdfs_silver_counts.json` records read-back counts of all 21 existing Silver tables, total 73,075 rows, including 1,140 matches / 2,280 team-matches / 60 team-seasons. `hdfs_write_readback.json` records a new isolated Parquet probe, block 64 MiB and replication 2, read from the existing Spark container. Its four numeric columns are probe values, not a second source dataset. DataNode advertised hostnames were changed only in temporary configuration copies for this test; original configuration files are unchanged.
+
+Source parity checks verified seven overlapping CSV tables and the original outlook / phase formulas (240 phases). Real Spark executed seven transfer SQL queries and GaussianMixture k=4, seed=42. DataMB contains 1,350 source rows with 1,337 original IDs; all rows are preserved and conservatively linked to Silver by unique name/season. Similarity excludes the same canonical player across seasons.
+
+GitHub CI imports all 21 real Silver fixture tables and DataMB. Raw CSV import is sampled at 20 rows per file only under an explicit `ci-*` namespace, with original row counts/checksums retained in metadata. Production import has no sampling. CI tests Neo4j, Kafka consumption with Spark, checkpoint restart/replay, complete publication, API/Web proxy, missing Neo4j and API restart. Browser acceptance uses real services after removing local report files and uploads screenshots. This is CI acceptance, not a claim that a production Database on the user's machine was populated.
+
+The user's Docker inventory has a Neo4j image and old volume but no existing Neo4j container/listener. No new Database container was created locally. Full production ingestion needs the URL and credentials of the user's existing running Neo4j, configured in an untracked `.env`. ZIP extraction/checksums were tested at a different directory; deployment on a separate receiver machine has not been tested.

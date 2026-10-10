@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "existing_namenode": "WSL /home/linh/hadoop",
+  "live_datanodes": 3,
+  "parquet_read_back": {
+    "matches": 1140,
+    "team_matches": 2280,
+    "team_seasons": 60,
+    "phases": 240
+  },
+  "files": [
+    {
+      "path": "hdfs://host.docker.internal:9000/bigdata/tests/pl-merge-20261010/parquet64/part-00000-fcf33188-06ca-4fd8-8d56-bbc557b734ad-c000.snappy.parquet",
+      "blocksize": 67108864,
+      "replication": 2
+    }
+  ]
+}

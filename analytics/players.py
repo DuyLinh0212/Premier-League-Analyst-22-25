@@ -34,7 +34,8 @@ def similar(players, player_id, candidate_season=None, limit=6):
     metrics = METRICS.get(current['pos'], METRICS['MF'])
     ranked = []
     for candidate in players:
-        if candidate.get('source_id', candidate['id']) == current.get('source_id', current['id']) or candidate['pos'] != current['pos'] or (candidate_season and candidate['season'] != candidate_season):
+        same_person = current.get('canonical_player_id') and candidate.get('canonical_player_id') == current['canonical_player_id']
+        if same_person or candidate.get('source_id', candidate['id']) == current.get('source_id', current['id']) or candidate['pos'] != current['pos'] or (candidate_season and candidate['season'] != candidate_season):
             continue
         # Match original JS `value || 50`, including its treatment of zero percentiles.
         a = [current['pct'].get(m) or 50 for m in metrics]

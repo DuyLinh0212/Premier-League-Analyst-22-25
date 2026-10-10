@@ -52,6 +52,11 @@ class SourceContracts(unittest.TestCase):
         rows = json.loads((ROOT / 'data/datamb_players_db.json').read_text(encoding='utf-8'))
         self.assertEqual(len(rows), 1350)
         self.assertEqual(len({p['id'] for p in rows}), 1337)
+        from analytics.identity import link_players
+        linked = link_players(rows,FootballData(self.tables.__getitem__))
+        self.assertEqual(sum(r['canonical_player_id'] is not None for r in linked),1350)
+        haaland = [r['canonical_player_id'] for r in linked if r['name']=='Erling Haaland']
+        self.assertEqual(len(set(haaland)),1)
 
     def test_valuation_reference_and_zero(self):
         result = valuation(22, 'FW', 50, 20, 2500, 'tier2')

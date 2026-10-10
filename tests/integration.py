@@ -27,6 +27,11 @@ def main():
     assert len(http('/knn/neighbors/ARS')) == 5
     assert len(http('/players')) == 1350
     assert len({p['id'] for p in http('/players')}) == 1350
+    assert all(p['canonical_player_id'] for p in http('/players'))
+    from urllib.parse import quote
+    similarity=http('/players/similar?player_id='+quote('Erling Haaland_2024-2025'))
+    assert similarity['persistence']=='saved'
+    assert all(r['player']['canonical_player_id']!=similarity['player']['canonical_player_id'] for r in similarity['recommendations'])
     assert len(http('/outlook?season=2024-2025&window=3')['players']) == 562
     phases = http('/phases')
     assert sum(len(v) for v in phases['seasons'].values()) == 60
@@ -80,13 +85,18 @@ def main():
         assert http('/model/metrics')
         assert http('/features')
         assert len(http('/knn/predictions')) == 20
+        assert len(http('/outlook')['players']) == 562
+        assert http('/phases')
+        assert http('/transfers')
+        assert http('/rfm/gmm')
+        assert len(http('/players')) == 1350
     finally:
         hidden.rename(root)
     with urllib.request.urlopen('http://web:3000',timeout=60) as response:
         assert response.status == 200
     proxied = http('/api/football/outlook?season=2022-2023&window=1',base='http://web:3000')
     assert proxied['season'] == '2022-2023' and proxied['window'] == 1
-    print(json.dumps({'status':'passed','source_records':after,'silver_rows':73075,'phases':240,'stream_events':count,'hdfs':'local fixture only; real HDFS tested separately'}))
+    print(json.dumps({'status':'passed','source_records':after,'raw_fixture_limit':int(os.getenv('RAW_FIXTURE_LIMIT','0')),'silver_rows':73075,'phases':240,'stream_events':count,'hdfs':'local fixture only; real HDFS tested separately'}))
 
 
 if __name__ == '__main__':

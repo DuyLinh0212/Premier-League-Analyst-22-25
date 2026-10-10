@@ -48,6 +48,8 @@ def publish(dataset_key, run_id=None, spark=None):
         from collections import Counter
         ids = Counter(p['id'] for p in original_players)
         serving_players = [{**p, 'source_id': p['id'], 'id': p['id'] if ids[p['id']] == 1 else p['id'] + '::' + str(i)} for i, p in enumerate(original_players)]
+        from .identity import link_players
+        serving_players = link_players(serving_players,data)
         reports.append(('players', serving_players, {}))
         for kind, payload, filters in reports:
             store.save_report(run_key, kind, payload, filters)

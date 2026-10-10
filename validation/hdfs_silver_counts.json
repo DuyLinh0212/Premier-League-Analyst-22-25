@@ -1,0 +1,91 @@
+{
+  "status": "passed",
+  "hdfs": "existing WSL",
+  "tables": [
+    {
+      "table": "audit/goal_against_mirror",
+      "rows": 3445
+    },
+    {
+      "table": "audit/identity_review",
+      "rows": 332
+    },
+    {
+      "table": "bridges/bridge_fbref_player",
+      "rows": 2171
+    },
+    {
+      "table": "bridges/bridge_transfermarkt_player",
+      "rows": 886
+    },
+    {
+      "table": "dimensions/dim_club",
+      "rows": 796
+    },
+    {
+      "table": "dimensions/dim_player",
+      "rows": 1218
+    },
+    {
+      "table": "dimensions/dim_transfermarkt_player",
+      "rows": 1161
+    },
+    {
+      "table": "facts/fact_appearance",
+      "rows": 34296
+    },
+    {
+      "table": "facts/fact_goal_event",
+      "rows": 3445
+    },
+    {
+      "table": "facts/fact_match_enriched",
+      "rows": 1140
+    },
+    {
+      "table": "facts/fact_player_gk",
+      "rows": 123
+    },
+    {
+      "table": "facts/fact_player_miscellaneous",
+      "rows": 1723
+    },
+    {
+      "table": "facts/fact_player_playing_time",
+      "rows": 2171
+    },
+    {
+      "table": "facts/fact_player_season",
+      "rows": 1723
+    },
+    {
+      "table": "facts/fact_player_shooting",
+      "rows": 1723
+    },
+    {
+      "table": "facts/fact_player_valuation",
+      "rows": 10472
+    },
+    {
+      "table": "facts/fact_player_wage",
+      "rows": 1851
+    },
+    {
+      "table": "facts/fact_squad_wage",
+      "rows": 60
+    },
+    {
+      "table": "facts/fact_team_match",
+      "rows": 2280
+    },
+    {
+      "table": "facts/fact_team_season",
+      "rows": 60
+    },
+    {
+      "table": "facts/fact_transfer",
+      "rows": 1999
+    }
+  ],
+  "total_rows": 73075
+}
