@@ -50,6 +50,14 @@ def silver_tables(directory=None):
 
 
 def import_sources(directory=None):
+    """Legacy raw-row importer, disabled for the serving pipeline.
+
+    The production flow keeps raw/Silver data in HDFS.  Keeping this helper
+    behind an explicit opt-in prevents an accidental multi-million-row graph
+    load while retaining it for controlled migration/fixture work.
+    """
+    if os.getenv('STORE_SOURCE_ROWS_IN_NEO4J', '').lower() not in {'1', 'true', 'yes'}:
+        raise RuntimeError('Raw source rows stay in HDFS; use publish_from_silver or explicitly opt in to STORE_SOURCE_ROWS_IN_NEO4J')
     from infra.expand_raw import main as expand_raw
     expand_raw()
     fixture_limit = int(os.getenv('RAW_FIXTURE_LIMIT','0'))

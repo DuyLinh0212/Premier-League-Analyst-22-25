@@ -28,7 +28,7 @@ Script mặc định `--no-build --pull never`: tái sử dụng `RUNTIME_IMAGE`
 
 `HADOOP_USER_NAME` chỉ dùng khi HDFS ở chế độ simple authentication và đã được quản trị hạ tầng cho phép. Hệ thống Kerberos cần cung cấp cấu hình/credential riêng của hạ tầng hiện có. `NAMENODE_HTTP_URI` trỏ HTTP JMX NameNode; `HDFS_MIN_DATANODES` là số node tối thiểu mong đợi, mặc định 1 (máy tác giả có 3).
 
-Sau bootstrap công bố đủ dữ liệu vào Neo4j, Web ở `http://localhost:3000`, API ở `http://localhost:8000/docs` (cổng có thể đổi). Không xóa file nguồn/model trước bootstrap; sau công bố, endpoint báo cáo đọc Neo4j và không cần file báo cáo cục bộ để phục vụ.
+Sau bootstrap công bố báo cáo và provenance vào Neo4j, Web ở `http://localhost:3000`, API ở `http://localhost:8000/docs` (cổng có thể đổi). Dữ liệu nguồn/Silver vẫn ở HDFS/lakehouse; sau công bố, endpoint báo cáo đọc Neo4j và không cần file báo cáo cục bộ để phục vụ.
 
 ## Airflow hiện có
 

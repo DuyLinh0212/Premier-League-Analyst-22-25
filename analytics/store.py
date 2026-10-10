@@ -50,6 +50,13 @@ def import_table(dataset_key, name, rows, metadata):
         return expected_count
     keys = metadata.get("keys", [])
     prepared, seen = [], set()
+    # Large raw Transfermarkt tables contain millions of rows.  Keep the
+    # write size configurable so local Neo4j and CI can trade request count
+    # against transaction memory without changing the immutable table model.
+    try:
+        batch_size = max(100, int(os.getenv("NEO4J_IMPORT_BATCH_SIZE", "20000")))
+    except ValueError:
+        batch_size = 20000
     query("MATCH (d:PLDataset {key:$dataset}) MERGE (t:PLTable {key:$key}) SET t.namespace=$ns,t.name=$name,t.metadata_json=$meta,t.checksum=$sha,t.status='loading' MERGE (d)-[:HAS_TABLE]->(t)",
           {"dataset": dataset_key, "key": table_key, "ns": namespace(), "name": name, "meta": encode(metadata), "sha": metadata["checksum"]})
     def flush():
@@ -66,7 +73,7 @@ def import_table(dataset_key, name, rows, metadata):
             seen.add(record_key)
         prepared.append({"key": record_key, "payload": encode(row), "ordinal": index})
         observed_count += 1
-        if len(prepared) == 1000:
+        if len(prepared) >= batch_size:
             flush()
     if prepared:
         flush()

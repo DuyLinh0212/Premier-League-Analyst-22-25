@@ -10,7 +10,7 @@ flowchart LR
     Pipeline --> Lake["HDFS: Raw → Silver → model / checkpoint"]
     Lake --> Analysis["Phân tích · KNN · model trận"]
     Analysis --> Publish["Kiểm tra và công bố hoàn chỉnh"]
-    Publish --> DB["Neo4j: dataset · báo cáo · lịch sử"]
+    Publish --> DB["Neo4j: báo cáo · provenance · lịch sử"]
     Browser["Trình duyệt"] --> Web["Next.js: Web + API proxy"]
     Web --> API["FastAPI"]
     API --> DB
@@ -27,7 +27,7 @@ flowchart LR
 | Spark | Chuẩn hóa Raw/Silver, phân tích batch, huấn luyện và xử lý sự kiện | `jobs/`, `analytics/`, `Generate_LeagueTable_Api/` |
 | Airflow | Điều phối pipeline và consumer Kafka, trạng thái lần chạy thực | `portable/airflow/dags/football.py`, `portable/runtime.py` |
 | Kafka | Sự kiện dự đoán, chuyển nhượng và chuẩn hóa giải đấu | `match_outcome/stream.py`, `analytics/streaming.py` |
-| Neo4j | Nguồn, Silver, DataMB, audit, báo cáo, đầu vào/kết quả phân tích | `analytics/store.py`, `analytics/ingest.py`, `analytics/publish.py` |
+| Neo4j | Metadata snapshot, provenance, báo cáo, đầu vào/kết quả phân tích và lịch sử công bố | `analytics/store.py`, `analytics/publish.py` |
 | HDFS | Lakehouse, model version, checkpoint và dữ liệu replay | `jobs/pl_pipeline/`, `portable/hdfs` |
 
 Kafka, Airflow, Neo4j và Hadoop là **hạ tầng ngoài đã có**. Compose production chỉ đóng gói API/Web/runtime. Script mã nguồn trong `scripts/` dùng `docker start` cho container Kafka/Airflow hiện có, không build/pull image, tạo container hoặc tạo Hadoop.
@@ -135,7 +135,7 @@ Khởi động Airflow không đồng nghĩa đã cài DAG project. Worker/DAG p
 
 `football_kafka_analytics`: chuẩn hóa giải đấu → dự đoán trận → mô phỏng chuyển nhượng. Checkpoint bền vững; khóa sự kiện và checksum ngăn ghi trùng. Sự kiện v2 giữ model version/mốc dữ liệu; consumer vẫn nhận v1. HDFS được ghi trước Neo4j và checkpoint.
 
-Neo4j có `PLDataset`, `PLTable`, `PLRecord`, `PLRun`, `PLReport`, `PLActive`, `PLEvent`, `PLJob`. Pointer chỉ đổi trong transaction hoàn tất sau khi đủ báo cáo. Run lỗi không thay thế bản tốt. Đầu vào, feature, láng giềng, xác suất và model version được lưu trước khi API báo thành công. Database lỗi trả 503 và Web hiển thị lỗi lưu.
+Neo4j có `PLRun`, `PLReport`, `PLActive`, `PLEvent`, `PLJob` và metadata snapshot nhỏ gọn. Dữ liệu thô/Silver/DataMB vẫn ở HDFS hoặc lakehouse; pipeline không materialize hàng triệu `PLRecord` vào graph. Pointer chỉ đổi trong transaction hoàn tất sau khi đủ báo cáo. Run lỗi không thay thế bản tốt. Đầu vào dự đoán, feature, láng giềng, xác suất và model version được lưu trước khi API báo thành công. Database lỗi trả 503 và Web hiển thị lỗi lưu.
 
 ## 6. API và dự đoán trận
 

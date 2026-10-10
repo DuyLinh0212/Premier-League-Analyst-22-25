@@ -16,9 +16,9 @@ def hdfs(*args, check=True):
     return subprocess.run([os.getenv("HDFS_BIN", "hdfs"), "dfs", "-Ddfs.blocksize=67108864", "-Ddfs.replication=2", *map(str, args)], check=check)
 
 def bootstrap():
-    from analytics.ingest import import_sources
-    from analytics.publish import publish
-    publish(import_sources())
+    from analytics.publish import publish_from_silver
+    silver = ROOT / 'data/silver'
+    publish_from_silver(silver, os.getenv('SILVER_SNAPSHOT_KEY', 'premier-league-22-25:silver:bootstrap'))
 
 def stage(name, run_id=None):
     from pl_pipeline.ingest import preflight, register_raw_snapshot

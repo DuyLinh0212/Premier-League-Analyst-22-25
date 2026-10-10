@@ -5,7 +5,6 @@ import tempfile
 import urllib.request
 from pathlib import Path
 from analytics import store
-from analytics.ingest import import_sources
 from analytics.streaming import persist_events
 
 
@@ -17,11 +16,12 @@ def http(path, body=None, base='http://localhost:8000'):
 
 
 def main():
-    first = import_sources()
-    before = store.query('MATCH (n:PLRecord) WHERE n.table_key STARTS WITH $prefix RETURN count(n) AS count', {'prefix': first + ':'})[0]['count']
-    assert import_sources() == first
-    after = store.query('MATCH (n:PLRecord) WHERE n.table_key STARTS WITH $prefix RETURN count(n) AS count', {'prefix': first + ':'})[0]['count']
-    assert before == after
+    # Silver remains in the lakehouse.  The serving graph contains report
+    # payloads and provenance only; source-row materialization is forbidden.
+    complete_runs = store.query('MATCH (r:PLRun {namespace:$ns,status:"complete"}) RETURN r.dataset_key AS dataset ORDER BY r.completed_at DESC LIMIT 1', {'ns': store.namespace()})
+    assert complete_runs, 'the Silver publish step did not create a report run'
+    first = complete_runs[0]['dataset']
+    assert store.query('MATCH (n:PLRecord) RETURN count(n) AS count')[0]['count'] == 0
     assert len(http('/matches')) == 1140
     assert len(http('/knn/predictions')) == 20
     assert len(http('/knn/neighbors/ARS')) == 5
@@ -139,7 +139,7 @@ def main():
         assert response.status == 200
     proxied = http('/api/football/outlook?season=2022-2023&window=1',base='http://web:3000')
     assert proxied['season'] == '2022-2023' and proxied['window'] == 1
-    print(json.dumps({'status':'passed','source_records':after,'raw_fixture_limit':int(os.getenv('RAW_FIXTURE_LIMIT','0')),'silver_rows':73075,'phases':240,'stream_events':count,'hdfs':'local fixture only; real HDFS tested separately'}))
+    print(json.dumps({'status':'passed','source_records':0,'raw_fixture_limit':int(os.getenv('RAW_FIXTURE_LIMIT','0')),'silver_rows':73075,'phases':240,'stream_events':count,'hdfs':'local fixture only; real HDFS tested separately'}))
 
 
 if __name__ == '__main__':
