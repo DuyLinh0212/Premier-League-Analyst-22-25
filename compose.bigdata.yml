@@ -6,6 +6,25 @@ x-hadoop-env: &hadoop-env
   HDFS_CONF_dfs_blocksize: "67108864"
   HDFS_CONF_dfs_permissions_enabled: "false"
   HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname_check: "false"
+x-airflow-env: &airflow-env
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+  AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow-ci-only@airflow-db:5432/airflow
+  AIRFLOW__API__SECRET_KEY: ci-only-ephemeral-airflow-key
+  AIRFLOW__WEBSERVER__SECRET_KEY: ci-only-ephemeral-web-key
+  PYTHONPATH: /opt/project:/opt/project/apps/api:/opt/project/apps/api/football:/opt/project/ml/inference:/opt/project/processing/spark
+  HDFS_URI: hdfs://namenode:9000
+  HDFS_BASE_PATH: /premier-league
+  NAMENODE_HTTP_URI: http://namenode:9870
+  HDFS_MIN_DATANODES: "3"
+  HADOOP_USER_NAME: root
+  SPARK_MASTER: local[2]
+  SPARK_LOCAL_IP: 127.0.0.1
+  STATE_DIR: /state
+  APP_NAMESPACE: premier-league-22-25
+  NEON_DATABASE_URL: ${NEON_DATABASE_URL:?Set GitHub Actions secret NEON_DATABASE_URL}
+  PIPELINE_RUN_ID: ${PIPELINE_RUN_ID:?Set a unique pipeline run ID}
 services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
@@ -58,24 +77,17 @@ services:
       datanode1: {condition: service_started}
       datanode2: {condition: service_started}
       datanode3: {condition: service_started}
-    environment:
-      AIRFLOW__CORE__EXECUTOR: LocalExecutor
-      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow-ci-only@airflow-db:5432/airflow
-      AIRFLOW__API__SECRET_KEY: ci-only-ephemeral-airflow-key
-      AIRFLOW__WEBSERVER__SECRET_KEY: ci-only-ephemeral-web-key
-      PYTHONPATH: /opt/project:/opt/project/apps/api:/opt/project/apps/api/football:/opt/project/ml/inference:/opt/project/processing/spark
-      HDFS_URI: hdfs://namenode:9000
-      HDFS_BASE_PATH: /premier-league
-      NAMENODE_HTTP_URI: http://namenode:9870
-      HDFS_MIN_DATANODES: "3"
-      HADOOP_USER_NAME: root
-      SPARK_MASTER: local[2]
-      SPARK_LOCAL_IP: 127.0.0.1
-      STATE_DIR: /state
-      APP_NAMESPACE: premier-league-22-25
-      NEON_DATABASE_URL: ${NEON_DATABASE_URL:?Set GitHub Actions secret NEON_DATABASE_URL}
-      PIPELINE_RUN_ID: ${PIPELINE_RUN_ID:?Set a unique pipeline run ID}
+    environment: *airflow-env
+    volumes:
+      - pipeline-runs:/opt/project/pipeline_runs
+      - airflow-state:/state
+  airflow-api-server:
+    image: football-airflow:4.0
+    command: ["airflow", "api-server", "--host", "0.0.0.0"]
+    depends_on:
+      airflow-db: {condition: service_healthy}
+      namenode: {condition: service_healthy}
+    environment: *airflow-env
     volumes:
       - pipeline-runs:/opt/project/pipeline_runs
       - airflow-state:/state

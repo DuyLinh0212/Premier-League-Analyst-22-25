@@ -122,6 +122,8 @@ jobs:
         run: |
           docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli -m analytics.neon_store
           docker compose -f compose.bigdata.yml run --rm airflow-cli airflow db migrate
+          docker compose -f compose.bigdata.yml up -d airflow-api-server
+          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli /opt/project/infrastructure/docker/wait_for_airflow_api.py
           docker compose -f compose.bigdata.yml run --rm airflow-cli airflow pools set spark_serial 1 'Serial Spark jobs'
           docker compose -f compose.bigdata.yml run --rm airflow-cli airflow dags test football_pipeline 2026-10-11 --use-executor
       - name: Verify HDFS layout and Neon reports
