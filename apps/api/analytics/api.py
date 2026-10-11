@@ -1,6 +1,7 @@
 """Database-backed APIs for unified reports and saved user analyses."""
 import json
 import uuid
+from datetime import date
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
@@ -120,8 +121,8 @@ def streamed_transfers(limit: int = Query(100, ge=1, le=1000)):
 
 
 @router.get('/reports')
-def history(limit: int = Query(50, ge=1, le=200)):
-    return _db().runs(limit)
+def history(day: date | None = Query(None, alias='date'), limit: int = Query(500, ge=1, le=1000)):
+    return _db().runs(limit, day)
 
 
 @router.get('/dashboard')
@@ -130,8 +131,8 @@ def dashboard(run_id: str | None = None):
 
 
 @router.get('/pipeline')
-def pipeline():
-    return neon_store.pipeline(100)
+def pipeline(day: date | None = Query(None, alias='date'), limit: int = Query(1000, ge=1, le=2000)):
+    return neon_store.pipeline(limit, day)
 
 
 @router.get('/reports/{run_id}/{kind}')

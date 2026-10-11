@@ -140,18 +140,31 @@ def report(kind, filters=None, run_id=None):
     return payload, {"run_id": published_run, "version": model_version, "completed_at": completed_at.isoformat() if completed_at else None, "status": status}
 
 
-def runs(limit=50):
+def runs(limit=200, day=None):
     schema()
     with _connect() as connection, connection.cursor() as cursor:
-        cursor.execute("SELECT run_id,dataset_id,status,model_version,created_at,completed_at,report_count,error,parameters FROM pl_analysis_runs ORDER BY created_at DESC LIMIT %s", (limit,))
+        cursor.execute(
+            "SELECT run_id,dataset_id,status,model_version,created_at,completed_at,report_count,error,parameters "
+            "FROM pl_analysis_runs "
+            "WHERE (%s::date IS NULL OR (created_at >= (%s::date::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh') "
+            "AND created_at < ((%s::date + 1)::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh'))) "
+            "ORDER BY created_at DESC LIMIT %s",
+            (day, day, day, limit),
+        )
         names = [column.name for column in cursor.description]
         return [dict(zip(names, row)) for row in cursor.fetchall()]
 
 
-def pipeline(limit=100):
+def pipeline(limit=500, day=None):
     schema()
     with _connect() as connection, connection.cursor() as cursor:
-        cursor.execute("SELECT run_id,stage,status,started_at,completed_at,error,details FROM pl_pipeline_jobs ORDER BY started_at DESC LIMIT %s", (limit,))
+        cursor.execute(
+            "SELECT run_id,stage,status,started_at,completed_at,error,details FROM pl_pipeline_jobs "
+            "WHERE (%s::date IS NULL OR (started_at >= (%s::date::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh') "
+            "AND started_at < ((%s::date + 1)::timestamp AT TIME ZONE 'Asia/Ho_Chi_Minh'))) "
+            "ORDER BY started_at DESC LIMIT %s",
+            (day, day, day, limit),
+        )
         names = [column.name for column in cursor.description]
         return [dict(zip(names, row)) for row in cursor.fetchall()]
 

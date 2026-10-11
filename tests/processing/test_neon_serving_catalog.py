@@ -1,4 +1,6 @@
 import unittest
+from datetime import date
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from analytics import api, neon_store
@@ -29,6 +31,23 @@ class NeonServingCatalogTests(unittest.TestCase):
             neon_store.schema()
         connect.assert_called_once_with()
         self.assertGreater(cursor.execute.call_count, 0)
+
+    def test_history_date_is_filtered_in_vietnam_timezone(self):
+        for reader, limit in ((neon_store.runs, 500), (neon_store.pipeline, 1000)):
+            connection = Mock()
+            connection.__enter__ = Mock(return_value=connection)
+            connection.__exit__ = Mock(return_value=False)
+            cursor = Mock()
+            cursor.__enter__ = Mock(return_value=cursor)
+            cursor.__exit__ = Mock(return_value=False)
+            cursor.description = [SimpleNamespace(name="run_id")]
+            cursor.fetchall.return_value = [("today",)]
+            connection.cursor.return_value = cursor
+            with patch.object(neon_store, "schema"), patch.object(neon_store, "_connect", return_value=connection):
+                self.assertEqual(reader(limit, date(2026, 10, 11)), [{"run_id": "today"}])
+            sql, params = cursor.execute.call_args.args
+            self.assertIn("Asia/Ho_Chi_Minh", sql)
+            self.assertEqual(params, (date(2026, 10, 11), date(2026, 10, 11), date(2026, 10, 11), limit))
 
 
 if __name__ == "__main__":
