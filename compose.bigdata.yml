@@ -11,6 +11,7 @@ x-airflow-env: &airflow-env
   AIRFLOW__CORE__LOAD_EXAMPLES: "False"
   AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
   AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow-ci-only@airflow-db:5432/airflow
+  AIRFLOW__API_AUTH__JWT_SECRET: ci-only-ephemeral-execution-jwt-key
   AIRFLOW__API__SECRET_KEY: ci-only-ephemeral-airflow-key
   AIRFLOW__WEBSERVER__SECRET_KEY: ci-only-ephemeral-web-key
   PYTHONPATH: /opt/project:/opt/project/apps/api:/opt/project/apps/api/football:/opt/project/ml/inference:/opt/project/processing/spark
