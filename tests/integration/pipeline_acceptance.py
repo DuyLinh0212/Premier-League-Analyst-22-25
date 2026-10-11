@@ -139,7 +139,7 @@ def main():
         assert response.status == 200
     proxied = http('/api/football/outlook?season=2022-2023&window=1',base='http://web:3000')
     assert proxied['season'] == '2022-2023' and proxied['window'] == 1
-    print(json.dumps({'status':'passed','source_records':0,'raw_fixture_limit':int(os.getenv('RAW_FIXTURE_LIMIT','0')),'silver_rows':73075,'phases':240,'stream_events':count,'hdfs':'local fixture only; real HDFS tested separately'}))
+    print(json.dumps({'status':'passed','source_records':0,'silver_rows':73075,'phases':240,'stream_events':len(events),'hdfs':'local fixture only; real HDFS tested separately'}))
 
 
 if __name__ == '__main__':
