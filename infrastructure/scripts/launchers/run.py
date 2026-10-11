@@ -46,7 +46,7 @@ def environment(path):
             value = re.split(r"\s+#", value, maxsplit=1)[0].rstrip()
         values[key] = value  # Literal values; no shell execution or variable expansion.
     values.update(os.environ)  # Explicit shell configuration takes precedence.
-    for key in ("NEO4J_HTTP_URI", "KAFKA_BOOTSTRAP_SERVERS", "HDFS_URI", "NAMENODE_HTTP_URI"):
+    for key in ("KAFKA_BOOTSTRAP_SERVERS", "HDFS_URI", "NAMENODE_HTTP_URI"):
         values[key] = values.get("LOCAL_" + key) or values.get(key, "").replace("host.docker.internal", "127.0.0.1")
     paths = [str(ROOT), str(ROOT / "apps/api"), str(ROOT / "ml/inference"), str(ROOT / "processing/spark"), str(ROOT / "apps/api/football")]
     if values.get("PYTHONPATH"):
@@ -94,10 +94,9 @@ def port(value):
 
 def app_command(service, env, args):
     if service == "backend":
-        missing = [key for key in ("NEO4J_HTTP_URI", "NEO4J_PASSWORD", "KAFKA_BOOTSTRAP_SERVERS") if not env.get(key)]
-        if missing or env.get("NEO4J_PASSWORD") == "replace-with-existing-password":
-            raise RuntimeError("Configure NEO4J_HTTP_URI, NEO4J_PASSWORD and KAFKA_BOOTSTRAP_SERVERS in the private env file.")
-        missing_modules = [module for module in ("fastapi", "uvicorn", "pydantic", "numpy", "kafka") if not importlib.util.find_spec(module)]
+        if not env.get("NEON_DATABASE_URL"):
+            raise RuntimeError("Configure NEON_DATABASE_URL in the private env file; analysis reports are served from Neon PostgreSQL.")
+        missing_modules = [module for module in ("fastapi", "uvicorn", "pydantic", "numpy", "kafka", "psycopg") if not importlib.util.find_spec(module)]
         if missing_modules:
             raise RuntimeError("Missing API dependencies. Activate Python 3.11 venv and install infrastructure/docker/requirements-api.txt.")
         host = env.get("LOCAL_API_HOST", "127.0.0.1")

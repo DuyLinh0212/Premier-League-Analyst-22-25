@@ -46,7 +46,7 @@ def stage(name, run_id=None):
     elif name == "publish":
         ctx.require("match_forecast_v2")
         # The following merged_publish stage atomically stores the complete
-        # report bundle in Neon; do not require or populate a Neo4j graph here.
+        # report bundle in Neon.
         result = {"model_version": json.loads((OUTPUT / "model.json").read_text(encoding="utf-8"))["model_version"],
                   "forecast_version": json.loads((OUTPUT / "forecast_v2.json").read_text(encoding="utf-8"))["model_version"],
                   "target": "Neon PostgreSQL"}
@@ -90,27 +90,12 @@ if __name__ == "__main__":
         if args.command == "bootstrap":
             bootstrap()
         else:
-            from analytics import store
+            from analytics import neon_store
             run_id = "football_" + hashlib.sha256(os.getenv("PIPELINE_RUN_ID", "manual").encode()).hexdigest()[:24]
-            use_neon = bool(os.getenv("NEON_DATABASE_URL") or os.getenv("DATABASE_URL"))
-            if use_neon:
-                from analytics import neon_store
-                db = neon_store
-                db.set_job(run_id, args.stage, "running")
-            else:
-                db = store
-                job_key = store.namespace() + ":job:" + run_id + ":" + args.stage
-                store.schema()
-                store.query("MERGE (j:PLJob {key:$key}) SET j.namespace=$ns,j.run_id=$run,j.stage=$stage,j.status='running',j.started_at=$now,j.error=null", {"key":job_key,"ns":store.namespace(),"run":run_id,"stage":args.stage,"now":store.now()})
+            neon_store.set_job(run_id, args.stage, "running")
             try:
                 stage(args.stage, run_id)
-                if use_neon:
-                    db.set_job(run_id, args.stage, "success", Context(run_id).manifest)
-                else:
-                    store.query("MATCH (j:PLJob {key:$key}) SET j.status='success',j.completed_at=$now,j.manifest_json=$manifest", {"key":job_key,"now":store.now(),"manifest":store.encode(Context(run_id).manifest)})
+                neon_store.set_job(run_id, args.stage, "success", Context(run_id).manifest)
             except Exception as exc:
-                if use_neon:
-                    db.set_job(run_id, args.stage, "failed", error=str(exc)[:1000])
-                else:
-                    store.query("MATCH (j:PLJob {key:$key}) SET j.status='failed',j.completed_at=$now,j.error=$error", {"key":job_key,"now":store.now(),"error":str(exc)[:1000]})
+                neon_store.set_job(run_id, args.stage, "failed", error=str(exc)[:1000])
                 raise

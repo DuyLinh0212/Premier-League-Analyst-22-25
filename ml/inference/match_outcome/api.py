@@ -13,7 +13,6 @@ from datetime import date, timedelta
 from kafka import KafkaProducer
 from .inference import predict
 from .schema import feature_schema, validate_stats, METRICS
-from analytics import store
 from analytics.api import router, payload, save_user_analysis, get_report
 
 ROOT = Path(__file__).resolve().parents[3]

@@ -15,12 +15,11 @@ class Launchers(unittest.TestCase):
     def test_env_is_literal_and_shell_overrides_container_addresses(self):
         with tempfile.TemporaryDirectory(prefix="launcher path ") as folder:
             path = Path(folder) / ".env"
-            path.write_text("NEO4J_PASSWORD='p# $() secret'\nNEO4J_HTTP_URI=http://host.docker.internal:7474\n"
+            path.write_text("NEON_DATABASE_URL='postgresql://user:p# $()@host/db?sslmode=require'\n"
                             "KAFKA_BOOTSTRAP_SERVERS=remote:9092 # remote broker\n", encoding="utf-8")
             with patch.dict("os.environ", {"LOCAL_KAFKA_BOOTSTRAP_SERVERS": "127.0.0.1:29092"}, clear=True):
                 env = launcher.environment(path)
-            self.assertEqual(env["NEO4J_PASSWORD"], "p# $() secret")
-            self.assertEqual(env["NEO4J_HTTP_URI"], "http://127.0.0.1:7474")
+            self.assertEqual(env["NEON_DATABASE_URL"], "postgresql://user:p# $()@host/db?sslmode=require")
             self.assertEqual(env["KAFKA_BOOTSTRAP_SERVERS"], "127.0.0.1:29092")
             self.assertIn(str(launcher.ROOT), env["PYTHONPATH"])
 
@@ -47,7 +46,7 @@ class Launchers(unittest.TestCase):
             listener.bind(("127.0.0.1", 0))
             listener.listen()
             args = argparse.Namespace(api_port=listener.getsockname()[1])
-            env = {"NEO4J_PASSWORD": "test", "NEO4J_HTTP_URI": "http://127.0.0.1:7474", "KAFKA_BOOTSTRAP_SERVERS": "127.0.0.1:29092"}
+            env = {"NEON_DATABASE_URL": "postgresql://test", "KAFKA_BOOTSTRAP_SERVERS": "127.0.0.1:29092"}
             with patch("infrastructure.scripts.launchers.run.importlib.util.find_spec", return_value=object()):
                 with self.assertRaisesRegex(RuntimeError, "Cannot bind backend"):
                     launcher.app_command("backend", env, args)

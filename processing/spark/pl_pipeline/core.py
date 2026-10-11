@@ -57,7 +57,7 @@ def clean_json(value):
     if isinstance(value, (tuple, list)):
         return [clean_json(v) for v in value]
     if isinstance(value, Decimal):
-        # Spark SQL DECIMAL metrics must remain numeric in JSON/Cypher, not
+        # Spark SQL DECIMAL metrics must remain numeric in JSON/JSONB, not
         # strings produced by json.dumps(default=str).
         return clean_json(float(value))
     if isinstance(value, float) and not math.isfinite(value):

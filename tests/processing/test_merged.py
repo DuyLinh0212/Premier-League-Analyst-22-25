@@ -1,7 +1,6 @@
 import json
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 from analytics.ingest import ROOT, convert, silver_tables
 from analytics.outlook.football_data import FootballData
 from analytics.outlook.player_outlook import evaluate
@@ -68,17 +67,14 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual(generate_simulated_transfers(10, seed=42), generate_simulated_transfers(10, seed=42))
         self.assertTrue(all(r['season'] == '2025-2026' for r in generate_simulated_transfers(10)))
 
-    def test_stream_failure_does_not_commit_database(self):
+    def test_stream_failure_leaves_retryable_hdfs_batch(self):
         event = {'event_id':'a'*32,'schema_version':1,'is_simulated':True,'season':'2025-2026'}
-        with patch('analytics.store.query', return_value=[]) as database:
-            def fail(event, checksum):
-                raise OSError('HDFS disconnected')
-            with self.assertRaises(OSError):
-                persist_events([event], fail)
-            self.assertEqual(database.call_count, 1)  # conflict read only, no commit
-        with patch('analytics.store.query', return_value=[]):
-            with self.assertRaises(ValueError):
-                persist_events([event, {**event, 'season':'2026-2027'}], lambda e,h: None)
+        def fail(event, checksum):
+            raise OSError('HDFS disconnected')
+        with self.assertRaises(OSError):
+            persist_events([event], fail)
+        with self.assertRaises(ValueError):
+            persist_events([event, {**event, 'season':'2026-2027'}], lambda e,h: None)
 
 
 if __name__ == '__main__':

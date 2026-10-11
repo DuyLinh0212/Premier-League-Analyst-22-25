@@ -1,4 +1,4 @@
-"""Real Web -> API -> Neo4j acceptance. No intercepted or mocked requests."""
+"""Real Web -> API -> Neon acceptance. No intercepted or mocked requests."""
 import json
 import re
 from pathlib import Path
@@ -68,12 +68,12 @@ def main():
         page.locator('.u-controls label').filter(has_text='Cầu thủ 2').locator('select').select_option('Alexander Isak_2024-2025')
         page.get_by_role('button',name='Tìm và lưu cầu thủ tương đồng').click()
         expect(page.locator('.f-saved')).to_contain_text('player_similarity_',timeout=30000)
-        capture('03-radar-cau-thu.png','Radar và tương đồng đã lưu Neo4j')
+        capture('03-radar-cau-thu.png','Radar và tương đồng đã lưu Neon')
         switch('Mô phỏng')
         page.get_by_role('button',name='Tính và lưu định giá').click()
         expect(page.locator('.u-value>strong')).to_have_text('€70,9M',timeout=30000)
         run=re.search(r'valuation_[a-f0-9]+',page.locator('.u-value .f-saved').inner_text()).group()
-        capture('04-dinh-gia.png','Định giá và quỹ đạo đã lưu Neo4j')
+        capture('04-dinh-gia.png','Định giá và quỹ đạo đã lưu Neon')
         switch('Chuyển nhượng')
         expect(page.locator('.u-panel .u-table').first.locator('tbody tr')).to_have_count(20)
         capture('07-chuyen-nhuong.png','Thu–chi chuyển nhượng và hiệu quả chi tiêu')
@@ -130,7 +130,7 @@ def main():
         assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         browser.close()
     assert not errors,errors
-    (folder/'checks.json').write_text(json.dumps({'status':'passed','mode':'real Web/API/Neo4j; local reports removed','javascript_errors':errors,'screenshots':shots},ensure_ascii=False,indent=2),encoding='utf-8')
+    (folder/'checks.json').write_text(json.dumps({'status':'passed','mode':'real Web/API/Neon; local reports removed','javascript_errors':errors,'screenshots':shots},ensure_ascii=False,indent=2),encoding='utf-8')
     print('Real browser acceptance passed;',len(shots),'screenshots')
 
 if __name__=='__main__':

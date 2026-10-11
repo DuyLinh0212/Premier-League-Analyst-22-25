@@ -8,7 +8,7 @@ from kafka import KafkaProducer
 from pyspark.sql import SparkSession
 from match_outcome.inference import load_artifact
 from match_outcome.stream import process_events
-from match_outcome.graph import query
+from analytics import neon_store
 
 STATE = Path(os.getenv('STATE_DIR','/state'))
 OUTPUT = Path(os.environ['MATCH_MODEL_DIR'])
@@ -39,32 +39,30 @@ def fail_after_hdfs(name):
         try:
             process_events(spark,[event],OUTPUT,os.environ['HDFS_URI']+'/bigdata/processed/kafka')
         except Exception as exc:
-            from urllib.error import URLError
-            if not isinstance(exc,URLError):
+            import psycopg
+            if not isinstance(exc,psycopg.Error):
                 raise
             fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(spark._jsc.hadoopConfiguration())
             path = spark._jvm.org.apache.hadoop.fs.Path('/bigdata/processed/kafka/facts/match_statistics/event_id='+event['event_id'])
-            assert fs.exists(path),'HDFS must commit before the intentional Neo4j failure'
-            (STATE/'recovery_partial.json').write_text(json.dumps({'event_id':event['event_id'],'hdfs_committed':True,'neo4j_failed':True}))
-            print('Expected Neo4j connection failure after HDFS commit')
+            assert fs.exists(path),'HDFS must commit before the intentional Neon failure'
+            (STATE/'recovery_partial.json').write_text(json.dumps({'event_id':event['event_id'],'hdfs_committed':True,'neon_failed':True}))
+            print('Expected Neon connection failure after HDFS commit')
         else:
-            raise AssertionError('Neo4j was expected to be offline')
+            raise AssertionError('Neon was expected to be offline')
     finally:
         spark.stop()
 
 def verify(name):
     event = json.loads(event_file(name).read_text())
-    key = event['event_id']+'_'+event['model_version']
-    result = query("MATCH (p:MatchPrediction {key:$key})<-[:PRODUCED]-(r:AnalysisRun) RETURN count(p) AS count,collect(r.status) AS statuses",{'key':key})[0]
-    assert result['count']==1 and result['statuses']==['complete'],result
-    result.update(event_id=event['event_id'],model_version=event['model_version'])
+    report = neon_store.report_by_event('match_prediction', event['event_id'])
+    result = {'event_id':event['event_id'],'model_version':report['model_version'],'status':'complete'}
     (STATE/('recovery_result_'+name+'.json')).write_text(json.dumps(result))
     print(json.dumps(result))
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('command',choices=['queue','duplicate','fail_after_hdfs','verify'])
-    parser.add_argument('--name',default='neo4j')
+    parser.add_argument('--name',default='neon')
     args=parser.parse_args()
     if args.command in {'queue','duplicate'}:
         queue(args.name,args.command=='duplicate')

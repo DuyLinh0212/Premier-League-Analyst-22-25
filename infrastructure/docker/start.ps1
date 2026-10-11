@@ -8,4 +8,4 @@ Invoke-TaskDocker compose --env-file .env config --quiet
 if ($Build) { Invoke-TaskDocker compose --env-file .env --profile tools build runtime api web }
 Invoke-TaskDocker compose --env-file .env --profile tools run --rm --no-deps --pull never publish
 Invoke-TaskDocker compose --env-file .env up -d --no-build --pull never --wait api web
-Write-Host 'Web ready. Airflow/Kafka/Hadoop/Neo4j are external.'
+Write-Host 'Web ready. Airflow/Kafka/Hadoop/Neon PostgreSQL are external.'

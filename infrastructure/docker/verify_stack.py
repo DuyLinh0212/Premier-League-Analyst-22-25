@@ -1,10 +1,10 @@
-"""Container acceptance checks. Run after bootstrap and Kafka DAG completion."""
+"""Container acceptance checks for HDFS, Neon, API and Kafka-backed predictions."""
 import json
 import math
 import os
 import urllib.request
 from pathlib import Path
-from match_outcome.graph import query
+from analytics import neon_store
 
 def get(path):
     with urllib.request.urlopen('http://api:8000' + path, timeout=30) as response:
@@ -25,11 +25,13 @@ def main():
         prediction = json.load(response)
     p = list(prediction['probabilities'].values())
     assert all(math.isfinite(x) and 0 <= x <= 1 for x in p) and abs(sum(p)-1) < 1e-12
-    counts = query("MATCH (r:AnalysisRun {analysis_run_id:'football_v3_seed'})-[:PRODUCED]->(n) RETURN labels(n)[0] AS label,count(n) AS count")
-    assert {r['label']:r['count'] for r in counts} == {'MatchPrediction':1140,'KNNPrediction':20,'KNNNeighbor':100}
-    incomplete = query("MATCH (r:AnalysisRun {project:'football-v3'}) WHERE r.status<>'complete' RETURN count(r) AS count")[0]['count']
+    saved = neon_store.report_by_run(prediction['run_id'], 'match_prediction')
+    assert saved['payload']['probabilities'] == prediction['probabilities']
+    with neon_store._connect() as connection, connection.cursor() as cursor:
+        cursor.execute("SELECT count(*) FROM pl_analysis_runs WHERE status NOT IN ('complete','failed')")
+        incomplete = cursor.fetchone()[0]
     assert incomplete == 0
-    report = {'bootstrap':bootstrap,'api_probability_sum':sum(p),'prediction':prediction,'neo4j_seed':counts,'incomplete_runs':incomplete}
+    report = {'bootstrap':bootstrap,'api_probability_sum':sum(p),'prediction':prediction,'neon_saved_run':prediction['run_id'],'incomplete_runs':incomplete}
     Path('/state/acceptance.json').write_text(json.dumps(report,indent=2))
     print(json.dumps(report))
 

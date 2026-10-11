@@ -83,7 +83,7 @@ class OutcomeTests(unittest.TestCase):
                 with (OUTPUT.parent/'knn'/('knn_predictions.csv' if kind=='knn_predictions' else 'knn_neighbors.csv')).open(encoding='utf-8-sig') as f:
                     value = list(csv.DictReader(f))
             return value, {'run_id':'test_complete_run'}
-        with patch('analytics.store.report', side_effect=report), patch('match_outcome.api.save_user_analysis', side_effect=lambda kind,params,result,sim: {**result,'persistence':'saved'}) as save, TestClient(app,raise_server_exceptions=False) as client:
+        with patch('analytics.neon_store.report', side_effect=report), patch('match_outcome.api.save_user_analysis', side_effect=lambda kind,params,result,sim: {**result,'persistence':'saved'}) as save, TestClient(app,raise_server_exceptions=False) as client:
             producer = Mock()
             producer.send.return_value.get.return_value = object()
             app.state.producer = producer

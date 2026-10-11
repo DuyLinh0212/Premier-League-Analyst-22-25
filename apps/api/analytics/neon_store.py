@@ -214,6 +214,58 @@ def report_by_run(run_id, kind):
             "completed_at": completed_at.isoformat() if completed_at else None}
 
 
+def report_by_model(kind, model_version):
+    """Load an immutable model artifact that was previously published to Neon."""
+    schema()
+    with _connect() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT p.payload FROM pl_analysis_reports p "
+            "JOIN pl_analysis_runs r USING (run_id) "
+            "WHERE p.report_name=%s AND p.model_version=%s AND r.status='complete' "
+            "ORDER BY r.completed_at DESC LIMIT 1",
+            (kind, model_version),
+        )
+        row = cursor.fetchone()
+    if not row:
+        raise LookupError("Không có phiên bản model Neon đã công bố: " + model_version)
+    return row[0]
+
+
+def report_by_event(kind, event_id):
+    """Load a saved streaming prediction by its stable Kafka event identity."""
+    schema()
+    with _connect() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT p.payload,p.filters,r.model_version,r.completed_at "
+            "FROM pl_analysis_reports p JOIN pl_analysis_runs r USING (run_id) "
+            "WHERE p.report_name=%s AND p.filters ->> 'event_id'=%s "
+            "AND r.source_manifest ->> 'source'='Kafka' AND r.status='complete' "
+            "ORDER BY r.completed_at DESC LIMIT 1",
+            (kind, event_id),
+        )
+        row = cursor.fetchone()
+    if not row:
+        raise LookupError("Không có kết quả Neon cho sự kiện: " + event_id)
+    return {"payload": row[0], "filters": row[1], "model_version": row[2],
+            "completed_at": row[3].isoformat() if row[3] else None}
+
+
+def latest_records(kind, field, limit=100):
+    """Return bounded records from the newest completed analysis report."""
+    schema()
+    with _connect() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT p.payload -> %s FROM pl_analysis_reports p "
+            "JOIN pl_analysis_runs r USING (run_id) "
+            "WHERE p.report_name=%s AND r.status='complete' "
+            "ORDER BY r.completed_at DESC LIMIT 1",
+            (field, kind),
+        )
+        row = cursor.fetchone()
+    records = row[0] if row and row[0] is not None else []
+    return records[:limit] if isinstance(records, list) else []
+
+
 def set_job(run_id, stage, status, details=None, error=None):
     schema()
     with _connect() as connection, connection.cursor() as cursor:

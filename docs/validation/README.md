@@ -1,11 +1,7 @@
-# Evidence and limits
+# Kiểm thử và ranh giới dữ liệu
 
-Local acceptance on 2026-10-10 reused existing Spark 3.5.1, Kafka 4.3.1, Airflow 3.3.2 containers. No image was built/pulled and no local container was created. Hadoop was the existing WSL installation, with its existing NameNode metadata and three DataNode storage directories; it was not formatted or recreated.
+GitHub Actions dùng PostgreSQL tạm tương thích Neon để kiểm tra schema, xuất bản report, API, lịch sử và xử lý lỗi kết nối. Khi triển khai thật, ứng dụng chỉ dùng `NEON_DATABASE_URL` và PostgreSQL do Neon cấp.
 
-`hdfs_silver_counts.json` records read-back counts of all 21 existing Silver tables, total 73,075 rows, including 1,140 matches / 2,280 team-matches / 60 team-seasons. `hdfs_write_readback.json` records a new isolated Parquet probe, block 64 MiB and replication 2, read from the existing Spark container. Its four numeric columns are probe values, not a second source dataset. DataNode advertised hostnames were changed only in temporary configuration copies for this test; original configuration files are unchanged.
+Các bảng Bronze/Silver và dữ liệu đầu vào tiếp tục nằm trong HDFS. Neon chỉ giữ lần chạy, trạng thái pipeline, report phân tích, phiên bản model và provenance. CI kiểm tra không có report dạng `raw/*` hoặc `facts/*` bị đưa vào Neon.
 
-Source parity checks verified seven overlapping CSV tables and the original outlook / phase formulas (240 phases). Real Spark executed seven transfer SQL queries and GaussianMixture k=4, seed=42. DataMB contains 1,350 source rows with 1,337 original IDs; all rows are preserved and conservatively linked to Silver by unique name/season. Similarity excludes the same canonical player across seasons.
-
-GitHub CI reads all 21 real Silver fixture tables and DataMB from the lakehouse fixture, then publishes only reports and provenance to Neo4j. Raw CSV rows are never materialized in the serving graph. CI tests Neo4j, Kafka consumption with Spark, checkpoint restart/replay, complete publication, API/Web proxy, missing Neo4j and API restart. Browser acceptance uses real services after removing local report files and uploads screenshots. This is CI acceptance, not a claim that a production Database on the user's machine was populated.
-
-The initial Docker inventory had a Neo4j image and old volume, with no existing Neo4j container. The user subsequently opened the existing Neo4j Desktop instance `linh` (2026.09.0); Windows ports 7474/7687 are listening, and the existing Spark container can reach its HTTP endpoint through `host.docker.internal:7474`. No new Database container or instance was created locally. Full production ingestion is still pending the existing instance credentials in an untracked `.env`; successful HTTP reachability is not authenticated Database acceptance. ZIP extraction/checksums were tested at a different directory; deployment on a separate receiver machine has not been tested.
+CI chạy fixture HDFS/Kafka cùng với kiểm thử API/Web, replay và restart. Việc này không thay thế kiểm chứng kết nối tới HDFS thật của máy cá nhân. Gói portable dùng cấu hình Neon từ `.env`; không chứa secret.

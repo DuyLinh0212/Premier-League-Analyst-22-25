@@ -56,9 +56,9 @@ jobs:
           set -o pipefail
           mkdir -p infrastructure/docker/evidence-ci
           docker compose -f compose.dev.yml exec -T api python tests/integration/pipeline_acceptance.py | tee infrastructure/docker/evidence-ci/acceptance.log
-          docker compose -f compose.dev.yml stop neo4j
+          docker compose -f compose.dev.yml stop postgres
           docker compose -f compose.dev.yml exec -T api python -c "import urllib.request,urllib.error; exec('try:\n urllib.request.urlopen(\"http://localhost:8000/health\")\n raise AssertionError(\"DB loss was hidden\")\nexcept urllib.error.HTTPError as e:\n assert e.code==503')"
-          docker compose -f compose.dev.yml start neo4j
+          docker compose -f compose.dev.yml start postgres
           docker compose -f compose.dev.yml up -d --wait --wait-timeout 180
           docker compose -f compose.dev.yml restart api
           docker compose -f compose.dev.yml up -d --wait --wait-timeout 180

@@ -30,7 +30,7 @@ Nền tảng phân tích Premier League hợp nhất dữ liệu FBref và Trans
 ├── tests/                           # integration, ml, processing, orchestration
 ├── docs/                            # Kiến trúc, phương pháp và bằng chứng kiểm thử
 ├── compose.yml                      # Ứng dụng kết nối hạ tầng ngoài
-├── compose.dev.yml                  # Fixture CI: API/Web, Kafka và Neo4j tạm
+├── compose.dev.yml                  # Fixture CI: API/Web, Kafka và PostgreSQL tạm tương thích Neon
 ├── compose.bigdata.yml              # HDFS/Airflow tạm chỉ dành cho CI
 └── README.md
 ```
@@ -108,4 +108,4 @@ python -m analytics.outlook.verify_outlook
 python -m analytics.outlook.verify_club_phases
 ```
 
-`npm run build` trong `apps/web` xác nhận Next.js. CI còn build các image ứng dụng, import DAG Airflow, chạy fixture Kafka/Neo4j, test Web khi bỏ các file báo cáo/model cục bộ, rồi chạy pipeline HDFS và Neon trên runner riêng.
+`npm run build` trong `apps/web` xác nhận Next.js. CI còn build các image ứng dụng, import DAG Airflow, chạy fixture Kafka/PostgreSQL tương thích Neon, test Web khi bỏ các file báo cáo/model cục bộ, rồi chạy pipeline HDFS và Neon trên runner riêng.

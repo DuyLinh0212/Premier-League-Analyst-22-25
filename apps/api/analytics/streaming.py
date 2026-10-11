@@ -1,10 +1,10 @@
-"""Transfer Kafka consumer with HDFS-first commit and idempotent Neo4j sink."""
+"""HDFS-first transfer event consumer; Neon stores only the published analysis result."""
 import argparse
 import glob
 import json
 import os
 from pathlib import Path
-from . import store
+from . import codec
 
 
 def persist_events(events, sink):
@@ -15,21 +15,14 @@ def persist_events(events, sink):
             raise ValueError('Invalid transfer event ID')
         if event.get('schema_version') != 1 or not event.get('is_simulated'):
             raise ValueError('Transfer simulation requires schema v1 and simulation flag')
-        checksum = store.digest(event)
+        checksum = codec.digest(event)
         if event_id in prepared and prepared[event_id][0] != checksum:
             raise ValueError('Conflicting transfer event in batch')
         prepared[event_id] = (checksum, event)
-    # Validate all conflicts before writing any part of the batch.
-    for event_id, (checksum, event) in prepared.items():
-        key = store.namespace() + ':transfer:' + event_id
-        existing = store.query('MATCH (e:PLEvent {key:$key}) RETURN e.checksum AS checksum', {'key': key})
-        if existing and existing[0]['checksum'] != checksum:
-            raise ValueError('Conflicting transfer event: ' + event_id)
-    for event_id, (checksum, event) in prepared.items():
+    # The HDFS sink owns the idempotency marker. Do not copy event/source rows
+    # into Neon; API-published analysis results are already stored there.
+    for checksum, event in prepared.values():
         sink(event, checksum)
-        key = store.namespace() + ':transfer:' + event_id
-        store.query('MERGE (e:PLEvent {key:$key}) SET e.namespace=$ns,e.kind="transfer",e.event_id=$id,e.checksum=$sha,e.payload_json=$payload,e.status="complete",e.completed_at=$now',
-                    {'key': key, 'ns': store.namespace(), 'id': event_id, 'sha': checksum, 'payload': store.encode(event), 'now': store.now()})
     return len(prepared)
 
 
@@ -41,7 +34,6 @@ def consume():
              .config('spark.hadoop.fs.defaultFS', uri).config('spark.hadoop.dfs.blocksize', '67108864').config('spark.hadoop.dfs.client.use.datanode.hostname','true').config('spark.hadoop.dfs.replication', '2')
              .config('spark.jars', ','.join(glob.glob(os.getenv('SPARK_EXTRA_JARS', '/opt/kafka-jars/*.jar'))))
              .config('spark.sql.shuffle.partitions', '2').config('spark.driver.memory', '512m').config('spark.ui.enabled', 'false').getOrCreate())
-    store.schema()
     spark.sparkContext.setLogLevel('WARN')
     fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(spark._jsc.hadoopConfiguration())
     path = spark._jvm.org.apache.hadoop.fs.Path
@@ -53,7 +45,7 @@ def consume():
                 raise ValueError('HDFS transfer event conflict')
             return
         staging = base + '/staging/' + event['event_id']
-        spark.createDataFrame([(event['event_id'], event['season'], True, store.encode(event))], 'event_id string,season string,is_simulated boolean,payload_json string').coalesce(1).write.mode('overwrite').parquet(staging)
+        spark.createDataFrame([(event['event_id'], event['season'], True, codec.encode(event))], 'event_id string,season string,is_simulated boolean,payload_json string').coalesce(1).write.mode('overwrite').parquet(staging)
         if spark.read.parquet(staging).count() != 1:
             raise RuntimeError('HDFS transfer read-back failed')
         fs.create(path(staging + '/sha256_' + checksum), False).close()

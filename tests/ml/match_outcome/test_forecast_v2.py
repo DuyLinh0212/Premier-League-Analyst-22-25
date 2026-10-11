@@ -87,7 +87,7 @@ class ForecastV2Tests(unittest.TestCase):
     def test_database_is_required_but_kafka_is_optional_for_prediction(self):
         def report(kind,*args,**kwargs):
             return (self.artifact if kind=='forecast_v2' else self.metrics,{'run_id':'test_bundle'})
-        with TestClient(app,raise_server_exceptions=False) as client, patch('analytics.store.report',side_effect=report), patch('match_outcome.api.save_user_analysis') as saved:
+        with TestClient(app,raise_server_exceptions=False) as client, patch('analytics.neon_store.report',side_effect=report), patch('match_outcome.api.save_user_analysis') as saved:
             producer=Mock(); app.state.producer=producer
             saved.side_effect=lambda kind,event,result,simulated:{**result,'run_id':'saved_v2','persistence':'saved'}
             config=client.get('/prediction/config').json()

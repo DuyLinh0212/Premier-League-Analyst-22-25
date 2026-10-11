@@ -1,4 +1,4 @@
-"""Bounded Kafka consumption: HDFS first, Neo4j second, then checkpoint."""
+"""Bounded Kafka consumption: HDFS first, Neon report publication second, then checkpoint."""
 import argparse
 import glob
 import hashlib
@@ -9,7 +9,7 @@ from kafka import KafkaProducer
 from pyspark.sql import SparkSession
 from .inference import load_artifact, load_published_artifact, predict
 from .schema import validate_stats
-from .graph import schema, publish_predictions
+from .neon_publication import schema, publish_predictions
 
 def replay(output):
     producer = KafkaProducer(bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092"), acks="all", retries=3,
@@ -60,13 +60,13 @@ def process_events(spark, events, output, base):
             pending.append((event_id, sha, payload, event))
         import re
         if event['schema_version']==2:
-            from analytics import store
+            from analytics import neon_store
             from .forecast_v2 import forecast
             requested_version=event.get('model_version','')
             if not re.fullmatch(r'wdl2_[0-9a-f]{20}',requested_version):
                 raise ValueError('Invalid v2 model version')
             # Read an immutable published version, never the latest local model.
-            selected=store.report_by_model('forecast_v2',requested_version)
+            selected=neon_store.report_by_model('forecast_v2',requested_version)
             if selected['dataset_fingerprint']!=event.get('dataset_fingerprint'):
                 raise ValueError('V2 dataset fingerprint conflict')
             results.append((event,forecast(event,selected)))

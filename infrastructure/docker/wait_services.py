@@ -1,7 +1,7 @@
 """Readiness of existing infrastructure; no provisioning."""
 import json,os,socket,time,urllib.request
 from urllib.parse import urlparse
-from match_outcome.graph import query
+from analytics import neon_store
 
 def main(timeout=180):
     deadline=time.monotonic()+timeout
@@ -19,8 +19,11 @@ def main(timeout=180):
             host,port=os.environ['KAFKA_BOOTSTRAP_SERVERS'].split(',')[0].rsplit(':',1)
             with socket.create_connection((host,int(port)),timeout=5):
                 pass
-            query('RETURN 1 AS ready')
-            print('Existing HDFS, Kafka and Neo4j ready',flush=True)
+            neon_store.schema()
+            with neon_store._connect() as connection, connection.cursor() as cursor:
+                cursor.execute('SELECT 1')
+                cursor.fetchone()
+            print('Existing HDFS, Kafka and Neon PostgreSQL ready',flush=True)
             return
         except Exception as error:
             last=error

@@ -4,7 +4,7 @@ import csv
 import json
 import os
 from pathlib import Path
-from . import VERSION, store
+from . import VERSION, codec, neon_store
 from .ingest import ROOT, silver_tables
 from .outlook.football_data import FootballData
 from .outlook.player_outlook import evaluate, SEASONS
@@ -15,19 +15,11 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
     output = Path(os.getenv('MATCH_MODEL_DIR', str(ROOT / 'data/models/match_outcome')))
     knn = Path(os.getenv('KNN_OUTPUT_DIR', str(ROOT / 'data/models/knn')))
     forecast_artifact = json.loads((output / 'forecast_v2.json').read_text(encoding='utf-8'))
-    run_id = run_id or 'bundle_' + store.digest({'dataset': dataset_key, 'version': VERSION, 'model': json.loads((output / 'model.json').read_text(encoding='utf-8'))['model_version'], 'forecast_v2':forecast_artifact['model_version']})[:24]
-    neon = None
-    if os.getenv("NEON_DATABASE_URL") or os.getenv("DATABASE_URL"):
-        from . import neon_store as neon
-        if neon.run_complete(run_id):
-            return run_id
-        if not defer_neon:
-            neon.begin_run(run_id, dataset_key, source_manifest={"source": "HDFS Silver", "dataset": dataset_key})
-    else:
-        run_key = store.begin_run(run_id, dataset_key)
-        completed = store.query('MATCH (r:PLRun {key:$key,status:"complete"}) RETURN r.run_id AS id',{'key':run_key})
-        if completed:
-            return run_id
+    run_id = run_id or 'bundle_' + codec.digest({'dataset': dataset_key, 'version': VERSION, 'model': json.loads((output / 'model.json').read_text(encoding='utf-8'))['model_version'], 'forecast_v2':forecast_artifact['model_version']})[:24]
+    if neon_store.run_complete(run_id):
+        return run_id
+    if not defer_neon:
+        neon_store.begin_run(run_id, dataset_key, source_manifest={"source": "HDFS Silver", "dataset": dataset_key})
     try:
         data = FootballData(reader)
         reports = []
@@ -57,45 +49,26 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
         from .identity import link_players
         serving_players = link_players(serving_players,data)
         reports.append(('players', serving_players, {}))
-        if neon:
-            if defer_neon:
-                if pending_path is None:
-                    raise ValueError("A pending report path is required when Neon publication is deferred")
-                Path(pending_path).write_text(json.dumps(reports, ensure_ascii=False, allow_nan=False), encoding="utf-8")
-            else:
-                neon.publish_reports(run_id, dataset_key, reports,
-                                      {"source": "HDFS Silver", "dataset": dataset_key,
-                                       "report_version": VERSION})
+        if defer_neon:
+            if pending_path is None:
+                raise ValueError("A pending report path is required when Neon publication is deferred")
+            Path(pending_path).write_text(json.dumps(reports, ensure_ascii=False, allow_nan=False), encoding="utf-8")
         else:
-            for kind, payload, filters in reports:
-                store.save_report(run_key, kind, payload, filters)
-            store.finish_run(run_key, len(reports))
+            neon_store.publish_reports(run_id, dataset_key, reports,
+                                       {"source": "HDFS Silver", "dataset": dataset_key,
+                                        "report_version": VERSION})
         print(json.dumps({'run_id': run_id, 'reports': len(reports), 'status': 'complete'}), flush=True)
         return run_id
     except Exception as exc:
-        if neon and not defer_neon:
-            with neon._connect() as connection, connection.cursor() as cursor:
+        if not defer_neon:
+            with neon_store._connect() as connection, connection.cursor() as cursor:
                 cursor.execute("UPDATE pl_analysis_runs SET status='failed',error=%s,completed_at=now() WHERE run_id=%s AND status<>'complete'", (str(exc)[:1000], run_id))
-        elif not neon:
-            store.fail_run(run_key, exc)
         raise
 
 
 def publish(dataset_key, run_id=None, spark=None):
-    """Publish reports from a previously registered serving snapshot.
-
-    Source rows are intentionally not copied into a serving database by this
-    function. They remain in HDFS/lakehouse; only run metadata and reports are
-    published.
-    """
-    cache = {}
-
-    def reader(name):
-        if name not in cache:
-            cache[name] = store.table_rows(name, dataset_key)
-        return cache[name]
-
-    return _publish_with_reader(dataset_key, reader, run_id, spark)
+    """Reject legacy serving-database reads; source tables live in HDFS only."""
+    raise RuntimeError("Source tables are not stored in Neon. Use publish_from_silver or the HDFS pipeline stage.")
 
 
 def publish_from_silver(directory, snapshot_key, run_id=None, spark=None, defer_neon=False):
@@ -139,25 +112,23 @@ def publish_hdfs(ctx):
                     values = row.asDict(recursive=True)
                     writer.writerow({k: '\\N' if v is None else str(v).lower() if isinstance(v, bool) else str(v) if hasattr(v, 'as_tuple') else clean_json(v) for k, v in values.items()})
             manifest['tables'].append({'table': table, 'csv': 'csv/' + table + '.csv', 'keys': info.get('keys', []), 'row_count': info['row_count'], 'schema': info['schema'], 'source_hdfs_path': info['path']})
-        (folder / 'silver_manifest.json').write_text(store.encode(manifest), encoding='utf-8')
+        (folder / 'silver_manifest.json').write_text(codec.encode(manifest), encoding='utf-8')
         # The Silver export is the input boundary for serving.  Keep the
         # lakehouse in HDFS and publish only reports/provenance to Neon.
-        dataset = store.namespace() + ':silver:' + ctx.run_id
-        use_neon = bool(os.getenv("NEON_DATABASE_URL") or os.getenv("DATABASE_URL"))
-        run_id = publish_from_silver(folder, dataset, ctx.run_id, spark, defer_neon=use_neon)
+        dataset = codec.namespace() + ':silver:' + ctx.run_id
+        run_id = publish_from_silver(folder, dataset, ctx.run_id, spark, defer_neon=True)
         # Store all derived Gold reports on HDFS; Neon is the report serving database.
-        from . import neon_store
-        report_reader = neon_store.report if use_neon else store.report
+        report_reader = neon_store.report
         pending_file = folder / "_pending_neon_reports.json"
         pending_reports = None
-        if use_neon and pending_file.exists():
+        if pending_file.exists():
             pending_reports = json.loads(pending_file.read_text(encoding="utf-8"))
 
         def read_report(kind, filters=None):
             if pending_reports is not None:
-                filter_json = store.encode(filters or {})
+                filter_json = codec.encode(filters or {})
                 for saved_kind, payload, saved_filters in pending_reports:
-                    if saved_kind == kind and store.encode(saved_filters or {}) == filter_json:
+                    if saved_kind == kind and codec.encode(saved_filters or {}) == filter_json:
                         return payload, {"run_id": run_id, "version": VERSION, "status": "pending_hdfs_gold"}
                 raise LookupError(f"Analysis payload was not staged for Gold: {kind}")
             return report_reader(kind, filters or {}, run_id)
@@ -176,12 +147,12 @@ def publish_hdfs(ctx):
                         payload, _ = read_report(kind, {'season': season, 'window': window})
                         for group in groups[kind]:
                             target = f"{ctx.gold}/{group}/{kind}/runs/{run_id}/season={season}/window={window}"
-                            spark.createDataFrame([(store.encode(payload),)], 'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
+                            spark.createDataFrame([(codec.encode(payload),)], 'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
                 continue
             payload, _ = read_report(kind, {})
             target_group = groups[kind]
             target = f"{ctx.gold}/{target_group}/{kind}/runs/{run_id}"
-            spark.createDataFrame([(store.encode(payload),)], 'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
+            spark.createDataFrame([(codec.encode(payload),)], 'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
         if pending_reports is not None:
             neon_store.publish_reports(run_id, dataset, pending_reports,
                                        {"source": "HDFS Silver", "dataset": dataset,
@@ -198,4 +169,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if not args.silver_dir:
         raise SystemExit('--silver-dir is required; source data stays in the lakehouse')
-    publish_from_silver(args.silver_dir, store.namespace() + ':silver:manual')
+    publish_from_silver(args.silver_dir, codec.namespace() + ':silver:manual')

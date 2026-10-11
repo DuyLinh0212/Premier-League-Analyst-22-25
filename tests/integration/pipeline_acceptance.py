@@ -1,10 +1,10 @@
-"""Real Neo4j/Kafka/HTTP acceptance; CI HDFS sink is explicitly a local fixture."""
+"""Real Neon/PostgreSQL, Kafka and HTTP acceptance; HDFS is a CI-local fixture."""
 import json
 import os
 import tempfile
 import urllib.request
 from pathlib import Path
-from analytics import store
+from analytics import neon_store
 from analytics.streaming import persist_events
 
 
@@ -16,12 +16,15 @@ def http(path, body=None, base='http://localhost:8000'):
 
 
 def main():
-    # Silver remains in the lakehouse.  The serving graph contains report
-    # payloads and provenance only; source-row materialization is forbidden.
-    complete_runs = store.query('MATCH (r:PLRun {namespace:$ns,status:"complete"}) RETURN r.dataset_key AS dataset ORDER BY r.completed_at DESC LIMIT 1', {'ns': store.namespace()})
-    assert complete_runs, 'the Silver publish step did not create a report run'
-    first = complete_runs[0]['dataset']
-    assert store.query('MATCH (n:PLRecord) RETURN count(n) AS count')[0]['count'] == 0
+    # Silver remains in the lakehouse. Neon receives derived reports and provenance only.
+    with neon_store._connect() as connection, connection.cursor() as cursor:
+        cursor.execute("SELECT run_id,dataset_id FROM pl_analysis_runs WHERE status='complete' ORDER BY completed_at DESC LIMIT 1")
+        complete_run = cursor.fetchone()
+        cursor.execute("SELECT count(*) FROM pl_analysis_reports WHERE report_name LIKE 'facts/%' OR report_name LIKE 'raw/%'")
+        source_rows = cursor.fetchone()[0]
+    assert complete_run, 'the Silver publish step did not create a Neon report run'
+    first = complete_run[1]
+    assert source_rows == 0, 'raw and Silver source rows must remain in HDFS'
     assert len(http('/matches')) == 1140
     assert len(http('/knn/predictions')) == 20
     assert len(http('/knn/neighbors/ARS')) == 5
@@ -74,8 +77,8 @@ def main():
             process_events(spark,match_events,output,Path(target).as_uri())
             process_events(spark,match_events,output,Path(target).as_uri())
         for result in (v2,live,ended):
-            stored=store.query('MATCH (p:MatchPrediction {key:$key}) RETURN p.result_json AS result',{'key':result['prediction_id']+'_'+result['model_version']})
-            assert len(stored)==1 and json.loads(stored[0]['result'])['probabilities']==result['probabilities']
+            stored=neon_store.report_by_event('match_prediction_v2',result['prediction_id'])
+            assert stored['payload']['result']['probabilities']==result['probabilities']
     finally:
         spark.stop()
     simulation = http('/transfers/simulate', {'batch_size':5,'season':'2025-2026','seed':42})
@@ -94,8 +97,6 @@ def main():
             path.write_text(checksum)
         persist_events(events, sink)
         persist_events(events, sink)
-    count = store.query('MATCH (n:PLEvent {namespace:$ns,kind:"transfer"}) RETURN count(n) AS count', {'ns':store.namespace()})[0]['count']
-    assert count == 5
     assert len(http('/pipeline')) == 0  # No Airflow run has been performed by this fixture.
     dashboard=http('/dashboard')
     assert dashboard['season_metrics']['all']['matches'] == 1140
@@ -106,16 +107,15 @@ def main():
     assert all('home_goals' not in r and 'away_goals' not in r for r in http('/matches'))
 
     # Real DB: partial and failed runs must not replace the previous complete report.
-    old, _ = store.report('rfm_gmm')
-    run = store.begin_run('integration_partial', first)
-    store.save_report(run, 'rfm_gmm', {'invalid':True})
-    try:
-        store.finish_run(run, 2)
-        raise AssertionError('Incomplete run was published')
-    except RuntimeError:
-        pass
-    assert store.report('rfm_gmm')[0] == old
-    store.fail_run(run, 'intentional recovery test')
+    old, _ = neon_store.report('rfm_gmm')
+    neon_store.begin_run('integration_partial', first, source_manifest={'source':'CI incomplete-run test'})
+    filter_hash, _ = neon_store._filter_key({})
+    with neon_store._connect() as connection, connection.cursor() as cursor:
+        cursor.execute("INSERT INTO pl_analysis_reports (run_id,report_name,filter_key,filters,payload) VALUES (%s,'rfm_gmm',%s,'{}'::jsonb,'{\"invalid\":true}'::jsonb)", ('integration_partial',filter_hash))
+        cursor.execute("SELECT count(*) FROM pl_analysis_active_reports WHERE report_name='rfm_gmm' AND run_id='integration_partial'")
+        assert cursor.fetchone()[0] == 0, 'partial run replaced an active Neon report'
+        cursor.execute("UPDATE pl_analysis_runs SET status='failed',error='intentional recovery test',completed_at=now() WHERE run_id='integration_partial'")
+    assert neon_store.report('rfm_gmm')[0] == old
     # Serving must be independent of local source/report files, even after API restart.
     root = Path('/opt/project/data/models/match_outcome')
     hidden = root.with_name('outputs_disabled_for_test')

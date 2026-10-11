@@ -4,17 +4,14 @@ import uuid
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
-from . import store
+from . import codec, neon_store
 from .players import valuation, similar
 
 router = APIRouter()
 
 
 def _db():
-    if __import__('os').getenv('NEON_DATABASE_URL') or __import__('os').getenv('DATABASE_URL'):
-        from . import neon_store
-        return neon_store
-    return store
+    return neon_store
 
 
 def get_report(kind, filters=None, run_id=None):
@@ -61,18 +58,7 @@ def players(season: str | None = None, position: str | None = None, search: str 
 
 
 def save_user_analysis(kind, parameters, result, simulated=False):
-    if _db() is not store:
-        return _db().save_user_analysis(kind, parameters, result, simulated)
-    store.schema()
-    run_id = kind + '_' + uuid.uuid4().hex
-    run_key = store.begin_run(run_id, None, parameters, simulated)
-    try:
-        store.save_report(run_key, kind, result, parameters)
-        store.finish_run(run_key, 1)
-    except Exception as exc:
-        store.fail_run(run_key, exc)
-        raise
-    return {**result, 'run_id': run_id, 'persistence': 'saved'}
+    return neon_store.save_user_analysis(kind, parameters, result, simulated)
 
 
 @router.get('/players/similar')
@@ -119,7 +105,7 @@ def simulate(request: SimulationRequest):
         row.update({'event_id': uuid.uuid4().hex, 'schema_version': 1, 'is_simulated': True, 'source': 'Danh seeded simulation'})
     saved = save_user_analysis('transfer_simulation', request.model_dump(), {'records': records, 'is_simulated': True}, True)
     producer = KafkaProducer(bootstrap_servers=os.environ['KAFKA_BOOTSTRAP_SERVERS'], acks='all', retries=3,
-                             value_serializer=lambda value: store.encode(value).encode(), max_block_ms=5000)
+                             value_serializer=lambda value: codec.encode(value).encode(), max_block_ms=5000)
     try:
         for row in records:
             producer.send(os.getenv('TRANSFER_TOPIC', 'fact_transfers_topic'), key=row['event_id'].encode(), value=row).get(timeout=10)
@@ -130,14 +116,7 @@ def simulate(request: SimulationRequest):
 
 @router.get('/streaming/transfers')
 def streamed_transfers(limit: int = Query(100, ge=1, le=1000)):
-    if _db() is not store:
-        try:
-            report, _ = _db().report('transfer_simulation', {})
-            return report.get('records', [])[:limit]
-        except LookupError:
-            return []
-    rows = store.query('MATCH (e:PLEvent {namespace:$ns,kind:"transfer",status:"complete"}) RETURN e.payload_json AS payload ORDER BY e.completed_at DESC LIMIT $limit', {'ns': store.namespace(), 'limit': limit})
-    return [json.loads(r['payload']) for r in rows]
+    return neon_store.latest_records('transfer_simulation', 'records', limit)
 
 
 @router.get('/reports')
@@ -152,37 +131,26 @@ def dashboard(run_id: str | None = None):
 
 @router.get('/pipeline')
 def pipeline():
-    db = _db()
-    if db is store:
-        return store.query('MATCH (j:PLJob {namespace:$ns}) RETURN j.run_id AS run_id,j.stage AS stage,j.status AS status,j.started_at AS started_at,j.completed_at AS completed_at,j.error AS error ORDER BY j.started_at DESC LIMIT 100',{'ns':store.namespace()})
-    return db.pipeline(100)
+    return neon_store.pipeline(100)
 
 
 @router.get('/reports/{run_id}/{kind}')
 def historical_report(run_id: str, kind: str):
-    db = _db()
-    if db is not store:
-        try:
-            return [db.report_by_run(run_id, kind)]
-        except LookupError as exc:
-            raise HTTPException(404, str(exc)) from exc
-    rows = store.query('MATCH (r:PLRun {key:$run,status:"complete"})-[:PRODUCED]->(p) WHERE p.kind=$kind RETURN p.payload_json AS payload,p.filters_json AS filters', {'run': store.namespace() + ':' + run_id, 'kind': kind})
-    if not rows:
-        raise HTTPException(404, 'Không có báo cáo đã lưu')
-    return [{'payload': json.loads(r['payload']), 'filters': json.loads(r['filters'])} for r in rows]
+    try:
+        return [neon_store.report_by_run(run_id, kind)]
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @router.get('/data/catalog')
 def catalog():
-    db = _db()
-    rows = db.catalog() if db is not store else store.catalog()
+    rows = neon_store.catalog()
     return [{**r, 'metadata': json.loads(r['metadata']) if isinstance(r.get('metadata'), str) else r.get('metadata', {})} for r in rows]
 
 
 @router.get('/data/rows')
 def data_rows(table: str, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)):
     try:
-        db = _db()
-        return db.table_rows(table, offset=offset, limit=limit) if db is not store else store.table_rows(table, offset=offset, limit=limit)
+        return neon_store.table_rows(table, offset=offset, limit=limit)
     except LookupError as exc:
         raise HTTPException(404, str(exc)) from exc
