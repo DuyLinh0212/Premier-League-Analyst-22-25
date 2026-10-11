@@ -10,6 +10,7 @@ import json
 import os
 import uuid
 from datetime import datetime, timezone
+from pathlib import Path
 
 import psycopg
 from psycopg.types.json import Jsonb
