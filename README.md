@@ -99,6 +99,22 @@ Gói bỏ secret, cache, image tar và Hadoop archive. GitHub Actions yêu cầu
 
 ## Kiểm thử
 
+### Lịch sử Airflow local trên Neon
+
+Với Airflow standalone dùng SQLite, chạy tiến trình đồng bộ cùng Airflow:
+
+```bash
+export AIRFLOW_METADATA_SQLITE=/path/to/airflow/airflow.db
+python -m analytics.airflow_history --interval 15
+```
+
+Tiến trình cần cùng `NEON_DATABASE_URL` và `PYTHONPATH` như backend. Nó chỉ đọc
+metadata Airflow; lịch sử DAG và từng lần thử lại được lưu riêng trong
+`pl_airflow_runs` / `pl_airflow_task_history`. Trạng thái công đoạn trên Web
+được đối chiếu từ metadata, kể cả khi tác vụ bị timeout hoặc bị dừng bên ngoài
+runtime. Endpoint `/airflow/history` trả lịch sử đầy đủ. Đồng bộ lịch sử không
+công bố hoặc thay đổi báo cáo phân tích.
+
 ```bash
 # PowerShell
 $env:PYTHONPATH = "apps/api;ml/inference;processing/spark"

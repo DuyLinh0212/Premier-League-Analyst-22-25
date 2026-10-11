@@ -49,3 +49,32 @@ CREATE INDEX IF NOT EXISTS pl_analysis_runs_completed_idx
     ON pl_analysis_runs (completed_at DESC) WHERE status = 'complete';
 CREATE INDEX IF NOT EXISTS pl_pipeline_jobs_started_idx
     ON pl_pipeline_jobs (started_at DESC);
+
+ALTER TABLE pl_pipeline_jobs DROP CONSTRAINT IF EXISTS pl_pipeline_jobs_status_check;
+ALTER TABLE pl_pipeline_jobs ADD CONSTRAINT pl_pipeline_jobs_status_check
+    CHECK (status IN ('running','success','failed','queued','scheduled','skipped',
+                     'upstream_failed','up_for_retry','up_for_reschedule','deferred','removed','restarting'));
+
+CREATE TABLE IF NOT EXISTS pl_airflow_runs (
+    dag_id TEXT NOT NULL,
+    airflow_run_id TEXT NOT NULL,
+    pipeline_run_id TEXT NOT NULL,
+    state TEXT,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (dag_id, airflow_run_id)
+);
+
+CREATE TABLE IF NOT EXISTS pl_airflow_task_history (
+    dag_id TEXT NOT NULL,
+    airflow_run_id TEXT NOT NULL,
+    task_id TEXT NOT NULL,
+    map_index INTEGER NOT NULL,
+    try_number INTEGER NOT NULL,
+    state TEXT,
+    started_at TIMESTAMPTZ,
+    completed_at TIMESTAMPTZ,
+    synced_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (dag_id, airflow_run_id, task_id, map_index, try_number)
+);

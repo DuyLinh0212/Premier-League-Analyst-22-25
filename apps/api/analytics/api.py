@@ -135,6 +135,12 @@ def pipeline(day: date | None = Query(None, alias='date'), limit: int = Query(10
     return neon_store.pipeline(limit, day)
 
 
+@router.get('/airflow/history')
+def airflow_history(limit: int = Query(100, ge=1, le=1000)):
+    from .airflow_history import history
+    return history(limit)
+
+
 @router.get('/reports/{run_id}/{kind}')
 def historical_report(run_id: str, kind: str):
     try:

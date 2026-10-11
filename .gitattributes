@@ -9,3 +9,4 @@ portable/hdfs text eol=lf
 *.json -text
 *.jsonl -text
 data/** -text
+infrastructure/docker/hdfs text eol=lf
