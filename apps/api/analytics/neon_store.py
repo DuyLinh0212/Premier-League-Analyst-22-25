@@ -8,12 +8,17 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import threading
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
 import psycopg
 from psycopg.types.json import Jsonb
+
+
+_schema_lock = threading.Lock()
+_schema_ready = False
 
 
 def _dsn() -> str:
@@ -38,12 +43,19 @@ def _filter_key(filters):
 
 def schema():
     """Create the serving schema idempotently; source rows are never copied."""
-    schema_file = Path(__file__).resolve().parents[3] / "database/schemas/analytics.sql"
-    statements = [item.strip() for item in schema_file.read_text(encoding="utf-8").split(";") if item.strip()]
-    with _connect() as connection:
-        with connection.cursor() as cursor:
-            for statement in statements:
-                cursor.execute(statement)
+    global _schema_ready
+    if _schema_ready:
+        return
+    with _schema_lock:
+        if _schema_ready:
+            return
+        schema_file = Path(__file__).resolve().parents[3] / "database/schemas/analytics.sql"
+        statements = [item.strip() for item in schema_file.read_text(encoding="utf-8").split(";") if item.strip()]
+        with _connect() as connection:
+            with connection.cursor() as cursor:
+                for statement in statements:
+                    cursor.execute(statement)
+        _schema_ready = True
 
 
 def begin_run(run_id, dataset_id, parameters=None, source_manifest=None):
@@ -142,6 +154,64 @@ def pipeline(limit=100):
         cursor.execute("SELECT run_id,stage,status,started_at,completed_at,error,details FROM pl_pipeline_jobs ORDER BY started_at DESC LIMIT %s", (limit,))
         names = [column.name for column in cursor.description]
         return [dict(zip(names, row)) for row in cursor.fetchall()]
+
+
+def catalog():
+    """Expose published Neon reports as the serving catalog, not HDFS source rows."""
+    schema()
+    with _connect() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT p.report_name AS name, "
+            "CASE WHEN jsonb_typeof(p.payload)='array' THEN jsonb_array_length(p.payload) ELSE 1 END AS row_count, "
+            "jsonb_build_object('storage','neon','run_id',r.run_id,'model_version',p.model_version,"
+            "'payload_type',jsonb_typeof(p.payload)) AS metadata "
+            "FROM (SELECT DISTINCT ON (report_name) * FROM pl_analysis_active_reports "
+            "ORDER BY report_name,updated_at DESC) a "
+            "JOIN pl_analysis_reports p USING (run_id,report_name,filter_key) "
+            "JOIN pl_analysis_runs r USING (run_id) "
+            "WHERE r.status='complete' ORDER BY p.report_name"
+        )
+        names = [column.name for column in cursor.description]
+        return [dict(zip(names, row)) for row in cursor.fetchall()]
+
+
+def table_rows(name, offset=0, limit=100):
+    """Read a page from one published report payload stored in Neon."""
+    schema()
+    with _connect() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT p.payload FROM pl_analysis_active_reports a "
+            "JOIN pl_analysis_reports p USING (run_id,report_name,filter_key) "
+            "JOIN pl_analysis_runs r USING (run_id) "
+            "WHERE a.report_name=%s AND r.status='complete' "
+            "ORDER BY a.updated_at DESC LIMIT 1",
+            (name,),
+        )
+        row = cursor.fetchone()
+    if not row:
+        raise LookupError("Chưa có báo cáo Neon được công bố: " + name)
+    payload = row[0]
+    rows = payload if isinstance(payload, list) else [payload]
+    return rows[offset:offset + limit]
+
+
+def report_by_run(run_id, kind):
+    """Load a saved version and its exact filters from Neon history."""
+    schema()
+    with _connect() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT p.payload,p.filters,r.model_version,r.completed_at "
+            "FROM pl_analysis_reports p JOIN pl_analysis_runs r USING (run_id) "
+            "WHERE p.run_id=%s AND p.report_name=%s AND r.status='complete' "
+            "ORDER BY p.created_at DESC LIMIT 1",
+            (run_id, kind),
+        )
+        row = cursor.fetchone()
+    if not row:
+        raise LookupError("Không có báo cáo đã lưu")
+    payload, filters, model_version, completed_at = row
+    return {"payload": payload, "filters": filters, "model_version": model_version,
+            "completed_at": completed_at.isoformat() if completed_at else None}
 
 
 def set_job(run_id, stage, status, details=None, error=None):

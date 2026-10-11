@@ -84,7 +84,7 @@ class ForecastV2Tests(unittest.TestCase):
         for h,a in [(0.05,0.05),(2,3),(12,12)]:
             self.assertAlmostEqual(float(score_probabilities((h,a)).sum()),1,places=12)
 
-    def test_db_and_kafka_errors_do_not_return_success(self):
+    def test_database_is_required_but_kafka_is_optional_for_prediction(self):
         def report(kind,*args,**kwargs):
             return (self.artifact if kind=='forecast_v2' else self.metrics,{'run_id':'test_bundle'})
         with TestClient(app,raise_server_exceptions=False) as client, patch('analytics.store.report',side_effect=report), patch('match_outcome.api.save_user_analysis') as saved:
@@ -100,8 +100,13 @@ class ForecastV2Tests(unittest.TestCase):
             self.assertEqual(sent['prediction_date'],'2025-05-26')
             saved.side_effect=ConnectionError('DB offline')
             self.assertEqual(client.post('/predict/v2',json=self.request).status_code,503)
+            saved.side_effect=lambda kind,event,result,simulated:{**result,'run_id':'saved_v2','persistence':'saved'}
             producer.send.side_effect=ConnectionError('Kafka offline')
-            self.assertEqual(client.post('/predict/v2',json=self.request).status_code,503)
+            response=client.post('/predict/v2',json=self.request)
+            self.assertEqual(response.status_code,200)
+            self.assertEqual(response.json()['persistence'],'saved')
+            self.assertEqual(response.json()['streaming'],'unavailable')
+            saved.assert_called()
             self.assertEqual(client.post('/predict/v2',json={**self.request,'home_goals':True}).status_code,422)
 
 if __name__=='__main__': unittest.main()

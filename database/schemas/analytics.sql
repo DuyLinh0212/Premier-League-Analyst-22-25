@@ -45,5 +45,7 @@ CREATE INDEX IF NOT EXISTS pl_analysis_reports_lookup_idx
     ON pl_analysis_reports (report_name, filter_key, created_at DESC);
 CREATE INDEX IF NOT EXISTS pl_analysis_runs_created_idx
     ON pl_analysis_runs (created_at DESC);
+CREATE INDEX IF NOT EXISTS pl_analysis_runs_completed_idx
+    ON pl_analysis_runs (completed_at DESC) WHERE status = 'complete';
 CREATE INDEX IF NOT EXISTS pl_pipeline_jobs_started_idx
     ON pl_pipeline_jobs (started_at DESC);

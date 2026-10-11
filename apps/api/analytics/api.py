@@ -160,6 +160,12 @@ def pipeline():
 
 @router.get('/reports/{run_id}/{kind}')
 def historical_report(run_id: str, kind: str):
+    db = _db()
+    if db is not store:
+        try:
+            return [db.report_by_run(run_id, kind)]
+        except LookupError as exc:
+            raise HTTPException(404, str(exc)) from exc
     rows = store.query('MATCH (r:PLRun {key:$run,status:"complete"})-[:PRODUCED]->(p) WHERE p.kind=$kind RETURN p.payload_json AS payload,p.filters_json AS filters', {'run': store.namespace() + ':' + run_id, 'kind': kind})
     if not rows:
         raise HTTPException(404, 'Không có báo cáo đã lưu')
@@ -168,12 +174,15 @@ def historical_report(run_id: str, kind: str):
 
 @router.get('/data/catalog')
 def catalog():
-    return [{**r, 'metadata': json.loads(r['metadata'])} for r in store.catalog()]
+    db = _db()
+    rows = db.catalog() if db is not store else store.catalog()
+    return [{**r, 'metadata': json.loads(r['metadata']) if isinstance(r.get('metadata'), str) else r.get('metadata', {})} for r in rows]
 
 
 @router.get('/data/rows')
 def data_rows(table: str, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)):
     try:
-        return store.table_rows(table, offset=offset, limit=limit)
+        db = _db()
+        return db.table_rows(table, offset=offset, limit=limit) if db is not store else store.table_rows(table, offset=offset, limit=limit)
     except LookupError as exc:
         raise HTTPException(404, str(exc)) from exc

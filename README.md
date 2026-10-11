@@ -53,6 +53,8 @@ Airflow DAG `football_pipeline` chạy preflight HDFS, nạp nguồn, tạo iden
 
 Dự đoán trận hỗ trợ trước trận và trong trận, dùng dữ liệu tối đa ba mùa và không đưa thống kê tương lai vào đặc trưng. Mốc dữ liệu hiện có đến 25/05/2025; đây không phải nguồn live. Xem [phương pháp và giới hạn](docs/validation/FORECAST_V2.md).
 
+Web/backend chỉ cần Neon có các báo cáo và model đã công bố để đọc và dự đoán; không cần khởi chạy HDFS, Spark hoặc Airflow cho từng lần dự đoán. Các thành phần đó chỉ cần khi nhập/chuẩn hóa dữ liệu hay huấn luyện và công bố phiên bản phân tích mới. Kafka là luồng bổ sung: kết quả dự đoán vẫn được lưu và trả về khi Kafka tắt. Neon giữ báo cáo; danh mục và phân trang dữ liệu trên Web đọc từ các báo cáo Neon đã công bố, còn bảng nguồn lớn vẫn nằm ở HDFS.
+
 ## Chạy ứng dụng trên máy cá nhân
 
 Cài Python 3.11, Node.js từ 20.9 và cấu hình các dịch vụ hiện có trong `.env` dựa theo [.env.example](.env.example). File `NeonKey.txt` chỉ là nguồn bí mật cục bộ, không được commit. Không có lệnh nào trong launcher tự dựng Hadoop, Kafka hay Airflow.
@@ -73,11 +75,12 @@ Trên Linux/WSL, dùng `python3.11 -m venv .venv`, kích hoạt `.venv`, rồi c
 | --- | --- | --- |
 | Frontend | `./infrastructure/scripts/launchers/start-frontend.ps1` | `bash infrastructure/scripts/launchers/start-frontend.sh` |
 | Backend | `./infrastructure/scripts/launchers/start-backend.ps1` | `bash infrastructure/scripts/launchers/start-backend.sh` |
+| Backend + Web only | `./infrastructure/scripts/launchers/start-web-backend.ps1` | `bash infrastructure/scripts/launchers/start-web-backend.sh` |
 | Kafka hiện có | `./infrastructure/scripts/launchers/start-kafka.ps1` | `bash infrastructure/scripts/launchers/start-kafka.sh` |
 | Airflow hiện có | `./infrastructure/scripts/launchers/start-airflow.ps1` | `bash infrastructure/scripts/launchers/start-airflow.sh` |
 | Tất cả | `./infrastructure/scripts/launchers/start-all.ps1` | `bash infrastructure/scripts/launchers/start-all.sh` |
 
-Launcher đọc `.env` ở root, kiểm tra tên và health của container hiện có rồi dùng `docker start`; nó không tạo hoặc build container. `python infrastructure/scripts/launchers/run.py all --check` chỉ preflight. Mặc định Web ở `http://127.0.0.1:3000`, API docs ở `http://127.0.0.1:8000/docs`.
+Launcher đọc `.env` ở root, kiểm tra tên và health của container hiện có rồi dùng `docker start`; nó không tạo hoặc build container. Lệnh Backend + Web chỉ chạy hai ứng dụng và không khởi động Kafka/Airflow. `python infrastructure/scripts/launchers/run.py all --check` chỉ preflight. Mặc định Web ở `http://127.0.0.1:3000`, API docs ở `http://127.0.0.1:8000/docs`.
 
 ## Đóng gói Docker và CI
 

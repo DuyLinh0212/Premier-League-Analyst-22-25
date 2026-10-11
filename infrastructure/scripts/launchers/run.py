@@ -169,7 +169,12 @@ def stop_apps(processes):
 def run(args):
     env_path = args.env_file if args.env_file.is_absolute() else ROOT / args.env_file
     env = environment(env_path)
-    services = ("kafka", "airflow", "backend", "frontend") if args.service == "all" else (args.service,)
+    if args.service == "all":
+        services = ("kafka", "airflow", "backend", "frontend")
+    elif args.service == "web-backend":
+        services = ("backend", "frontend")
+    else:
+        services = (args.service,)
     apps, groups = {}, {}
     # Complete preflight first; --check never starts an app or a container.
     for service in services:
@@ -177,7 +182,7 @@ def run(args):
             apps[service] = app_command(service, env, args)
         else:
             groups[service] = infrastructure(service, env)
-    if args.service == "all" and apps["backend"][3] == apps["frontend"][3]:
+    if args.service in ("all", "web-backend") and apps["backend"][3] == apps["frontend"][3]:
         raise RuntimeError("API and Web must use different ports.")
     for service, group in groups.items():
         for name, state in group:
@@ -219,7 +224,7 @@ def run(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("service", choices=("frontend", "backend", "kafka", "airflow", "all"))
+    parser.add_argument("service", choices=("frontend", "backend", "web-backend", "kafka", "airflow", "all"))
     parser.add_argument("--env-file", type=Path, default=Path(".env"), help="Relative to project root, or an absolute path")
     parser.add_argument("--check", action="store_true", help="Read-only dependency/configuration/container preflight")
     parser.add_argument("--production", action="store_true", help="Use the existing npm run build output")

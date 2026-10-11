@@ -96,8 +96,12 @@ class OutcomeTests(unittest.TestCase):
             self.assertEqual(sent["kind"], "scenario")
             save.side_effect = ConnectionError('DB offline')
             self.assertEqual(client.post('/predict',json=payload).status_code,503)
+            save.side_effect = lambda kind,params,result,sim:{**result,'persistence':'saved'}
             producer.send.side_effect = ConnectionError("offline")
-            self.assertEqual(client.post("/predict", json=payload).status_code, 503)
+            response = client.post("/predict", json=payload)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()['persistence'], 'saved')
+            self.assertEqual(response.json()['streaming'], 'unavailable')
             bad = dict(payload, away_team=payload["home_team"])
             self.assertEqual(client.post("/predict", json=bad).status_code, 422)
             self.assertEqual(len(client.get("/knn/predictions").json()), 20)

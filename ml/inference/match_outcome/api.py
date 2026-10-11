@@ -74,12 +74,19 @@ class PredictionRequestV2(BaseModel):
 def send_prediction(event):
     try:
         if app.state.producer is None:
-            app.state.producer = KafkaProducer(bootstrap_servers=os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:29092'),
-                acks='all', retries=3, max_block_ms=5000, request_timeout_ms=5000,
+            brokers = os.getenv('KAFKA_BOOTSTRAP_SERVERS')
+            if not brokers:
+                return 'not_configured'
+            app.state.producer = KafkaProducer(bootstrap_servers=brokers,
+                acks='all', retries=1, max_block_ms=1000, request_timeout_ms=2000,
                 value_serializer=lambda x: json.dumps(x, ensure_ascii=False, allow_nan=False).encode())
-        app.state.producer.send('match_statistics', key=event['event_id'].encode(), value=event).get(timeout=10)
-    except Exception as exc:
-        raise HTTPException(503, 'Kafka chưa sẵn sàng. Hãy thử lại sau.') from exc
+        app.state.producer.send('match_statistics', key=event['event_id'].encode(), value=event).get(timeout=2)
+        return 'queued'
+    except Exception:
+        import logging
+        logging.getLogger(__name__).warning('Match prediction was saved, but optional Kafka delivery is unavailable', exc_info=True)
+        app.state.producer = None
+        return 'unavailable'
 
 @app.get('/prediction/config')
 def prediction_config():
@@ -111,9 +118,9 @@ def forecast_v2(request: PredictionRequestV2):
     event={**params,'event_id':uuid.uuid4().hex,'kind':'scenario','schema_version':2,'source':'manual' if params['mode']=='live' else 'as_of_history',
            'is_simulated':params['mode']=='live','model_version':artifact['model_version'],'dataset_fingerprint':artifact['dataset_fingerprint'],
            'home_name':names[params['home_team']],'away_name':names[params['away_team']]}
-    send_prediction(event)
     saved=save_user_analysis('match_prediction_v2',event,result,params['mode']=='live')
-    return {**saved,'prediction_id':event['event_id'],'streaming':'queued','publication_run_id':metadata['run_id']}
+    streaming = send_prediction(event)
+    return {**saved,'prediction_id':event['event_id'],'streaming':streaming,'publication_run_id':metadata['run_id']}
 
 def matches():
     return payload('matches')
@@ -153,16 +160,9 @@ def forecast(request: PredictionRequest):
         result = predict(event, artifact)
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
-    try:
-        if app.state.producer is None:
-            app.state.producer = KafkaProducer(bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:29092"),
-                acks="all", retries=3, max_block_ms=5000, request_timeout_ms=5000,
-                value_serializer=lambda x: json.dumps(x, ensure_ascii=False, allow_nan=False).encode())
-        app.state.producer.send("match_statistics", key=event["event_id"].encode(), value=event).get(timeout=10)
-    except Exception as exc:
-        raise HTTPException(503, "Kafka chưa sẵn sàng. Hãy thử lại sau.") from exc
     saved = save_user_analysis('match_prediction', event, result, True)
-    return {**saved, "prediction_id": event["event_id"], "streaming": "queued"}
+    streaming = send_prediction(event)
+    return {**saved, "prediction_id": event["event_id"], "streaming": streaming}
 
 def knn_rows(name):
     return payload('knn_predictions' if name == 'knn_predictions.csv' else 'knn_neighbors')
