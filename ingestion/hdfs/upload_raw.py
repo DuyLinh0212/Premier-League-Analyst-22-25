@@ -11,7 +11,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-from .core import ROOT, json_write, now
+# The pipeline package lives under processing/spark and is added to
+# PYTHONPATH by both packaged runtimes.  This module is intentionally kept in
+# ingestion/hdfs because it owns the Bronze/HDFS boundary.
+from pl_pipeline.core import ROOT, json_write, now
 
 
 def preflight(ctx):
