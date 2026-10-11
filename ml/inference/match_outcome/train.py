@@ -154,6 +154,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=str(Path(__file__).resolve().parents[3]))
     parser.add_argument("--output", default=str(Path(__file__).resolve().parents[3] / "data/models/match_outcome"))
-    parser.add_argument("--silver")
+    parser.add_argument("--silver", help="Exact run-scoped fact_match_enriched Parquet path")
     args = parser.parse_args()
     train(args.root, args.output, args.silver)

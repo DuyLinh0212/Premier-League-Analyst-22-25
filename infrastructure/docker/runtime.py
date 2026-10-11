@@ -40,7 +40,7 @@ def stage(name, run_id=None):
         ctx.require("knn")
         from match_outcome.train import train
         from match_outcome.compare import compare
-        train(ROOT, OUTPUT, ctx.silver)
+        train(ROOT, OUTPUT, ctx.silver_table_path("fact_match_enriched"))
         report = compare(OUTPUT)
         ctx.completed("match_outcome", {"model_version": report["model_version"], "test": report["test"]})
     elif name == "publish":

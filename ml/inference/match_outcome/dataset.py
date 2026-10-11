@@ -102,7 +102,9 @@ def write_dataset(root, output):
 
 def reconcile_silver(spark, rows, silver, output):
     """Verify every modeling input/label against normalization shared with KNN."""
-    normalized = {r.match_id: r.asDict() for r in spark.read.parquet(silver.rstrip('/') + '/facts/fact_match_enriched').collect()}
+    # `silver` is the exact run-scoped Parquet table path.  The canonical
+    # layout groups this table under matches/fact_match_enriched/runs/<run_id>.
+    normalized = {r.match_id: r.asDict() for r in spark.read.parquet(str(silver).rstrip('/')).collect()}
     if set(normalized) != {r['match_id'] for r in rows}:
         raise ValueError('Silver match keys differ from the 1140 historical matches')
     metric_columns = {'possession': 'possession', 'shots': 'shooting_shots', 'shots_on_target': 'shooting_shots_on_target',
@@ -123,6 +125,6 @@ def reconcile_silver(spark, rows, silver, output):
                     raise ValueError(f'Silver feature mismatch: {row["match_id"]}/{side}/{key}')
                 checked += 1
             row[side + '_stats'] = stats
-    Path(output, 'silver_reconciliation.json').write_text(json.dumps({'path': silver, 'matches': len(rows),
+    Path(output, 'silver_reconciliation.json').write_text(json.dumps({'path': str(silver), 'matches': len(rows),
         'checked_fields': checked, 'all_features_and_labels_equal': True}, indent=2), encoding='utf-8')
     return rows
