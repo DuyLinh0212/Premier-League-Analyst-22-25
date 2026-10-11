@@ -84,7 +84,7 @@ def publish_reports(run_id, dataset_id, reports, source_manifest=None):
                 for name, filter_hash, filters, payload, model_version in prepared:
                     cursor.execute(
                         "INSERT INTO pl_analysis_reports (run_id,report_name,filter_key,filters,payload,model_version) VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT (run_id,report_name,filter_key) DO NOTHING",
-                        (run_id, name, filter_hash, filters, payload, model_version),
+                        (run_id, name, filter_hash, Jsonb(filters), Jsonb(payload), model_version),
                     )
                     cursor.execute("SELECT payload FROM pl_analysis_reports WHERE run_id=%s AND report_name=%s AND filter_key=%s", (run_id, name, filter_hash))
                     if cursor.fetchone()[0] != payload:
