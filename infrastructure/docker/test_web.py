@@ -42,12 +42,7 @@ def main():
         expect(page.locator('.f-error[role=alert]')).to_contain_text('chưa sẵn sàng')
         checks.append('service_failure_shown')
         page.unroute('**/api/football/predict')
-        page.get_by_role('button', name='Đội tương đồng · KNN').click()
-        expect(page.locator('.f-knn tbody tr')).to_have_count(5)
-        page.screenshot(path=str(evidence / 'web_knn.png'), full_page=True)
-        checks.append('knn_has_five_neighbors')
         page.set_viewport_size({'width':390,'height':844})
-        page.get_by_role('button', name='Dự đoán trận').click()
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
         assert page.locator('#home-possession').bounding_box()['width'] >= 55
         page.screenshot(path=str(evidence / 'web_mobile.png'), full_page=True)

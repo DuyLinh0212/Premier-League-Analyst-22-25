@@ -9,7 +9,6 @@ x-env: &env
   HADOOP_USER_NAME: ${HADOOP_USER_NAME:-}
   SPARK_MASTER: ${SPARK_MASTER:-local[2]}
   APP_NAMESPACE: ${APP_NAMESPACE:-premier-league-22-25}
-  TRANSFER_TOPIC: ${TRANSFER_TOPIC:-fact_transfers_topic}
 services:
   runtime:
     image: ${RUNTIME_IMAGE:-football-runtime:4.0}

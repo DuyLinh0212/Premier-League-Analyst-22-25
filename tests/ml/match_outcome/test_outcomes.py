@@ -80,7 +80,7 @@ class OutcomeTests(unittest.TestCase):
             elif kind == 'clubs': value = [{'id':k,'name':k} for k in {r[side] for r in self.rows for side in ('home_team','away_team')}]
             else:
                 import csv
-                with (OUTPUT.parent/'knn'/('knn_predictions.csv' if kind=='knn_predictions' else 'knn_neighbors.csv')).open(encoding='utf-8-sig') as f:
+                with (OUTPUT.parent/'knn'/'knn_predictions.csv').open(encoding='utf-8-sig') as f:
                     value = list(csv.DictReader(f))
             return value, {'run_id':'test_complete_run'}
         with patch('analytics.neon_store.report', side_effect=report), patch('match_outcome.api.save_user_analysis', side_effect=lambda kind,params,result,sim: {**result,'persistence':'saved'}) as save, TestClient(app,raise_server_exceptions=False) as client:
@@ -105,7 +105,7 @@ class OutcomeTests(unittest.TestCase):
             bad = dict(payload, away_team=payload["home_team"])
             self.assertEqual(client.post("/predict", json=bad).status_code, 422)
             self.assertEqual(len(client.get("/knn/predictions").json()), 20)
-            self.assertEqual(len(client.get("/knn/neighbors/ARS").json()), 5)
+            self.assertEqual(client.get("/knn/neighbors/ARS").status_code, 404)
 
 if __name__ == "__main__":
     unittest.main()

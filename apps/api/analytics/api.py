@@ -1,14 +1,14 @@
 """Database-backed APIs for unified reports and saved user analyses."""
 import json
-import uuid
 from datetime import date
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
-from . import codec, neon_store
+from . import neon_store
 from .players import valuation, similar
 
 router = APIRouter()
+RETIRED_REPORTS = {'dashboard', 'transfers', 'knn_neighbors', 'rfm_gmm', 'rfm_rules', 'transfer_simulation'}
 
 
 def _db():
@@ -38,19 +38,6 @@ def outlook(season: Literal['2022-2023', '2023-2024', '2024-2025'] = '2024-2025'
 @router.get('/phases')
 def phases(run_id: str | None = None):
     return payload('phases', run_id=run_id)
-
-
-@router.get('/transfers')
-def transfers(season: str | None = None, club_id: str | None = None, run_id: str | None = None):
-    report = payload('transfers', run_id=run_id)
-    for name in ('net_spend_sql', 'roi_sql'):
-        report[name] = [r for r in report[name] if (not season or r['season'] == season) and (not club_id or r['club_id'] == club_id)]
-    return report
-
-
-@router.get('/rfm/{method}')
-def rfm(method: Literal['gmm', 'rules'], run_id: str | None = None):
-    return payload('rfm_' + method, run_id=run_id)
 
 
 @router.get('/players')
@@ -87,47 +74,14 @@ def value_player(request: ValuationRequest):
     return save_user_analysis('valuation', params, valuation(**params), True)
 
 
-class SimulationRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    batch_size: int = Field(5, ge=1, le=100)
-    season: str = Field('2025-2026', pattern=r'^20\d{2}-20\d{2}$')
-    seed: int = Field(42, ge=0, le=2147483647)
-
-
-@router.post('/transfers/simulate')
-def simulate(request: SimulationRequest):
-    from .simulator import generate_simulated_transfers
-    from kafka import KafkaProducer
-    import os
-    if int(request.season[5:]) != int(request.season[:4]) + 1 or int(request.season[:4]) < 2025:
-        raise HTTPException(422, 'Mùa mô phỏng phải bắt đầu từ 2025 và gồm hai năm liên tiếp')
-    records = generate_simulated_transfers(**request.model_dump())
-    for row in records:
-        row.update({'event_id': uuid.uuid4().hex, 'schema_version': 1, 'is_simulated': True, 'source': 'Danh seeded simulation'})
-    saved = save_user_analysis('transfer_simulation', request.model_dump(), {'records': records, 'is_simulated': True}, True)
-    producer = KafkaProducer(bootstrap_servers=os.environ['KAFKA_BOOTSTRAP_SERVERS'], acks='all', retries=3,
-                             value_serializer=lambda value: codec.encode(value).encode(), max_block_ms=5000)
-    try:
-        for row in records:
-            producer.send(os.getenv('TRANSFER_TOPIC', 'fact_transfers_topic'), key=row['event_id'].encode(), value=row).get(timeout=10)
-    finally:
-        producer.close(timeout=5)
-    return {**saved, 'streaming': 'queued'}
-
-
-@router.get('/streaming/transfers')
-def streamed_transfers(limit: int = Query(100, ge=1, le=1000)):
-    return neon_store.latest_records('transfer_simulation', 'records', limit)
-
-
 @router.get('/reports')
 def history(day: date | None = Query(None, alias='date'), limit: int = Query(500, ge=1, le=1000)):
     return _db().runs(limit, day)
 
 
-@router.get('/dashboard')
-def dashboard(run_id: str | None = None):
-    return payload('dashboard',run_id=run_id)
+@router.get('/match-results')
+def match_results(run_id: str | None = None):
+    return payload('match_results', run_id=run_id)
 
 
 @router.get('/pipeline')
@@ -143,6 +97,8 @@ def airflow_history(limit: int = Query(100, ge=1, le=1000)):
 
 @router.get('/reports/{run_id}/{kind}')
 def historical_report(run_id: str, kind: str):
+    if kind in RETIRED_REPORTS:
+        raise HTTPException(404, 'Báo cáo này đã được gỡ khỏi sản phẩm')
     try:
         return [neon_store.report_by_run(run_id, kind)]
     except LookupError as exc:
@@ -157,6 +113,8 @@ def catalog():
 
 @router.get('/data/rows')
 def data_rows(table: str, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000)):
+    if table in RETIRED_REPORTS:
+        raise HTTPException(404, 'Báo cáo này đã được gỡ khỏi sản phẩm')
     try:
         return neon_store.table_rows(table, offset=offset, limit=limit)
     except LookupError as exc:

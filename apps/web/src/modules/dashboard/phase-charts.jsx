@@ -22,34 +22,29 @@ function LineChart({series,rolling=false,metric="ppg"}){
 
 // Display-only adaptation of club_phases.js in football_analysis_share_v3.
 function momentum(report){let total=0;return [{index:0,value:0},...report.stages.flatMap(s=>s.fixtures).slice().sort((a,b)=>a.index-b.index).map(m=>({...m,value:total+=m.points===3?1:m.points===1?0:-1}))];}
-function Momentum({primary,secondary,compare}){
-  const a=momentum(primary),b=secondary?momentum(secondary):null;
-  if(compare&&(!b||a.length!==b.length))return <p>Không đủ dữ liệu cùng mùa để đối chiếu.</p>;
-  const values=compare?[...a,...b]:a;
+function Momentum({primary}){
+  const values=momentum(primary);
   const limit=Math.ceil(Math.max(2,...values.map(v=>Math.abs(v.value)))/4)*4;
   const x=n=>64+n*904/38,y=v=>36+(limit-v)*299/(limit*2);
-  const teams=compare?[{report:primary,values:a},{report:secondary,values:b}]:[{report:primary,values:a}];
-  return <section className="pl-momentum"><div className="pl-momentum-heading"><h2>{compare?"Đối chiếu phong độ":"Phong độ cộng dồn"} · {primary.season}</h2><strong>{compare?`A: ${a.at(-1).value} / B: ${b.at(-1).value}`:`${a.at(-1).value>0?"+":""}${a.at(-1).value}`} · cuối mùa</strong></div><p>{primary.club_name}{compare?` (xanh) / ${secondary.club_name} (đỏ)`:" · Thắng +1 / Hòa 0 / Thua −1"}</p>
-    <svg viewBox={`0 0 1000 ${compare?500:458}`} role="img" aria-label={compare?"Hai đường phong độ cộng dồn của đội A và đội B":"Phong độ cộng dồn thắng hòa thua"}>
+  return <section className="pl-momentum"><div className="pl-momentum-heading"><h2>Phong độ cộng dồn · {primary.season}</h2><strong>{values.at(-1).value>0?"+":""}{values.at(-1).value} · cuối mùa</strong></div><p>{primary.club_name} · Thắng +1 / Hòa 0 / Thua −1</p>
+    <svg viewBox="0 0 1000 458" role="img" aria-label="Phong độ cộng dồn thắng hòa thua">
       <text x="64" y="18" fill="#9db5c1" fontSize="12">{"Chỉ số phong độ (không phải điểm giải đấu)"}</text>
       {[-4,-3,-2,-1,0,1,2,3,4].map(i=><g key={i}><line x1="64" x2="968" y1={y(i*limit/4)} y2={y(i*limit/4)} stroke={i?"#29414c":"#bdad7a"}/><text x="50" y={y(i*limit/4)+4} textAnchor="end" fill="#97aeb9" fontSize="12">{i>0?"+":""}{i*limit/4}</text></g>)}
       {names.map((name,i)=><g key={name}><text x={x([5.5,15,24.5,34][i])} y="359" textAnchor="middle" fontSize="12" fill="#b4c7d1">{name}</text><text x={x([5.5,15,24.5,34][i])} y="378" textAnchor="middle" fontSize="11" fill="#7795a6">Trận {ranges[i]}</text>{i<3&&<line x1={x([10.5,19.5,29.5][i])} x2={x([10.5,19.5,29.5][i])} y1="36" y2="335" stroke="#29414c" strokeDasharray="3 6"/>}</g>)}
-      {teams.map((team,k)=>{const color=k?"#ec365c":"#60a8d2",line=team.values.map((v,i)=>`${i?"L":"M"}${x(v.index)},${y(v.value)}`).join(" ");return <g key={`line-${k}`}><path d={line} fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round"/>{team.values.map(v=><circle key={v.index} cx={x(v.index)} cy={y(v.value)} r="4.3" fill={color} stroke="#061620"><title>{team.report.club_name} · Trận {v.index} · {v.date||"Bắt đầu mùa"} · {v.opponent||""} · Chỉ số {v.value}</title></circle>)}</g>;})}
-      {teams.map((team,k)=><g key={team.report.club_id}><rect x="64" y={399+k*44} width="904" height="39" fill={k?"#ec365c":"#60a8d2"} opacity=".09"/><text x="72" y={413+k*44} fill={k?"#ec365c":"#60a8d2"} fontSize="11">{team.report.club_name} · thắng ● / hòa ◇ / thua ×</text>{team.values.slice(1).map(v=><text key={v.index} x={x(v.index)} y={432+k*44} textAnchor="middle" fill={k?"#ec365c":"#60a8d2"} fontSize="13">{v.points===3?"●":v.points===1?"◇":"×"}<title>Trận {v.index} · {v.date} · {v.opponent} · {v.goals_for}–{v.goals_against}</title></text>)}</g>)}
-    </svg><p className="pl-momentum-note">{compare?"Mỗi CLB có một đường riêng: A xanh, B đỏ. Thắng +1, hòa 0, thua −1; cộng dồn từ đầu mùa. So cùng thứ tự trận, không phải cùng ngày.":"Đường bắt đầu từ 0, thắng lên 1, thua xuống 1, hòa giữ nguyên."} Đây là chỉ số mô tả, không phải điểm bảng xếp hạng.</p>
+      {(()=>{const line=values.map((v,i)=>`${i?"L":"M"}${x(v.index)},${y(v.value)}`).join(" ");return <g><path d={line} fill="none" stroke="#60a8d2" strokeWidth="3" strokeLinejoin="round"/>{values.map(v=><circle key={v.index} cx={x(v.index)} cy={y(v.value)} r="4.3" fill="#60a8d2" stroke="#061620"><title>{primary.club_name} · Trận {v.index} · {v.date||"Bắt đầu mùa"} · {v.opponent||""} · Chỉ số {v.value}</title></circle>)}</g>;})()}
+      <g><rect x="64" y="399" width="904" height="39" fill="#60a8d2" opacity=".09"/><text x="72" y="413" fill="#60a8d2" fontSize="11">{primary.club_name} · thắng ● / hòa ◇ / thua ×</text>{values.slice(1).map(v=><text key={v.index} x={x(v.index)} y="432" textAnchor="middle" fill="#60a8d2" fontSize="13">{v.points===3?"●":v.points===1?"◇":"×"}<title>Trận {v.index} · {v.date} · {v.opponent} · {v.goals_for}–{v.goals_against}</title></text>)}</g>
+    </svg><p className="pl-momentum-note">Đường bắt đầu từ 0, thắng lên 1, thua xuống 1, hòa giữ nguyên. Đây là chỉ số mô tả, không phải điểm bảng xếp hạng.</p>
   </section>;
 }
 
-export default function PhaseCharts({data,season,club,compare}){
-  const [view,setView]=useState("history"),[metric,setMetric]=useState("ppg");
+export default function PhaseCharts({data,season,club}){
+  const [metric,setMetric]=useState("ppg");
   const reports=Object.values(data.seasons||{}).flat().filter(r=>r.club_id===club);
-  const primary=(data.seasons?.[season]||[]).find(r=>r.club_id===club),secondary=(data.seasons?.[season]||[]).find(r=>r.club_id===compare);
-  const comparing=view==="compare";
-  const selected=comparing?[primary,secondary].filter(Boolean):reports;
-  const series=selected.map((r,i)=>({name:comparing?r.club_name:r.season,color:comparing?(i?"#ec365c":"#2563eb"):colors[i%colors.length],values:r.stages.map((s,j)=>({x:j+1,y:s[metric],tip:s.name}))}));
+  const primary=(data.seasons?.[season]||[]).find(r=>r.club_id===club);
+  const series=reports.map((r,i)=>({name:r.season,color:colors[i%colors.length],values:r.stages.map((s,j)=>({x:j+1,y:s[metric],tip:s.name}))}));
   if(!primary)return <p>CLB không có dữ liệu mùa đã chọn.</p>;
-  return <div className="pl-phase-charts"><div className="u-controls"><label>Góc nhìn biểu đồ<select value={view} onChange={e=>setView(e.target.value)}><option value="history">Một CLB qua các mùa</option><option value="compare">So sánh hai CLB trong mùa chọn</option></select></label><label>Chỉ số biểu đồ<select value={metric} onChange={e=>setMetric(e.target.value)}>{Object.entries(metrics).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label></div>
-    <section className="pl-phase-card"><h2>Phong độ 4 giai đoạn · {primary.club_name}</h2><p>{comparing?`Mùa ${season}.` :"Mỗi đường là một mùa có dữ liệu; không điền 0 cho mùa ngoài Premier League."}{metric==="ga_per_match"&&" Bàn thua/trận: thấp hơn tốt hơn."}</p>{comparing&&!secondary?<p>CLB đối chiếu không có mùa này.</p>:<LineChart series={series} metric={metric}/>}</section>
-    <Momentum primary={primary} secondary={secondary} compare={comparing}/>
+  return <div className="pl-phase-charts"><div className="u-controls"><label>Chỉ số biểu đồ<select value={metric} onChange={e=>setMetric(e.target.value)}>{Object.entries(metrics).map(([key,label])=><option key={key} value={key}>{label}</option>)}</select></label></div>
+    <section className="pl-phase-card"><h2>Phong độ 4 giai đoạn · {primary.club_name}</h2><p>Mỗi đường là một mùa có dữ liệu; không điền 0 cho mùa ngoài Premier League.{metric==="ga_per_match"&&" Bàn thua/trận: thấp hơn tốt hơn."}</p><LineChart series={series} metric={metric}/></section>
+    <Momentum primary={primary}/>
   </div>;
 }

@@ -163,13 +163,6 @@ def forecast(request: PredictionRequest):
     streaming = send_prediction(event)
     return {**saved, "prediction_id": event["event_id"], "streaming": streaming}
 
-def knn_rows(name):
-    return payload('knn_predictions' if name == 'knn_predictions.csv' else 'knn_neighbors')
-
 @app.get("/knn/predictions")
 def knn_predictions():
-    return knn_rows("knn_predictions.csv")
-
-@app.get("/knn/neighbors/{club_id}")
-def knn_neighbors(club_id: str):
-    return [r for r in knn_rows("knn_neighbors.csv") if r["query_club_id"] == club_id]
+    return payload('knn_predictions')

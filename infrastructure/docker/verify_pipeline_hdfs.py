@@ -48,7 +48,7 @@ def main():
             if observed != info["row_count"]:
                 raise RuntimeError(f"HDFS read-back mismatch for {name}: {observed} != {info['row_count']}")
             total_rows += observed
-        for group in ("team_performance", "player_performance", "season_comparison", "league_standings", "transfer_impact", "tactical_insights", "prediction_features"):
+        for group in ("player_performance", "season_comparison", "league_standings", "tactical_insights", "prediction_features"):
             if not fs.exists(path_cls(f"{uri}/premier-league/gold/{group}")):
                 raise RuntimeError("Gold category missing: " + group)
         sample = spark.read.parquet(tables["facts/fact_match_enriched"]["path"]).inputFiles()[0]
@@ -60,7 +60,7 @@ def main():
                   "hdfs_base": "/premier-league", "bronze_seasons": ["2022-23", "2023-24", "2024-25"],
                   "silver_table_count": len(tables), "silver_row_count": total_rows,
                   "silver_paths": sorted({str(info["path"]).split("/silver/",1)[-1].split("/",1)[0] for info in tables.values()}),
-                  "gold_categories": ["team_performance", "player_performance", "season_comparison", "league_standings", "transfer_impact", "tactical_insights", "prediction_features"],
+                  "gold_categories": ["player_performance", "season_comparison", "league_standings", "tactical_insights", "prediction_features"],
                   "verified_block_size_bytes": block_size}
         print(json.dumps(output, ensure_ascii=False, sort_keys=True), flush=True)
     finally:

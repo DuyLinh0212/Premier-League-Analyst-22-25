@@ -6,8 +6,6 @@ from analytics.outlook.football_data import FootballData
 from analytics.outlook.player_outlook import evaluate
 from analytics.outlook.club_phases import analyze
 from analytics.players import valuation, similar
-from analytics.simulator import generate_simulated_transfers
-from analytics.streaming import persist_events
 
 
 class SourceContracts(unittest.TestCase):
@@ -62,20 +60,6 @@ class SourceContracts(unittest.TestCase):
         self.assertEqual(result['estimated_fee_mil_eur'], 70.9)
         self.assertEqual(len(result['trajectory']), 3)
         self.assertEqual(valuation(22, 'FW', 0, 0, 0, 'tier2')['estimated_fee_mil_eur'], 0)
-
-    def test_simulation_reproducible_and_isolated(self):
-        self.assertEqual(generate_simulated_transfers(10, seed=42), generate_simulated_transfers(10, seed=42))
-        self.assertTrue(all(r['season'] == '2025-2026' for r in generate_simulated_transfers(10)))
-
-    def test_stream_failure_leaves_retryable_hdfs_batch(self):
-        event = {'event_id':'a'*32,'schema_version':1,'is_simulated':True,'season':'2025-2026'}
-        def fail(event, checksum):
-            raise OSError('HDFS disconnected')
-        with self.assertRaises(OSError):
-            persist_events([event], fail)
-        with self.assertRaises(ValueError):
-            persist_events([event, {**event, 'season':'2026-2027'}], lambda e,h: None)
-
 
 if __name__ == '__main__':
     unittest.main()

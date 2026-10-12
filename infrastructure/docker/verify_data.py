@@ -9,8 +9,7 @@ def main():
     output = Path(os.environ['KNN_OUTPUT_DIR'])
     reference = Path('/opt/project/data/samples/pipeline-seed/knn')
     checks = {}
-    for name, keys in [('knn_predictions.csv', ['query_season','query_club_id']),
-                       ('knn_neighbors.csv', ['query_season','query_club_id','neighbor_order'])]:
+    for name, keys in [('knn_predictions.csv', ['query_season','query_club_id'])]:
         def read(folder):
             with (folder/name).open(encoding='utf-8-sig', newline='') as stream:
                 return {tuple(row[k] for k in keys):row for row in csv.DictReader(stream)}

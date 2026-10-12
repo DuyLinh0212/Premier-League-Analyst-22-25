@@ -144,34 +144,21 @@ class Context:
             group = "players" if kind in {"dimensions", "bridges"} else "matches"
         return f"{self.silver}/{group}/{name}/runs/{self.run_id}"
 
-    def gold_table_path(self, group, name):
-        return f"{self.gold}/{group}/{name}/runs/{self.run_id}"
-
     def gold_read(self, spark, name):
-        for group in ("team_performance", "player_performance", "season_comparison", "league_standings", "transfer_impact", "tactical_insights", "prediction_features"):
+        for group in ("player_performance", "season_comparison", "league_standings", "tactical_insights", "prediction_features"):
             path = f"{self.gold}/{group}/{name}/runs/{self.run_id}"
             if self.hdfs("-test", "-e", path, check=False).returncode == 0:
                 return spark.read.parquet(path)
         raise FileNotFoundError("Gold table not found for this run: " + name)
 
-    def table(self, df, name, kind="facts", gold=False, keys=(), sources=()):
+    def table(self, df, name, kind="facts", keys=(), sources=()):
         cached = df.cache()
         count = cached.count()
         if keys:
             duplicates = df.groupBy(*keys).count().where("count > 1").limit(1).count()
             if duplicates:
                 raise RuntimeError(f"Duplicate key in {name}: {keys}")
-        if gold:
-            df = (df.withColumn("analysis_run_id", F.lit(self.run_id))
-                  .withColumn("created_at_utc", F.lit(self.manifest["started_at_utc"]))
-                  .withColumn("silver_run_id", F.lit(self.run_id))
-                  .withColumn("logic_version", F.lit(LOGIC_VERSION))
-                  .withColumn("source_tables", F.lit(",".join(sources))))
-            if "status" not in df.columns:
-                df = df.withColumn("status", F.lit("computed"))
-            if "coverage_pct" not in df.columns:
-                df = df.withColumn("coverage_pct", F.lit(100.0))
-        target = self.gold_table_path("team_performance", name) if gold else self.silver_table_path(name, kind)
+        target = self.silver_table_path(name, kind)
         staging = target + "_staging"
         jvm = df.sparkSession._jvm
         fs = jvm.org.apache.hadoop.fs.FileSystem.get(jvm.java.net.URI(self.uri), df.sparkSession._jsc.hadoopConfiguration())
@@ -190,9 +177,9 @@ class Context:
         if not fs.rename(path(staging), path(target)):
             raise RuntimeError(f"HDFS staging commit failed: {name}")
         schema = df.schema.jsonValue()
-        if gold or kind in {"audit", "bridges", "dimensions"}:
+        if kind in {"audit", "bridges", "dimensions"}:
             self.export_rows(df, name)
-        self.manifest["tables"][("gold/" if gold else kind + "/") + name] = {
+        self.manifest["tables"][kind + "/" + name] = {
             "path": target, "row_count": count, "keys": list(keys), "schema": schema,
             "source_tables": list(sources), "validated_parquet": True,
         }

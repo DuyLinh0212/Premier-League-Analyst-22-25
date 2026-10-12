@@ -17,7 +17,7 @@ def main():
     assert bootstrap['hdfs_files_64mib'] > 0
     matches = get('/matches')
     assert len(matches) == 1140 and len({r['match_id'] for r in matches}) == 1140
-    assert len(get('/knn/predictions')) == 20 and len(get('/knn/neighbors/ARS')) == 5
+    assert len(get('/knn/predictions')) == 20
     row = matches[0]
     payload = {k:row[k] for k in ['home_team','away_team','home_stats','away_stats']}
     request = urllib.request.Request('http://api:8000/predict', data=json.dumps(payload).encode(), headers={'Content-Type':'application/json'})

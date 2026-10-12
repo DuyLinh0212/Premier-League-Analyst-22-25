@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""KNN similarity and Top-4 estimation for a historical league table.
+"""KNN rank and points estimates for a historical league table.
 
 Spark SQL builds the team-season features. Spark MLlib StandardScaler is used
 before pairwise KNN distances are calculated. The latest selected season is the
@@ -38,20 +38,6 @@ FEATURE_COLUMNS = (
     "goals_against_per_match",
     "wins_per_match",
 )
-GROUP_NAMES = {
-    "champion": "Nhóm vô địch",
-    "champions_league": "Nhóm dự Champions League",
-    "mid_table": "Nhóm giữa bảng",
-    "relegation": "Nhóm đua trụ hạng",
-}
-GROUP_COLORS = {
-    "champion": "#16a34a",
-    "champions_league": "#2563eb",
-    "mid_table": "#f59e0b",
-    "relegation": "#dc2626",
-}
-
-
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Spark SQL + StandardScaler + KNN for historical league tables"
@@ -102,15 +88,6 @@ def parse_seasons(raw: str) -> list[str]:
     return seasons
 
 
-def group_expression(column: str) -> F.Column:
-    return (
-        F.when(F.col(column) == 1, F.lit("champion"))
-        .when(F.col(column) <= 4, F.lit("champions_league"))
-        .when(F.col(column) <= 10, F.lit("mid_table"))
-        .otherwise(F.lit("relegation"))
-    )
-
-
 def build_features(spark: SparkSession, input_path: str, seasons: list[str]) -> DataFrame:
     source = spark.read.parquet(input_path)
     source.createOrReplaceTempView("fact_team_season")
@@ -146,7 +123,7 @@ def build_features(spark: SparkSession, input_path: str, seasons: list[str]) -> 
         WHERE season IN ({season_values})
           AND matches_played > 0
     """
-    features = spark.sql(query).withColumn("actual_group", group_expression("rank")).cache()
+    features = spark.sql(query).cache()
     counts = {row["season"]: row["count"] for row in features.groupBy("season").count().collect()}
     missing = [season for season in seasons if counts.get(season, 0) == 0]
     if missing:
@@ -201,17 +178,13 @@ def fit_scaled(features: DataFrame) -> DataFrame:
 
 def run_knn(
     scaled: DataFrame, query_season: str, neighbor_count: int
-) -> tuple[DataFrame, DataFrame]:
+) -> DataFrame:
     if neighbor_count < 1:
         raise ValueError("--neighbors must be at least 1")
     query = scaled.filter(F.col("season") == query_season).select(
         F.col("season").alias("query_season"),
         F.col("club_id").alias("query_club_id"),
         F.col("club_name").alias("query_club_name"),
-        F.col("rank").alias("actual_rank"),
-        F.col("points").alias("actual_points"),
-        F.col("points_per_mp").alias("actual_points_per_mp"),
-        F.col("actual_group").alias("actual_group"),
         F.col("scaled_array").alias("query_vector"),
     )
     reference = scaled.filter(F.col("season") != query_season).select(
@@ -220,8 +193,6 @@ def run_knn(
         F.col("club_name").alias("neighbor_club_name"),
         F.col("rank").alias("neighbor_rank"),
         F.col("points").alias("neighbor_points"),
-        F.col("points_per_mp").alias("neighbor_points_per_mp"),
-        F.col("actual_group").alias("neighbor_group"),
         F.col("scaled_array").alias("neighbor_vector"),
     )
     if query.limit(1).count() == 0:
@@ -253,38 +224,14 @@ def run_knn(
         "query_season",
         "query_club_id",
         "query_club_name",
-        "actual_rank",
-        "actual_points",
-        "actual_points_per_mp",
-        "actual_group",
     ).agg(
-        F.avg("distance").alias("average_neighbor_distance"),
         F.avg("neighbor_rank").alias("predicted_rank"),
         F.avg("neighbor_points").alias("predicted_points"),
-        F.avg("neighbor_points_per_mp").alias("predicted_points_per_mp"),
         F.avg(F.when(F.col("neighbor_rank") <= 4, 1.0).otherwise(0.0)).alias(
             "top4_probability"
         ),
     )
-    group_counts = neighbors.groupBy("query_club_id", "neighbor_group").count()
-    group_window = Window.partitionBy("query_club_id").orderBy(
-        F.col("count").desc(), F.col("neighbor_group").asc()
-    )
-    majority_group = (
-        group_counts.withColumn("group_order", F.row_number().over(group_window))
-        .filter(F.col("group_order") == 1)
-        .select("query_club_id", F.col("neighbor_group").alias("predicted_group"))
-    )
-    predictions = summary.join(majority_group, "query_club_id", "left").withColumn(
-        "predicted_group_name",
-        F.create_map(
-            F.lit("champion"), F.lit(GROUP_NAMES["champion"]),
-            F.lit("champions_league"), F.lit(GROUP_NAMES["champions_league"]),
-            F.lit("mid_table"), F.lit(GROUP_NAMES["mid_table"]),
-            F.lit("relegation"), F.lit(GROUP_NAMES["relegation"]),
-        )[F.col("predicted_group")],
-    )
-    return predictions, neighbors
+    return summary
 
 
 def clean_json(value: Any) -> Any:
@@ -375,90 +322,6 @@ def checkpoint_state(spark: SparkSession, root: str) -> dict[str, Any] | None:
     return json.loads(raw)
 
 
-def render_html(
-    predictions: list[dict[str, Any]],
-    neighbors: list[dict[str, Any]],
-    query_season: str,
-    path: Path,
-) -> None:
-    predictions_json = json.dumps(predictions, ensure_ascii=False).replace("</", "<\\/")
-    neighbors_json = json.dumps(neighbors, ensure_ascii=False).replace("</", "<\\/")
-    names_json = json.dumps(GROUP_NAMES, ensure_ascii=False)
-    colors_json = json.dumps(GROUP_COLORS)
-    options = "".join(
-        f'<option value="{row["query_club_id"]}">{row["query_club_name"]}</option>'
-        for row in predictions
-    )
-    html = f"""<!doctype html>
-<html lang="vi">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>KNN league table — {query_season}</title>
-  <style>
-    :root {{ font-family:Inter,Segoe UI,Arial,sans-serif; color:#14233d; }}
-    body {{ margin:0; background:#f5f7fb; }}
-    .page {{ max-width:1180px; margin:auto; padding:28px 20px 46px; }}
-    h1 {{ margin:0 0 6px; font-size:clamp(24px,3vw,38px); }}
-    .muted {{ color:#61708a; }}
-    .panel {{ background:#fff; border:1px solid #e3e8f0; border-radius:16px; box-shadow:0 8px 24px #16243d12; padding:18px; margin:16px 0; }}
-    .controls {{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; }}
-    select {{ border:1px solid #ccd5e3; border-radius:9px; padding:9px 11px; background:white; min-width:250px; }}
-    .cards {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }}
-    .card {{ background:#f8fafc; border:1px solid #e5eaf1; border-radius:12px; padding:13px; }}
-    .card strong {{ display:block; font-size:24px; margin-top:5px; }}
-    .bar-row {{ display:grid; grid-template-columns:180px 1fr 70px; gap:10px; align-items:center; margin:9px 0; font-size:13px; }}
-    .bar-track {{ height:15px; background:#e9edf4; border-radius:10px; overflow:hidden; }}
-    .bar {{ height:100%; border-radius:10px; }}
-    table {{ width:100%; border-collapse:collapse; font-size:13px; min-width:780px; }}
-    th,td {{ padding:9px 10px; border-bottom:1px solid #edf0f5; text-align:left; white-space:nowrap; }}
-    th {{ color:#526079; background:#f8fafc; }}
-    .table-wrap {{ overflow:auto; }}
-    .pill {{ color:white; border-radius:999px; padding:4px 8px; font-size:12px; }}
-    .note {{ font-size:12px; color:#68768d; margin-top:12px; }}
-  </style>
-</head>
-<body>
-  <main class="page">
-    <h1>KNN tìm đội bóng tương tự</h1>
-    <p class="muted">Mùa truy vấn: <strong>{query_season}</strong>. Feature đã được chuẩn hóa bằng StandardScaler; KNN so sánh với các mùa lịch sử trước đó.</p>
-    <section class="panel controls"><label for="team">Chọn đội hiện tại</label><select id="team">{options}</select></section>
-    <section class="panel"><div id="cards" class="cards"></div></section>
-    <section class="panel"><h2>Xác suất Top 4 theo KNN</h2><div id="bars"></div><p class="note">Xác suất = tỷ lệ đội láng giềng nằm trong Top 4.</p></section>
-    <section class="panel table-wrap"><h2>Các đội/mùa gần nhất</h2><table><thead><tr><th>#</th><th>Mùa</th><th>Đội tương tự</th><th>Khoảng cách</th><th>Hạng</th><th>Điểm/Trận</th><th>Nhóm</th></tr></thead><tbody id="neighborRows"></tbody></table></section>
-    <p class="note">Các nhóm được suy ra từ hạng lịch sử: hạng 1, Top 4, hạng 5–10 và hạng 11–20. KNN dùng {len(neighbors) // max(len(predictions), 1)} láng giềng cho mỗi đội.</p>
-  </main>
-  <script>
-    const PREDICTIONS = {predictions_json};
-    const NEIGHBORS = {neighbors_json};
-    const NAMES = {names_json};
-    const COLORS = {colors_json};
-    const team = document.getElementById('team');
-    const cards = document.getElementById('cards');
-    const bars = document.getElementById('bars');
-    const neighborRows = document.getElementById('neighborRows');
-    function esc(v) {{ return String(v).replace(/[&<>\"']/g,c=>({{'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}}[c])); }}
-    function label(group) {{ return NAMES[group] || group; }}
-    function render() {{
-      const selected = PREDICTIONS.find(p => p.query_club_id === team.value) || PREDICTIONS[0];
-      cards.innerHTML = [
-        ['Hạng thực tế', selected.actual_rank],
-        ['Hạng dự đoán', Number(selected.predicted_rank).toFixed(1)],
-        ['Xác suất Top 4', (Number(selected.top4_probability)*100).toFixed(0)+'%'],
-        ['Nhóm dự đoán', label(selected.predicted_group)]
-      ].map(x => `<div class="card"><span>${{x[0]}}</span><strong>${{esc(x[1])}}</strong></div>`).join('');
-      const sorted = PREDICTIONS.slice().sort((a,b) => Number(b.top4_probability)-Number(a.top4_probability));
-      bars.innerHTML = sorted.map(p => `<div class="bar-row"><span>${{esc(p.query_club_name)}}</span><div class="bar-track"><div class="bar" style="width:${{Number(p.top4_probability)*100}}%;background:${{COLORS[p.predicted_group]}}"></div></div><strong>${{(Number(p.top4_probability)*100).toFixed(0)}}%</strong></div>`).join('');
-      const near = NEIGHBORS.filter(n => n.query_club_id === selected.query_club_id).sort((a,b)=>a.neighbor_order-b.neighbor_order);
-      neighborRows.innerHTML = near.map(n => `<tr><td>${{n.neighbor_order}}</td><td>${{esc(n.neighbor_season)}}</td><td>${{esc(n.neighbor_club_name)}}</td><td>${{Number(n.distance).toFixed(3)}}</td><td>${{n.neighbor_rank}}</td><td>${{Number(n.neighbor_points_per_mp).toFixed(2)}}</td><td><span class="pill" style="background:${{COLORS[n.neighbor_group]}}">${{esc(label(n.neighbor_group))}}</span></td></tr>`).join('');
-    }}
-    team.addEventListener('change', render); render();
-  </script>
-</body>
-</html>
-"""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(html, encoding="utf-8")
-
 
 def main() -> int:
     args = parse_args()
@@ -469,9 +332,9 @@ def main() -> int:
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    html_path = output_dir / "knn_league_table.html"
     predictions_csv = output_dir / "knn_predictions.csv"
-    neighbors_csv = output_dir / "knn_neighbors.csv"
+    for retired_output in ("knn_neighbors.csv", "knn_league_table.html"):
+        (output_dir / retired_output).unlink(missing_ok=True)
 
     spark = (
         SparkSession.builder.appName("HistoricalLeagueTableKNN")
@@ -489,61 +352,33 @@ def main() -> int:
             "query_season": query_season,
             "neighbors": args.neighbors,
             "input_fingerprint": source_fingerprint,
+            "output_contract": "predictions-only-v1",
         }
-        outputs_exist = html_path.exists() and predictions_csv.exists() and neighbors_csv.exists()
+        outputs_exist = predictions_csv.exists()
         if not args.force and checkpoint and checkpoint.get("config") == checkpoint_key and outputs_exist:
             print("HDFS input has not changed; KNN outputs are already up to date.")
             print(f"Last run: {checkpoint.get('run_at_utc', 'unknown')}")
             return 0
 
         scaled = fit_scaled(features).cache()
-        predictions, neighbors = run_knn(scaled, query_season, args.neighbors)
+        predictions = run_knn(scaled, query_season, args.neighbors)
         prediction_columns = [
             "query_season",
             "query_club_id",
             "query_club_name",
-            "actual_rank",
-            "actual_points",
-            "actual_points_per_mp",
-            "actual_group",
             "predicted_rank",
             "predicted_points",
-            "predicted_points_per_mp",
             "top4_probability",
-            "average_neighbor_distance",
-            "predicted_group",
-            "predicted_group_name",
         ]
-        neighbor_columns = [
-            "query_season",
-            "query_club_id",
-            "query_club_name",
-            "actual_rank",
-            "neighbor_order",
-            "neighbor_season",
-            "neighbor_club_id",
-            "neighbor_club_name",
-            "neighbor_rank",
-            "neighbor_points",
-            "neighbor_points_per_mp",
-            "neighbor_group",
-            "distance",
-        ]
-        prediction_records = records_from_df(predictions, prediction_columns, ["actual_rank"])
-        neighbor_records = records_from_df(
-            neighbors, neighbor_columns, ["query_club_id", "neighbor_order"]
-        )
+        prediction_records = records_from_df(predictions, prediction_columns, ["query_club_id"])
         write_csv(prediction_records, predictions_csv)
-        write_csv(neighbor_records, neighbors_csv)
-        render_html(prediction_records, neighbor_records, query_season, html_path)
 
         now = datetime.now(timezone.utc).isoformat()
         history_entry = {
             "run_at_utc": now,
             "config": checkpoint_key,
             "rows": len(prediction_records),
-            "neighbor_rows": len(neighbor_records),
-            "outputs": [str(predictions_csv.resolve()), str(neighbors_csv.resolve()), str(html_path.resolve())],
+            "outputs": [str(predictions_csv.resolve())],
         }
         write_hdfs_text(
             spark,
@@ -558,11 +393,9 @@ def main() -> int:
         )
         print(f"KNN query season: {query_season}")
         print(f"Reference seasons: {', '.join(s for s in seasons if s != query_season)}")
-        print(f"Query teams: {len(prediction_records)}; neighbor rows: {len(neighbor_records)}")
+        print(f"Query teams: {len(prediction_records)}")
         print(f"Input fingerprint: {source_fingerprint}")
         print(f"Predictions CSV: {predictions_csv.resolve()}")
-        print(f"Neighbors CSV: {neighbors_csv.resolve()}")
-        print(f"Interactive HTML: {html_path.resolve()}")
         return 0
     finally:
         spark.stop()

@@ -3,9 +3,9 @@ import json
 import os
 import tempfile
 import urllib.request
+from urllib.error import HTTPError
 from pathlib import Path
 from analytics import neon_store
-from analytics.streaming import persist_events
 
 
 def http(path, body=None, base='http://localhost:8000'):
@@ -25,9 +25,26 @@ def main():
     assert complete_run, 'the Silver publish step did not create a Neon report run'
     first = complete_run[1]
     assert source_rows == 0, 'raw and Silver source rows must remain in HDFS'
+    retired_requests = [('/dashboard', None), ('/transfers', None), ('/knn/neighbors/ARS', None),
+                        ('/rfm/gmm', None), ('/rfm/rules', None), ('/streaming/transfers', None),
+                        (f'/reports/{complete_run[0]}/dashboard', None),
+                        (f'/reports/{complete_run[0]}/transfers', None),
+                        (f'/reports/{complete_run[0]}/rfm_gmm', None),
+                        (f'/reports/{complete_run[0]}/rfm_rules', None),
+                        (f'/reports/{complete_run[0]}/transfer_simulation', None),
+                        ('/data/rows?table=dashboard', None), ('/data/rows?table=transfers', None),
+                        ('/data/rows?table=knn_neighbors', None), ('/data/rows?table=rfm_gmm', None),
+                        ('/data/rows?table=rfm_rules', None), ('/data/rows?table=transfer_simulation', None),
+                        ('/transfers/simulate', {'batch_size': 5, 'season': '2025-2026', 'seed': 42})]
+    for retired_path, body in retired_requests:
+        try:
+            http(retired_path, body)
+        except HTTPError as exc:
+            assert exc.code == 404, f'{retired_path} should be retired'
+        else:
+            raise AssertionError(f'{retired_path} should be retired')
     assert len(http('/matches')) == 1140
     assert len(http('/knn/predictions')) == 20
-    assert len(http('/knn/neighbors/ARS')) == 5
     assert len(http('/players')) == 1350
     assert len({p['id'] for p in http('/players')}) == 1350
     assert all(p['canonical_player_id'] for p in http('/players'))
@@ -38,11 +55,6 @@ def main():
     assert len(http('/outlook?season=2024-2025&window=3')['players']) == 562
     phases = http('/phases')
     assert sum(len(v) for v in phases['seasons'].values()) == 60
-    gmm = http('/rfm/gmm')
-    assert gmm['method'] == 'Spark MLlib GaussianMixture'
-    assert all(abs(sum(r['probability']) - 1) < 1e-8 for r in gmm['clubs'])
-    assert http('/rfm/rules')['method'] != gmm['method']
-    assert len(http('/transfers?season=2024-2025')['roi_sql']) == 20
     valuation = http('/valuation', {'age':22,'position':'FW','market_value_mil':50,'goals_assists':20,'minutes':2500,'tier':'tier2'})
     assert valuation['persistence'] == 'saved'
     assert http('/reports/' + valuation['run_id'] + '/valuation')[0]['payload']['estimated_fee_mil_eur'] == valuation['estimated_fee_mil_eur']
@@ -81,41 +93,25 @@ def main():
             assert stored['payload']['result']['probabilities']==result['probabilities']
     finally:
         spark.stop()
-    simulation = http('/transfers/simulate', {'batch_size':5,'season':'2025-2026','seed':42})
-    events = simulation['records']
-    # The packaged Spark client really consumes Kafka and writes the CI filesystem
-    # fixture, then restarts with the same checkpoint. Real HDFS is a local audit.
-    from analytics.streaming import consume
-    consume()
-    consume()
-    assert len(http('/streaming/transfers')) == 5
-    with tempfile.TemporaryDirectory() as folder:
-        def sink(event, checksum):
-            path = Path(folder) / event['event_id']
-            if path.exists() and path.read_text() != checksum:
-                raise ValueError('Fixture event conflict')
-            path.write_text(checksum)
-        persist_events(events, sink)
-        persist_events(events, sink)
     assert len(http('/pipeline')) == 0  # No Airflow run has been performed by this fixture.
-    dashboard=http('/dashboard')
-    assert dashboard['season_metrics']['all']['matches'] == 1140
-    assert len(dashboard['match_results']) == 1140
-    results=[r for r in dashboard['match_results'] if r['season']=='2024-2025']
+    match_results=http('/match-results')
+    assert match_results['season_metrics']['all']['matches'] == 1140
+    assert len(match_results['results']) == 1140
+    results=[r for r in match_results['results'] if r['season']=='2024-2025']
     assert sum(r['home_goals']+r['away_goals'] for r in results)==1115
     assert [sum(r['home_goals']>r['away_goals'] for r in results),sum(r['home_goals']==r['away_goals'] for r in results),sum(r['home_goals']<r['away_goals'] for r in results)]==[155,93,132]
     assert all('home_goals' not in r and 'away_goals' not in r for r in http('/matches'))
 
     # Real DB: partial and failed runs must not replace the previous complete report.
-    old, _ = neon_store.report('rfm_gmm')
+    old, _ = neon_store.report('phases')
     neon_store.begin_run('integration_partial', first, source_manifest={'source':'CI incomplete-run test'})
     filter_hash, _ = neon_store._filter_key({})
     with neon_store._connect() as connection, connection.cursor() as cursor:
-        cursor.execute("INSERT INTO pl_analysis_reports (run_id,report_name,filter_key,filters,payload) VALUES (%s,'rfm_gmm',%s,'{}'::jsonb,'{\"invalid\":true}'::jsonb)", ('integration_partial',filter_hash))
-        cursor.execute("SELECT count(*) FROM pl_analysis_active_reports WHERE report_name='rfm_gmm' AND run_id='integration_partial'")
+        cursor.execute("INSERT INTO pl_analysis_reports (run_id,report_name,filter_key,filters,payload) VALUES (%s,'phases',%s,'{}'::jsonb,'{\"invalid\":true}'::jsonb)", ('integration_partial',filter_hash))
+        cursor.execute("SELECT count(*) FROM pl_analysis_active_reports WHERE report_name='phases' AND run_id='integration_partial'")
         assert cursor.fetchone()[0] == 0, 'partial run replaced an active Neon report'
         cursor.execute("UPDATE pl_analysis_runs SET status='failed',error='intentional recovery test',completed_at=now() WHERE run_id='integration_partial'")
-    assert neon_store.report('rfm_gmm')[0] == old
+    assert neon_store.report('phases')[0] == old
     # Serving must be independent of local source/report files, even after API restart.
     root = Path('/opt/project/data/models/match_outcome')
     hidden = root.with_name('outputs_disabled_for_test')
@@ -130,8 +126,7 @@ def main():
         assert len(http('/knn/predictions')) == 20
         assert len(http('/outlook')['players']) == 562
         assert http('/phases')
-        assert http('/transfers')
-        assert http('/rfm/gmm')
+        assert len(http('/match-results')['results']) == 1140
         assert len(http('/players')) == 1350
     finally:
         hidden.rename(root)
@@ -139,7 +134,7 @@ def main():
         assert response.status == 200
     proxied = http('/api/football/outlook?season=2022-2023&window=1',base='http://web:3000')
     assert proxied['season'] == '2022-2023' and proxied['window'] == 1
-    print(json.dumps({'status':'passed','source_records':0,'silver_rows':73075,'phases':240,'stream_events':len(events),'hdfs':'local fixture only; real HDFS tested separately'}))
+    print(json.dumps({'status':'passed','source_records':0,'silver_rows':73075,'phases':240,'hdfs':'local fixture only; real HDFS tested separately'}))
 
 
 if __name__ == '__main__':

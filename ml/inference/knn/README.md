@@ -1,11 +1,11 @@
-# KNN tìm đội bóng tương tự
+# KNN dự đoán bảng xếp hạng
 
-`knn_league_table.py` dùng Spark SQL và Spark MLlib để tìm các đội/mùa có phong
-độ gần nhau. Mặc định:
+`knn_league_table.py` dùng Spark SQL và Spark MLlib để ước tính thứ hạng, điểm
+số và khả năng vào Top 4 của các đội trong mùa được chọn. Mặc định:
 
 - Mùa truy vấn: `2024-2025`.
 - Mùa tham chiếu: `2022-2023` và `2023-2024`.
-- 5 láng giềng gần nhất cho mỗi đội.
+- 5 mùa đội bóng tương đồng gần nhất được dùng nội bộ cho mỗi đội dự đoán.
 - Chỉ dùng mùa lịch sử trước `2025-2026`; script sẽ từ chối mùa giả lập.
 
 ## Đặc trưng và chuẩn hóa
@@ -23,7 +23,8 @@ wins_per_match
 Sau đó `StandardScaler(withMean=True, withStd=True)` chuẩn hóa toàn bộ đặc
 trưng trước khi tính khoảng cách Euclid và chọn K láng giềng. Với mỗi đội của
 mùa truy vấn, báo cáo đưa ra hạng/điểm dự đoán trung bình, xác suất Top 4 (tỷ lệ
-láng giềng từng nằm Top 4), nhóm dự đoán và danh sách các đội gần nhất.
+láng giềng từng nằm Top 4) và nhóm dự đoán. Các láng giềng chỉ là đầu vào của
+phép ước tính, không được xuất thành chức năng tra cứu đội tương tự.
 
 ## Chạy
 
@@ -60,21 +61,7 @@ Không cần bật Kafka, FastAPI hoặc `streaming_spark.py` cho báo cáo này
 
 ```text
 data/models/knn/knn_predictions.csv
-data/models/knn/knn_neighbors.csv
-data/models/knn/knn_league_table.html
 ```
-
-Mở biểu đồ trên Windows:
-
-```bash
-explorer.exe 'data/models/knn/knn_league_table.html'
-```
-
-Hoặc mở trực tiếp file
-`data/models/knn/knn_league_table.html`.
-
-HTML có danh sách chọn đội, thanh xác suất Top 4 cho cả mùa và bảng các đội/mùa
-gần nhất của đội đang chọn.
 
 ## Checkpoint lịch sử trên HDFS
 
@@ -86,13 +73,13 @@ hdfs://localhost:9000/bigdata/checkpoints/analytics/knn_league_table/latest.json
 hdfs://localhost:9000/bigdata/checkpoints/analytics/knn_league_table/history.jsonl
 ```
 
-Nếu đường dẫn input, danh sách mùa, mùa truy vấn, số láng giềng và fingerprint
-đều giống `latest.json`, đồng thời ba file output vẫn còn, script báo:
+Nếu đường dẫn input, danh sách mùa, mùa truy vấn, số láng giềng, fingerprint và
+định dạng output đều giống `latest.json`, đồng thời file dự đoán vẫn còn, script báo:
 `HDFS input has not changed; KNN outputs are already up to date.` và không chạy
 lại. Vì vậy chạy lại nhiều lần không tạo bản ghi lịch sử trùng và không ghi đè
 file kết quả.
 
-Muốn chạy lại có chủ ý (ví dụ đổi code hoặc cần tái tạo HTML), thêm `--force`:
+Muốn chạy lại có chủ ý (ví dụ đổi code), thêm `--force`:
 
 ```bash
 /home/linh/.venvs/league-table/bin/spark-submit \
@@ -100,6 +87,6 @@ Muốn chạy lại có chủ ý (ví dụ đổi code hoặc cần tái tạo H
   --input-path hdfs://localhost:9000/bigdata/processed/facts/fact_team_season
 ```
 
-Checkpoint chỉ được cập nhật sau khi cả ba file output local đã ghi thành công.
+Checkpoint chỉ được cập nhật sau khi file output local đã ghi thành công.
 Nếu HDFS không truy cập được, job dừng và không cập nhật checkpoint; kết quả
 lần chạy trước vẫn giữ nguyên.

@@ -111,6 +111,7 @@ def publish_reports(run_id, dataset_id, reports, source_manifest=None):
                         "INSERT INTO pl_analysis_active_reports (report_name,filter_key,run_id,updated_at) VALUES (%s,%s,%s,now()) ON CONFLICT (report_name,filter_key) DO UPDATE SET run_id=EXCLUDED.run_id,updated_at=now()",
                         (name, filter_hash, run_id),
                     )
+                cursor.execute("DELETE FROM pl_analysis_active_reports WHERE report_name IN ('dashboard','transfers','knn_neighbors','rfm_gmm','rfm_rules','transfer_simulation')")
     except Exception as exc:
         with _connect() as connection, connection.cursor() as cursor:
             cursor.execute("UPDATE pl_analysis_runs SET status='failed',error=%s,completed_at=now() WHERE run_id=%s AND status<>'complete'", (str(exc)[:1000], run_id))
@@ -182,7 +183,7 @@ def catalog():
             "ORDER BY report_name,updated_at DESC) a "
             "JOIN pl_analysis_reports p USING (run_id,report_name,filter_key) "
             "JOIN pl_analysis_runs r USING (run_id) "
-            "WHERE r.status='complete' ORDER BY p.report_name"
+            "WHERE r.status='complete' AND p.report_name NOT IN ('dashboard','transfers','knn_neighbors','rfm_gmm','rfm_rules','transfer_simulation') ORDER BY p.report_name"
         )
         names = [column.name for column in cursor.description]
         return [dict(zip(names, row)) for row in cursor.fetchall()]
@@ -261,22 +262,6 @@ def report_by_event(kind, event_id):
         raise LookupError("Không có kết quả Neon cho sự kiện: " + event_id)
     return {"payload": row[0], "filters": row[1], "model_version": row[2],
             "completed_at": row[3].isoformat() if row[3] else None}
-
-
-def latest_records(kind, field, limit=100):
-    """Return bounded records from the newest completed analysis report."""
-    schema()
-    with _connect() as connection, connection.cursor() as cursor:
-        cursor.execute(
-            "SELECT p.payload -> %s FROM pl_analysis_reports p "
-            "JOIN pl_analysis_runs r USING (run_id) "
-            "WHERE p.report_name=%s AND r.status='complete' "
-            "ORDER BY r.completed_at DESC LIMIT 1",
-            (field, kind),
-        )
-        row = cursor.fetchone()
-    records = row[0] if row and row[0] is not None else []
-    return records[:limit] if isinstance(records, list) else []
 
 
 def set_job(run_id, stage, status, details=None, error=None):

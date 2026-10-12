@@ -27,11 +27,15 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
             for window in (1, 2, 3):
                 reports.append(('outlook', evaluate(data, season, window), {'season': season, 'window': window}))
         reports.append(('phases', phases(data), {}))
-        from .transfers import analyze
-        transfer_reports = analyze(reader, spark)
-        from .dashboard import analyze as dashboard
-        reports.append(('dashboard',dashboard(reader,transfer_reports),{}))
-        reports += [('transfers', transfer_reports['sql'], {}), ('rfm_gmm', transfer_reports['gmm'], {}), ('rfm_rules', transfer_reports['rules'], {})]
+        results = [{k: row[k] for k in ('match_id', 'season', 'match_date', 'home_club_id', 'away_club_id', 'home_goals', 'away_goals')}
+                   for row in reader('facts/fact_match_enriched')]
+        season_metrics = {}
+        for season in [*SEASONS, 'all']:
+            selected = results if season == 'all' else [row for row in results if row['season'] == season]
+            goals = sum(row['home_goals'] + row['away_goals'] for row in selected)
+            season_metrics[season] = {'matches': len(selected), 'goals': goals,
+                                      'goals_per_match': round(goals / len(selected), 2) if selected else None}
+        reports.append(('match_results', {'results': results, 'season_metrics': season_metrics}, {}))
         matches = [json.loads(line) for line in (output / 'matches.jsonl').read_text(encoding='utf-8').splitlines()]
         reports.append(('matches', matches, {}))
         reports.append(('clubs', [{'id': cid, 'name': name} for cid, name in sorted(data.clubs.items()) if any(cid in (m['home_team'], m['away_team']) for m in matches)], {}))
@@ -39,7 +43,7 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
         reports.append(('model_metrics', json.loads((output / 'metrics.json').read_text(encoding='utf-8')), {}))
         reports.append(('forecast_v2', forecast_artifact, {}))
         reports.append(('forecast_v2_metrics', json.loads((output / 'forecast_v2_metrics.json').read_text(encoding='utf-8')), {}))
-        for kind, filename in [('knn_predictions', 'knn_predictions.csv'), ('knn_neighbors', 'knn_neighbors.csv')]:
+        for kind, filename in [('knn_predictions', 'knn_predictions.csv')]:
             with (knn / filename).open(encoding='utf-8-sig', newline='') as stream:
                 reports.append((kind, list(csv.DictReader(stream)), {}))
         original_players = reader('datamb/players')
@@ -134,11 +138,11 @@ def publish_hdfs(ctx):
             return report_reader(kind, filters or {}, run_id)
         groups = {
             'outlook': ('player_performance', 'season_comparison'), 'players': 'player_performance',
-            'phases': 'tactical_insights', 'dashboard': 'team_performance',
-            'transfers': 'transfer_impact', 'rfm_gmm': 'transfer_impact', 'rfm_rules': 'transfer_impact',
+            'phases': 'tactical_insights',
+            'match_results': 'prediction_features',
             'matches': 'prediction_features', 'model': 'prediction_features', 'model_metrics': 'prediction_features',
             'forecast_v2': 'prediction_features', 'forecast_v2_metrics': 'prediction_features',
-            'knn_predictions': 'league_standings', 'knn_neighbors': 'league_standings',
+            'knn_predictions': 'league_standings',
         }
         for kind, group in groups.items():
             if kind == 'outlook':

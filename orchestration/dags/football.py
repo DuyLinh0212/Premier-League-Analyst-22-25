@@ -22,5 +22,3 @@ with DAG("football_kafka_analytics", schedule="* * * * *", start_date=datetime(2
     league = BashOperator(task_id="league_normalization", bash_command=readiness + "$SPARK_PYTHON /opt/project/apps/api/football/streaming_spark.py --available-now")
     matches = BashOperator(task_id="match_statistics", bash_command=readiness + "$SPARK_PYTHON -m match_outcome.stream")
     league >> matches
-    transfers = BashOperator(task_id="transfer_simulation", bash_command=readiness + "$SPARK_PYTHON -m analytics.streaming")
-    matches >> transfers

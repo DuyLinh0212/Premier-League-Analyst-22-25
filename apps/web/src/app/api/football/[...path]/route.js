@@ -1,8 +1,8 @@
-const allowed = /^(health|features|clubs|matches|model\/metrics(?:\/v2)?|prediction\/config|predict(?:\/v2)?|knn\/predictions|knn\/neighbors\/[A-Z]{3}|dashboard|pipeline|airflow\/history|outlook|phases|transfers|transfers\/simulate|rfm\/(gmm|rules)|players|players\/similar|valuation|reports|reports\/[^/]+\/[^/]+|data\/catalog|data\/rows|streaming\/transfers)$/;
+const allowed = /^(health|features|clubs|matches|model\/metrics(?:\/v2)?|prediction\/config|predict(?:\/v2)?|knn\/predictions|match-results|pipeline|airflow\/history|outlook|phases|players|players\/similar|valuation|reports|reports\/[^/]+\/[^/]+|data\/catalog|data\/rows)$/;
 async function proxy(request, context) {
   const { path } = await context.params;
   const endpoint = path.join("/");
-  if (!allowed.test(endpoint) || (request.method === "POST" && !["predict", "predict/v2", "valuation", "transfers/simulate"].includes(endpoint)))
+  if (!allowed.test(endpoint) || (request.method === "POST" && !["predict", "predict/v2", "valuation"].includes(endpoint)))
     return Response.json({ detail: "Không tìm thấy chức năng" }, { status: 404 });
   try {
     const response = await fetch(`${process.env.FOOTBALL_API_URL || "http://127.0.0.1:8000"}/${endpoint}${new URL(request.url).search}`, {

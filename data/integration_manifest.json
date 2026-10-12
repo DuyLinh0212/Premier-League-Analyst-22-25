@@ -1,26 +1,6 @@
 {
   "sources": [
     {
-      "source": "Danh/processing/spark/step_05_spark_sql_analysis.py",
-      "sha256": "6559780e98744f0b3f0111aa95ea4d24918b58e0d270e5ab24efcac6ea95b5d7"
-    },
-    {
-      "source": "Danh/processing/spark/step_07_save_analytics_hdfs.py",
-      "sha256": "1a2f07b673f33ff86bb87dc52fb0eea9afcba98d41c0f7fba99ddd0dd6c206f2"
-    },
-    {
-      "source": "Danh/processing/spark/step_06_rfm_clustering.py",
-      "sha256": "6b81cb5665494b58b34b0e5a7f557e1cd55499921ac96535b88feb912d7d03c0"
-    },
-    {
-      "source": "Danh/processing/spark/generate_visual_dashboard.py",
-      "sha256": "3d8910bf421d8f059763170f3595c14fd35080c8e58d0c8c879fcc599703a338"
-    },
-    {
-      "source": "Danh/streaming/fastapi_transfer_service.py",
-      "sha256": "6389a5bd86ba08a27b7cfeabc1dca03bdd5fe836144cd41ca99955e5a31de953"
-    },
-    {
       "source": "football_analysis_share/src/football_data.py",
       "sha256": "57c497c63812fb20c9a28363473c847077e4217b7bcd1fa490a580e05d5ad560"
     },
