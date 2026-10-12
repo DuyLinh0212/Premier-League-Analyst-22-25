@@ -48,7 +48,7 @@ jobs:
         run: |
           docker build -f infrastructure/docker/Dockerfile.web -t football-web:4.0 .
           docker build -f infrastructure/docker/Dockerfile.airflow -t football-airflow:4.0 .
-          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.dag_processing.dagbag import DagBag; b=DagBag('/opt/airflow/dags'); assert not b.import_errors,b.import_errors; assert 'match_forecast_v2' in b.dags['football_pipeline'].task_dict; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'transfer_simulation' in b.dags['football_kafka_analytics'].task_dict"
+          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.dag_processing.dagbag import DagBag; b=DagBag('/opt/airflow/dags'); assert not b.import_errors,b.import_errors; assert 'match_forecast_v2' in b.dags['football_pipeline'].task_dict; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'match_statistics' in b.dags['football_kafka_analytics'].task_dict; assert 'transfer_simulation' not in b.dags['football_kafka_analytics'].task_dict"
       - name: Start fixture services and packaged application
         run: docker compose -f compose.dev.yml up -d --wait --wait-timeout 1200
       - name: Database Kafka HTTP and recovery acceptance
