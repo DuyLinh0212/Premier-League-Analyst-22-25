@@ -44,7 +44,6 @@ def main():
         expect(page.locator('.u-meta')).to_contain_text('bundle_')
         capture('01-tiem-nang.png','Tiềm năng và duy trì cầu thủ')
         page.locator('.u-heading select').select_option('2022-2023')
-        page.locator('.u-panel>label').filter(has_text='Cửa sổ phân tích').locator('select').select_option('1')
         page.wait_for_load_state('networkidle')
         expect(page.locator('.u-pages').first).to_contain_text('554 dòng')
         page.locator('.u-heading select').select_option('2024-2025')
