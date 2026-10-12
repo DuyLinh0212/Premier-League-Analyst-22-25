@@ -1,4 +1,4 @@
-"""Kafka Structured Streaming job: exact CSV to HDFS, typed Parquet by season."""
+"""Kafka Structured Streaming job: commit full league tables to project HDFS."""
 
 from __future__ import annotations
 
@@ -53,9 +53,13 @@ def fact_rows(csv_rows: list[dict[str, str]]) -> list[tuple]:
 
 
 class HdfsSink:
-    def __init__(self, spark: SparkSession, uri: str):
+    def __init__(self, spark: SparkSession, uri: str, base_path: str):
         self.spark = spark
         self.uri = uri.rstrip("/")
+        normalized_base = "/" + base_path.strip("/")
+        if normalized_base == "/":
+            raise ValueError("HDFS base path must not be empty or root")
+        self.base_path = normalized_base
         self.jvm = spark.sparkContext._jvm
         self.Path = self.jvm.org.apache.hadoop.fs.Path
         self.fs = self.Path(self.uri + "/").getFileSystem(
@@ -69,10 +73,13 @@ class HdfsSink:
     def check_available(self) -> None:
         # getFileStatus raises when the NameNode is unavailable. Safe mode still
         # permits reads, so check it separately before accepting a Kafka batch.
-        self.fs.getFileStatus(self.path("/bigdata"))
         action = self.jvm.org.apache.hadoop.hdfs.protocol.HdfsConstants.SafeModeAction.SAFEMODE_GET
         if self.fs.setSafeMode(action):
             raise RuntimeError("HDFS NameNode is in safe mode; Kafka offsets remain uncommitted")
+        base = self.path(self.base_path)
+        if not self.fs.exists(base) and not self.fs.mkdirs(base):
+            raise RuntimeError(f"Could not create HDFS project root: {base}")
+        self.fs.getFileStatus(base)
 
     def _read_bytes(self, path) -> bytes:
         source = self.fs.open(path)
@@ -118,11 +125,12 @@ class HdfsSink:
             raise ValueError(f"Checksum mismatch for season {season}")
         expected = fact_rows(parse_and_validate_csv(csv_text))
 
-        raw_parent = self.path(f"/bigdata/raw/fbref/{season}/01_league")
-        raw_final = self.path(f"/bigdata/raw/fbref/{season}/01_league/league_table.csv")
-        parquet_root = self.path("/bigdata/processed/facts/league_table")
-        parquet_final = self.path(f"/bigdata/processed/facts/league_table/season={season}")
-        marker = self.path(f"/bigdata/processed/facts/league_table/season={season}/_source_sha256")
+        kafka_root = self.base_path + "/kafka"
+        raw_parent = self.path(f"{kafka_root}/raw/fbref/{season}/01_league")
+        raw_final = self.path(f"{kafka_root}/raw/fbref/{season}/01_league/league_table.csv")
+        parquet_root = self.path(f"{kafka_root}/processed/facts/league_table")
+        parquet_final = self.path(f"{kafka_root}/processed/facts/league_table/season={season}")
+        marker = self.path(f"{kafka_root}/processed/facts/league_table/season={season}/_source_sha256")
 
         raw_exists = self.fs.exists(raw_final)
         if raw_exists and self._read_bytes(raw_final) != csv_bytes:
@@ -133,8 +141,8 @@ class HdfsSink:
             return
 
         token = uuid.uuid4().hex
-        raw_stage = self.path(f"/bigdata/raw/fbref/{season}/01_league/.league_table.{token}.tmp")
-        parquet_stage = self.path(f"/bigdata/processed/facts/_league_table_staging/{season}-{token}")
+        raw_stage = self.path(f"{kafka_root}/raw/fbref/{season}/01_league/.league_table.{token}.tmp")
+        parquet_stage = self.path(f"{kafka_root}/processed/facts/_league_table_staging/{season}-{token}")
         try:
             if not raw_exists:
                 self.fs.mkdirs(raw_parent)
@@ -174,13 +182,19 @@ def main() -> None:
     parser.add_argument("--topic", default=os.getenv("KAFKA_TOPIC", "league_table_simulated"))
     parser.add_argument("--available-now", action="store_true")
     parser.add_argument("--hdfs-uri", default=os.getenv("HDFS_URI", "hdfs://localhost:9000"))
+    parser.add_argument("--hdfs-base-path", default=os.getenv("HDFS_BASE_PATH", "/premier-league"))
     parser.add_argument(
         "--checkpoint-location",
         default=os.getenv("SPARK_CHECKPOINT"),
     )
     args = parser.parse_args()
     if not args.checkpoint_location:
-        args.checkpoint_location = args.hdfs_uri.rstrip('/') + '/bigdata/checkpoints/league_table_stream'
+        args.checkpoint_location = (
+            args.hdfs_uri.rstrip("/")
+            + "/"
+            + args.hdfs_base_path.strip("/")
+            + "/kafka/checkpoints/league_table_stream"
+        )
     spark = (
         SparkSession.builder.appName("SimulatedLeagueTableStream")
         .master(os.getenv("SPARK_MASTER", "local[2]"))
@@ -193,7 +207,7 @@ def main() -> None:
         .config("spark.sql.parquet.compression.codec", "snappy")
         .getOrCreate()
     )
-    sink = HdfsSink(spark, args.hdfs_uri)
+    sink = HdfsSink(spark, args.hdfs_uri, args.hdfs_base_path)
 
     def process_batch(frame, batch_id: int) -> None:
         sink.check_available()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""KNN rank and points estimates for a historical league table.
+"""KNN rank and points estimates for historical and Kafka-ingested tables.
 
 Spark SQL builds the team-season features. Spark MLlib StandardScaler is used
 before pairwise KNN distances are calculated. The latest selected season is the
@@ -25,12 +25,24 @@ from pyspark.sql import DataFrame, SparkSession, Window, functions as F
 
 
 DEFAULT_INPUT = "hdfs://localhost:9000/bigdata/processed/facts/fact_team_season"
-DEFAULT_SEASONS = ("2022-2023", "2023-2024", "2024-2025")
 DEFAULT_CHECKPOINT = (
     "hdfs://localhost:9000/bigdata/checkpoints/analytics/knn_league_table"
 )
 DEFAULT_OUTPUT_DIR = str(Path(__file__).resolve().parents[3] / "data/models/knn")
-SIMULATED_START_YEAR = 2025
+FACT_COLUMNS = (
+    "club_id",
+    "club_name",
+    "season",
+    "rank",
+    "matches_played",
+    "wins",
+    "draws",
+    "losses",
+    "goals_for",
+    "goals_against",
+    "goal_diff",
+    "points",
+)
 FEATURE_COLUMNS = (
     "points_per_mp",
     "goal_diff_per_match",
@@ -40,13 +52,19 @@ FEATURE_COLUMNS = (
 )
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Spark SQL + StandardScaler + KNN for historical league tables"
+    description="Spark SQL + StandardScaler + KNN for league tables"
     )
     parser.add_argument("--input-path", default=DEFAULT_INPUT)
     parser.add_argument(
         "--seasons",
-        default=",".join(DEFAULT_SEASONS),
-        help="Comma-separated historical seasons before 2025",
+        default=None,
+        help="Comma-separated seasons; defaults to every available season",
+    )
+    parser.add_argument(
+        "--additional-input-path",
+        action="append",
+        default=[],
+        help="Additional season-partitioned Parquet data; committed Kafka seasons are included",
     )
     parser.add_argument(
         "--query-season",
@@ -69,7 +87,9 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def parse_seasons(raw: str) -> list[str]:
+def parse_seasons(raw: str | None) -> list[str]:
+    if raw is None:
+        raise ValueError("No seasons supplied")
     seasons = [item.strip() for item in raw.split(",") if item.strip()]
     if not seasons:
         raise ValueError("--seasons must contain at least one season")
@@ -81,15 +101,92 @@ def parse_seasons(raw: str) -> list[str]:
             raise ValueError(f"Invalid season: {season!r}; expected YYYY-YYYY") from None
         if len(season) != 9 or season[4] != "-" or end_year != start_year + 1:
             raise ValueError(f"Invalid season: {season!r}; expected YYYY-YYYY")
-        if start_year >= SIMULATED_START_YEAR:
-            raise ValueError(
-                f"Season {season} is simulated by this project; use a historical season before 2025"
-            )
-    return seasons
+    return sorted(set(seasons))
 
 
-def build_features(spark: SparkSession, input_path: str, seasons: list[str]) -> DataFrame:
-    source = spark.read.parquet(input_path)
+def _committed_season_partitions(spark: SparkSession, root: str) -> list[str]:
+    jvm = spark.sparkContext._jvm
+    path = jvm.org.apache.hadoop.fs.Path(root)
+    fs = path.getFileSystem(spark.sparkContext._jsc.hadoopConfiguration())
+    if not fs.exists(path):
+        return []
+    partitions = []
+    for status in fs.listStatus(path):
+        if not status.isDirectory():
+            continue
+        name = status.getPath().getName()
+        season = name.removeprefix("season=")
+        try:
+            parse_seasons(season)
+        except ValueError:
+            continue
+        marker = jvm.org.apache.hadoop.fs.Path(status.getPath(), "_source_sha256")
+        if fs.exists(marker):
+            partitions.append(status.getPath().toString())
+    return sorted(partitions)
+
+
+def _load_fact_tables(
+    spark: SparkSession, input_path: str, additional_input_paths: list[str]
+) -> DataFrame:
+    frames: list[DataFrame] = []
+    base = spark.read.parquet(input_path)
+    missing = sorted(set(FACT_COLUMNS) - set(base.columns))
+    if missing:
+        raise RuntimeError(f"KNN input {input_path} is missing columns: {', '.join(missing)}")
+    base = base.select(*FACT_COLUMNS)
+    if base.groupBy("season", "club_id").count().where("count > 1").limit(1).count():
+        raise RuntimeError(f"KNN input {input_path} contains duplicate club-season rows")
+    frames.append(base.withColumn("__source_priority", F.lit(0)))
+
+    for priority, path in enumerate(additional_input_paths, start=1):
+        partitions = _committed_season_partitions(spark, path)
+        if not partitions:
+            print(f"No committed season partitions found under {path}; skipping optional input.")
+            continue
+        extra = spark.read.option("basePath", path).parquet(*partitions)
+        missing = sorted(set(FACT_COLUMNS) - set(extra.columns))
+        if missing:
+            raise RuntimeError(f"KNN input {path} is missing columns: {', '.join(missing)}")
+        extra = extra.select(*FACT_COLUMNS)
+        if extra.groupBy("season", "club_id").count().where("count > 1").limit(1).count():
+            raise RuntimeError(f"KNN input {path} contains duplicate club-season rows")
+        frames.append(extra.withColumn("__source_priority", F.lit(priority)))
+
+    combined = frames[0]
+    for frame in frames[1:]:
+        combined = combined.unionByName(frame)
+
+    # If a season is present in both Silver and Kafka, use the committed Kafka
+    # snapshot for that season and keep one row per club-season key.
+    source_window = Window.partitionBy("season", "club_id").orderBy(
+        F.col("__source_priority").desc()
+    )
+    return (
+        combined.withColumn("__source_rank", F.row_number().over(source_window))
+        .filter(F.col("__source_rank") == 1)
+        .drop("__source_priority", "__source_rank")
+    )
+
+
+def build_features(
+    spark: SparkSession,
+    input_path: str,
+    seasons: list[str] | None,
+    additional_input_paths: list[str] | None = None,
+) -> tuple[DataFrame, list[str]]:
+    source = _load_fact_tables(spark, input_path, additional_input_paths or [])
+    if seasons is None:
+        available = [
+            row["season"]
+            for row in source.select(F.col("season").cast("string").alias("season"))
+            .where(F.col("season").isNotNull())
+            .distinct()
+            .collect()
+        ]
+        if not available:
+            raise RuntimeError("No season values found in the KNN input tables")
+        seasons = parse_seasons(",".join(available))
     source.createOrReplaceTempView("fact_team_season")
     season_values = ", ".join(f"'{season}'" for season in seasons)
 
@@ -133,10 +230,10 @@ def build_features(spark: SparkSession, input_path: str, seasons: list[str]) -> 
     wrong_counts = {season: count for season, count in counts.items() if count != 20}
     if wrong_counts:
         raise RuntimeError(
-            "Expected 20 teams per historical season, got: "
+            "Expected 20 teams per season, got: "
             + ", ".join(f"{season}={count}" for season, count in sorted(wrong_counts.items()))
         )
-    return features
+    return features, seasons
 
 
 def fingerprint(features: DataFrame) -> str:
@@ -325,10 +422,7 @@ def checkpoint_state(spark: SparkSession, root: str) -> dict[str, Any] | None:
 
 def main() -> int:
     args = parse_args()
-    seasons = parse_seasons(args.seasons)
-    query_season = args.query_season or sorted(seasons)[-1]
-    if query_season not in seasons:
-        raise ValueError(f"--query-season {query_season} is not in --seasons")
+    requested_seasons = parse_seasons(args.seasons) if args.seasons else None
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -337,17 +431,26 @@ def main() -> int:
         (output_dir / retired_output).unlink(missing_ok=True)
 
     spark = (
-        SparkSession.builder.appName("HistoricalLeagueTableKNN")
+        SparkSession.builder.appName("LeagueTableKNN")
         .config("spark.sql.session.timeZone", "UTC")
         .getOrCreate()
     )
     spark.sparkContext.setLogLevel("WARN")
     try:
-        features = build_features(spark, args.input_path, seasons)
+        features, seasons = build_features(
+            spark,
+            args.input_path,
+            requested_seasons,
+            args.additional_input_path,
+        )
+        query_season = args.query_season or seasons[-1]
+        if query_season not in seasons:
+            raise ValueError(f"--query-season {query_season} is not in --seasons")
         source_fingerprint = fingerprint(features)
         checkpoint = checkpoint_state(spark, args.checkpoint_location)
         checkpoint_key = {
             "input_path": args.input_path,
+            "additional_input_paths": args.additional_input_path,
             "seasons": seasons,
             "query_season": query_season,
             "neighbors": args.neighbors,

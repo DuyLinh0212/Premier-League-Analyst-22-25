@@ -34,6 +34,7 @@ def stage(name, run_id=None):
                         "--conf", "spark.hadoop.dfs.blocksize=67108864", "--conf", "spark.hadoop.parquet.block.size=67108864", "--conf", "spark.hadoop.dfs.replication=2", "--conf", "spark.hadoop.dfs.client.use.datanode.hostname=true",
                         str(ROOT / "ml/inference/knn/knn_league_table.py"),
                         "--input-path", ctx.silver_table_path("fact_team_season"), "--output-dir", str(KNN),
+                        "--additional-input-path", ctx.uri + ctx.base + "/kafka/processed/facts/league_table",
                         "--checkpoint-location", ctx.uri + ctx.base + "/checkpoints/analytics/knn_league_table"], check=True)
         ctx.completed("knn")
     elif name == "match_outcome":
