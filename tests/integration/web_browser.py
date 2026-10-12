@@ -67,6 +67,7 @@ def main():
         switch('Báo cáo & dữ liệu')
         expect(page.locator('.history-intro')).to_contain_text('UTC+7')
         expect(page.get_by_label('Ngày lịch sử')).to_have_value(re.compile(r'\d{4}-\d{2}-\d{2}'))
+        page.get_by_label('Lọc nguồn báo cáo').select_option('manual')
         page.get_by_label('Lần chạy cần xem').select_option(run)
         page.get_by_label('Loại báo cáo cần xem').select_option('valuation')
         page.get_by_role('button',name='Xem báo cáo').click()
