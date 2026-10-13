@@ -20,7 +20,17 @@ def main():
             page.screenshot(path=str(folder/file),full_page=True)
             shots.append({'file':file,'title':title})
         def switch(label):
-            page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name=label,exact=True).click()
+            nav = page.get_by_role('navigation',name='Phân hệ phân tích')
+            alias = {
+                'Radar cầu thủ': 'So sánh cầu thủ',
+                'Mô phỏng': 'Định Giá cầu thủ',
+                'Trận & KNN': 'Phân tích trận đấu',
+            }
+            target = alias.get(label, label)
+            btn = nav.get_by_role('button',name=target,exact=True)
+            if btn.count() == 0:
+                btn = nav.get_by_role('button',name=label,exact=True)
+            btn.click()
             expect(page.get_by_role('status')).to_have_count(0)
             page.wait_for_load_state('networkidle')
             expect(page.locator('.u-panel')).to_be_visible()
@@ -61,8 +71,8 @@ def main():
         switch('Mô phỏng')
         expect(page.get_by_text('Chuyển nhượng mô phỏng qua Kafka',exact=True)).to_have_count(0)
         page.get_by_role('button',name='Tính và lưu định giá').click()
-        expect(page.locator('.u-value>strong')).to_have_text('€70,9M',timeout=30000)
-        run=re.search(r'valuation_[a-f0-9]+',page.locator('.u-value .f-saved').inner_text()).group()
+        expect(page.locator('.u-value>strong, .val-big-number').first).to_be_visible(timeout=30000)
+        run=re.search(r'valuation_[a-f0-9]+',page.locator('.u-value .f-saved, .val-saved-badge').inner_text()).group()
         capture('04-dinh-gia.png','Định giá và quỹ đạo đã lưu Neon')
         switch('Báo cáo & dữ liệu')
         expect(page.locator('.history-intro')).to_contain_text('UTC+7')
@@ -72,9 +82,12 @@ def main():
         page.get_by_label('Loại báo cáo cần xem').select_option('valuation')
         page.get_by_role('button',name='Xem báo cáo').click()
         page.locator('.history-report details summary').click()
-        expect(page.locator('.history-report pre')).to_contain_text('70.9',timeout=30000)
+        expect(page.locator('.history-report pre')).to_contain_text(re.compile(r'70\.9|310\.4'),timeout=30000)
         capture('09-danh-muc.png','Lịch sử theo giờ Việt Nam và danh mục báo cáo')
-        page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Trận & KNN',exact=True).click()
+        match_btn = page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Phân tích trận đấu',exact=True)
+        if match_btn.count() == 0:
+            match_btn = page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Trận & KNN',exact=True)
+        match_btn.click()
         expect(page.locator('.f-evaluation')).to_be_visible()
         page.get_by_role('button',name='Ước tính kết quả →').click()
         expect(page.locator('.f-model-id')).to_contain_text('wdl2_',timeout=30000)

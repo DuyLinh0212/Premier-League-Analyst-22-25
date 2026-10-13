@@ -4,10 +4,11 @@ import Football from "./football";
 import PhaseCharts from "./phase-charts";
 import OutlookPanel from "./outlook-panel";
 import Insights, {Stats,number} from "./insights";
+import ValuationSimulator from "./valuation-simulator";
 
 const seasons = ["2024-2025","2023-2024","2022-2023"];
-const titles = {home:"Trang chủ",standings:"BXH dự đoán theo KNN",phases:"Phong độ CLB",outlook:"Tiềm năng cầu thủ",players:"Radar cầu thủ",match:"Trận & KNN",simulation:"Mô phỏng",history:"Báo cáo & dữ liệu"};
-const descriptions={home:"Phân tích · Dự đoán · Khám phá dữ liệu 2022–2025",standings:"BXH dự đoán theo KNN cho mùa 2024–2025",phases:"Theo dõi phong độ qua bốn giai đoạn mùa giải",outlook:"Tiềm năng và khả năng duy trì qua một đến ba mùa",players:"So sánh kỹ năng và khám phá cầu thủ tương đồng",simulation:"Định giá cầu thủ",history:"Xem từng lần phân tích theo ngày và giờ Việt Nam"};
+const titles = {home:"Trang chủ",standings:"BXH dự đoán theo KNN",phases:"Phong độ CLB",outlook:"Tiềm năng cầu thủ",players:"So sánh cầu thủ",match:"Phân tích trận đấu",simulation:"Định Giá cầu thủ",history:"Báo cáo & dữ liệu"};
+const descriptions={home:"Phân tích · Dự đoán · Khám phá dữ liệu 2022–2025",standings:"BXH dự đoán theo KNN cho mùa 2024–2025",phases:"Theo dõi phong độ qua bốn giai đoạn mùa giải",outlook:"Tiềm năng và khả năng duy trì qua một đến ba mùa",players:"So sánh kỹ năng và khám phá cầu thủ tương đồng",match:"Dự đoán xác suất và phân tích trận đấu chuyên sâu",simulation:"Mô hình định giá thị trường & dự báo quỹ đạo giá trị 3 năm tới",history:"Xem từng lần phân tích theo ngày và giờ Việt Nam"};
 const labels={player_name:"Cầu thủ",club_name:"CLB",club_id:"Mã CLB",season:"Mùa giải",points:"Điểm",rank:"Hạng",goals_for:"Bàn thắng",goals_against:"Bàn thua",first:"Cầu thủ 1",second:"Cầu thủ 2",metric:"Chỉ số",first_pct:"Bách phân vị 1",second_pct:"Bách phân vị 2",similarity:"Tương đồng (%)",saved_mil_eur:"Chênh giá · M€",name:"Cầu thủ",club:"CLB"};
 const metricNames={assists_p90:"Kiến tạo /90",crosses_p90:"Tạt bóng /90",fouls_dr_p90:"Bị phạm lỗi /90",goals_p90:"Bàn thắng /90",int_p90:"Cắt bóng /90",minutes:"Phút",sot_p90:"Sút trúng đích /90",tackles_p90:"Tắc bóng /90"};
 const fmt = v => v == null ? "—" : typeof v === "number" ? v.toLocaleString("vi-VN",{maximumFractionDigits:2}) : Array.isArray(v)&&v.every(x=>typeof x==="number") ? v.map(x=>`${number(x*100,1)}%`).join(" · ") : typeof v === "object" ? JSON.stringify(v) : String(v);
@@ -17,15 +18,20 @@ const timeVietnam=value=>value?new Intl.DateTimeFormat("vi-VN",{timeZone:"Asia/H
 const statusVietnam=value=>({complete:"Hoàn tất",success:"Hoàn tất",processing:"Đang chạy",running:"Đang chạy",failed:"Thất bại",queued:"Đang chờ",scheduled:"Đã lên lịch",skipped:"Bỏ qua",upstream_failed:"Bước trước thất bại",up_for_retry:"Chờ thử lại",up_for_reschedule:"Chờ lịch mới",deferred:"Tạm hoãn",removed:"Đã gỡ",restarting:"Đang khởi động lại"}[value]||value||"Không rõ");
 const stageVietnam=value=>({preflight:"Kiểm tra đầu vào",raw_snapshot:"Nhập dữ liệu nguồn vào HDFS",register_raw_snapshot:"Nhập dữ liệu nguồn vào HDFS",build_identity:"Chuẩn hóa mã đội và cầu thủ",build_silver:"Chuẩn hóa dữ liệu Silver",validate_silver:"Kiểm tra dữ liệu",publish_silver:"Công bố Silver lên HDFS",knn:"Tính bảng xếp hạng KNN",match_outcome:"Huấn luyện dự đoán trận",match_forecast_v2:"Huấn luyện dự đoán theo tỉ số",publish:"Chuẩn bị báo cáo",merged_publish:"Lưu báo cáo lên Neon"}[value]||String(value||"").replaceAll("_"," "));
 function Icon({id="home"}) {const paths={home:"M3 10 12 3l9 7M5 9v11h5v-7h4v7h5V9",standings:"M4 20V10h4v10m2 0V4h4v16m2 0v-7h4v7",players:"M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-6 9v-2a6 6 0 0 1 12 0v2m3-16a4 4 0 0 1 0 8m1 3a5 5 0 0 1 4 5",match:"M12 3 3 7v10l9 5 9-5V7l-9-4Zm0 6 4 3-2 5h-4l-2-5 4-3",history:"M4 4h16v16H4V4Zm5 4v8m4-8v8m4-8v8",phases:"M3 20h18M5 16l4-6 5 3 6-9",outlook:"M3 20h18M5 15l5-5 4 3 6-9",simulation:"M9 3h6m-5 0v7L4 20h16l-6-10V3M7 16h10"};return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[id]||paths.home}/></svg>;}
-function Logo(){return <svg viewBox="0 0 24 24" aria-hidden="true">{[0,1,2].flatMap(y=>[0,1,2].map(x=><rect key={`${x}${y}`} x={2+x*7} y={2+y*7} width="5" height="5" rx="1" fill="currentColor" opacity={x===1 && y===1 ? .4 : 1}/>))}</svg>;}
+function Logo({className="a-logo-img"}){return <img src="/logo.jpg" alt="Premier League Logo" className={className}/>;}
 function matchHistory(matchReport,features) {
   const results=new Map((matchReport.results||[]).map(r=>[r.match_id,r]));
   if(results.size!==features.length||features.some(m=>{const r=results.get(m.match_id);return !r||!Number.isFinite(r.home_goals)||!Number.isFinite(r.away_goals);})) throw new Error("Báo cáo chưa có kết quả trận đầy đủ. Hãy chạy lại bước công bố dữ liệu.");
   return features.map(m=>({...m,...results.get(m.match_id)}));
 }
+const apiCache = new Map();
 async function api(path,body) {
+  const isGet = !body;
+  if(isGet && apiCache.has(path)) return apiCache.get(path);
   const r=await fetch(`/api/football/${path}`,body?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}:{});
-  const data=await r.json(); if(!r.ok) throw new Error(typeof data.detail==="string"?data.detail:"Kiểm tra dữ liệu và thử lại."); return data;
+  const data=await r.json(); if(!r.ok) throw new Error(typeof data.detail==="string"?data.detail:"Kiểm tra dữ liệu và thử lại.");
+  if(isGet) apiCache.set(path, data);
+  return data;
 }
 function Table({rows=[],columns,sortable=false}) {
   const [page,setPage]=useState(0),[search,setSearch]=useState(""),[sort,setSort]=useState(null);
@@ -75,32 +81,56 @@ function Radar({a,b}) {
   return <svg className="u-radar" viewBox="-45 -15 330 280" role="img" aria-label={`Radar ${a.name} và ${b?.name||"cầu thủ so sánh"}`}>{[25,50,75,100].map(n=><polygon key={n} points={shape(Object.fromEntries(metrics.map(m=>[m,n])))} fill="none" stroke="#c8d6e3"/>)}{metrics.map((m,i)=><text key={m} x={point(i,105)[0]} y={point(i,105)[1]} textAnchor="middle" fontSize="8">{metricNames[m]||m}</text>)}<polygon points={shape(a.pct)} fill="#3977ff25" stroke="#3977ff" strokeWidth="2"/>{b&&<polygon points={shape(b.pct)} fill="#ef667025" stroke="#ef6670" strokeWidth="2"/>}</svg>;
 }
 export default function Unified() {
-  const [tab,setTab]=useState("home"),[season,setSeason]=useState(seasons[0]),[position,setPosition]=useState("");
+  const [tab, setTab] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("tab") || window.location.hash.replace("#", "");
+      if (t && titles[t]) return t;
+    }
+    return "home";
+  });
+  const [season,setSeason]=useState(seasons[0]),[position,setPosition]=useState("");
   const [menu,setMenu]=useState(false),[navSearch,setNavSearch]=useState("");
-  const [data,setData]=useState(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[revision,setRevision]=useState(0),[busy,setBusy]=useState(false);
+  const [data,setData]=useState(null),[error,setError]=useState(""),[loading,setLoading]=useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("tab") || window.location.hash.replace("#", "");
+      if (t === "simulation" || t === "match") return false;
+    }
+    return true;
+  }),[revision,setRevision]=useState(0),[busy,setBusy]=useState(false);
   const [club,setClub]=useState("ARS"),[first,setFirst]=useState(""),[second,setSecond]=useState(""),[suggestions,setSuggestions]=useState(null),[result,setResult]=useState(null);
   const [form,setForm]=useState({age:22,position:"FW",market_value_mil:50,goals_assists:20,minutes:2500,tier:"tier2"});
   const [table,setTable]=useState(""),[offset,setOffset]=useState(0),[rows,setRows]=useState(null),[details,setDetails]=useState(null),[reportKind,setReportKind]=useState("match_results"),[historyDate,setHistoryDate]=useState(todayVietnam);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get("tab") || window.location.hash.replace("#", "");
+      if (t && titles[t] && t !== tab) setTab(t);
+    }
+  }, []);
   useEffect(()=>{
-    let active=true;setLoading(true);setError("");setData(null);setSuggestions(null);setDetails(null);
-    if(tab==="match"){setLoading(false);return;}
+    let active=true;setError("");setData(null);setSuggestions(null);setDetails(null);
+    if(revision > 0) apiCache.clear();
+    if(tab==="match" || tab==="simulation"){setLoading(false);return;}
+    setLoading(true);
     const paths={outlook:`outlook?season=${season}&window=3`,phases:"phases",players:`players?season=${season}&position=${position}`};
-    const pending=tab==="simulation"?Promise.resolve({}):["home","standings"].includes(tab)?Promise.all([api("match-results"),api("matches"),api("knn/predictions")]).then(([matchReport,matches,knn])=>({match_results:matchReport,matches:matchHistory(matchReport,matches),knn,_publication:matchReport._publication})):tab==="history"?Promise.all([api(`reports?date=${historyDate}&limit=500`),api("data/catalog"),api(`pipeline?date=${historyDate}&limit=1000`),api("airflow/history")]).then(([runs,catalog,jobs,airflow])=>({runs,catalog,jobs,airflow})):api(paths[tab]);
+    const pending=["home","standings"].includes(tab)?Promise.all([api("match-results"),api("matches"),api("knn/predictions")]).then(([matchReport,matches,knn])=>({match_results:matchReport,matches:matchHistory(matchReport,matches),knn,_publication:matchReport._publication})):tab==="history"?Promise.all([api(`reports?date=${historyDate}&limit=500`),api("data/catalog"),api(`pipeline?date=${historyDate}&limit=1000`),api("airflow/history")]).then(([runs,catalog,jobs,airflow])=>({runs,catalog,jobs,airflow})):api(paths[tab]);
     pending.then(x=>{if(active){if(tab==="players"&&Array.isArray(x)){if(!x.some(p=>p.id===first))setFirst(x.find(p=>p.name==="Erling Haaland")?.id||x[0]?.id||"");if(!x.some(p=>p.id===second))setSecond(x.find(p=>p.name==="Alexander Isak")?.id||x[1]?.id||"");}setData(x);setLoading(false);}}).catch(e=>{if(active){setError(e.message);setLoading(false);}});return()=>{active=false;};
   },[tab,season,position,revision,historyDate]);
   async function action(work){setBusy(true);setError("");try{await work();}catch(e){setError(e.message);}finally{setBusy(false);}}
   const player=Array.isArray(data)?data.find(p=>p.id===first):null,other=Array.isArray(data)?data.find(p=>p.id===second):null;
   const clubs=data?.seasons?.[season]||[],publication=data?._publication;
-  return <div className="a-shell"><aside className={`a-sidebar ${menu?"is-open":""}`}><a className="a-brand" href="/"><Logo/><strong>PL Analytics</strong></a><nav className="u-nav" aria-label="Phân hệ phân tích">{Object.entries(titles).filter(([,label])=>label.toLocaleLowerCase("vi").includes(navSearch.toLocaleLowerCase("vi"))).map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>{setData(null);setLoading(true);setError("");setTab(id);setResult(null);setMenu(false);}}><Icon id={id}/><span>{label}</span></button>)}</nav><div className="a-sidebar-bottom"><span className="a-season-mark"><i/><i/><i/></span><strong>Ba mùa Premier League</strong><small>2022–2023 → 2024–2025</small></div></aside>{menu&&<button className="a-backdrop" aria-label="Đóng điều hướng" onClick={()=>setMenu(false)}/>}
+  return <div className="a-shell"><aside className={`a-sidebar ${menu?"is-open":""}`}><a className="a-brand" href="/"><Logo/><strong>PL Analytics</strong></a><nav className="u-nav" aria-label="Phân hệ phân tích">{Object.entries(titles).filter(([,label])=>label.toLocaleLowerCase("vi").includes(navSearch.toLocaleLowerCase("vi"))).map(([id,label])=><button key={id} aria-pressed={tab===id} onClick={()=>{if(tab!==id){if(id!=="simulation"&&id!=="match"){setData(null);setLoading(true);}else{setLoading(false);}setError("");setTab(id);setResult(null);setMenu(false);}}}><Icon id={id}/><span>{label}</span></button>)}</nav><div className="a-sidebar-bottom"><span className="a-season-mark"><i/><i/><i/></span><strong>Ba mùa Premier League</strong><small>2022–2023 → 2024–2025</small></div></aside>{menu&&<button className="a-backdrop" aria-label="Đóng điều hướng" onClick={()=>setMenu(false)}/>}
     <div className="a-body"><header className="a-topbar"><button className="a-menu" aria-label="Mở điều hướng" aria-expanded={menu} onClick={()=>setMenu(!menu)}><Icon id="history"/></button><div className="a-breadcrumb"><Logo/><span>PL Analytics</span><b>/</b><strong>{titles[tab]}</strong></div><label className="a-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><input aria-label="Tìm phân hệ phân tích" placeholder="Tìm phân tích…" value={navSearch} onChange={e=>{setNavSearch(e.target.value);setMenu(true);}}/></label><button className="a-refresh" title="Tải lại báo cáo" aria-label="Cập nhật dữ liệu" onClick={()=>setRevision(r=>r+1)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M20 7a9 9 0 1 0 1 7M20 3v5h-5"/></svg></button></header>
     <main className="football unified">
-    {tab==="match"?<Football/>:<><div className="u-heading"><div><h1>{tab==="home"?"Premier League Analytics":titles[tab]}</h1><p>{descriptions[tab]}</p></div>{["home","outlook","phases","players"].includes(tab)&&<label>Mùa giải<select value={season} onChange={e=>setSeason(e.target.value)}>{seasons.map(s=><option key={s} value={s}>{s.slice(0,4)+"/"+s.slice(7)}</option>)}</select></label>}</div>{publication&&<p className="u-meta"><span>Đã công bố</span>{publication.run_id} · {new Date(publication.completed_at).toLocaleString("vi-VN")} · {publication.version}</p>}{error&&<p className="f-error" role="alert">{error}</p>}{loading&&<div className="a-loading" role="status"><span/>Đang tải báo cáo đã lưu…</div>}
-    {!loading&&data&&<section className={`u-panel a-page-${tab}`}>
+    {tab==="match"?<Football/>:<>{tab!=="simulation"&&<div className="u-heading"><div><h1>{tab==="home"?"Premier League Analytics":titles[tab]}</h1><p>{descriptions[tab]}</p></div>{["home","outlook","phases","players"].includes(tab)&&<label>Mùa giải<select value={season} onChange={e=>setSeason(e.target.value)}>{seasons.map(s=><option key={s} value={s}>{s.slice(0,4)+"/"+s.slice(7)}</option>)}</select></label>}</div>}{publication&&tab!=="simulation"&&<p className="u-meta"><span>Đã công bố</span>{publication.run_id} · {new Date(publication.completed_at).toLocaleString("vi-VN")} · {publication.version}</p>}{error&&tab!=="simulation"&&<p className="f-error" role="alert">{error}</p>}{loading&&tab!=="simulation"&&<div className="a-loading" role="status"><span/>Đang tải báo cáo đã lưu…</div>}
+    {(tab==="simulation" || (!loading&&data))&&<section className={`u-panel a-page-${tab}`}>
       {["home","standings"].includes(tab)&&<Insights {...{data,season,tab,Table}}/>}
       {tab==="outlook"&&<OutlookPanel {...{data,season,Table}}/>}
       {tab==="phases"&&<><div className="u-controls"><label>CLB<select value={club} onChange={e=>setClub(e.target.value)}>{clubs.map(c=><option key={c.club_id} value={c.club_id}>{c.club_name}</option>)}</select></label></div><PhaseCharts {...{data,season,club}}/><p>Thứ tự trận thực tế, chia 10 / 9 / 10 / 9 trận. Nhóm đối thủ theo thứ hạng cuối mùa là phân tích hồi cứu.</p>{clubs.filter(c=>c.club_id===club).map(c=><article key={c.club_id}><h2>{c.club_name}</h2><div className="u-phases">{c.stages.map((s,i)=><div key={i}><span>{["Khởi đầu","Giữa lượt đi","Đầu lượt về","Nước rút"][i]}</span><strong>{fmt(s.ppg)}<small> điểm/trận</small></strong><div className="u-bar"><i style={{width:`${s.ppg/3*100}%`}}/></div><p>{s.points} điểm · {s.played} trận</p></div>)}</div><Table rows={c.stages} columns={[["played","Trận"],["won","Thắng"],["drawn","Hòa"],["lost","Thua"],["goals_for","Bàn thắng"],["goals_against","Bàn thua"],["delta_ppg","Thay đổi điểm/trận"]]}/><details><summary>Sân đấu, nhóm đối thủ và cửa sổ 5 trận</summary><Table rows={c.stages.flatMap((s,i)=>Object.entries(s.venues).map(([venue,r])=>({phase:i+1,venue,...r})))}/><Table rows={c.stages.flatMap((s,i)=>Object.entries(s.opponents).map(([group,r])=>({phase:i+1,group,...r})))}/><Table rows={c.rolling}/></details></article>)}<details><summary>So sánh các mùa có dữ liệu</summary><Table rows={data.averages.filter(c=>c.club_id===club)}/></details></>}
       {tab==="players"&&<><div className="u-controls"><label>Vị trí<select value={position} onChange={e=>setPosition(e.target.value)}><option value="">Tất cả</option>{["FW","MF","DF","GK"].map(p=><option key={p}>{p}</option>)}</select></label>{[[first,setFirst,"Cầu thủ 1"],[second,setSecond,"Cầu thủ 2"]].map(([v,set,label])=><label key={label}>{label}<select value={v} onChange={e=>{set(v===first?e.target.value:e.target.value);setSuggestions(null);}}><option value="">Chọn cầu thủ</option>{data.map(p=><option key={p.id} value={p.id}>{p.name} · {p.club}</option>)}</select></label>)}</div>{player&&<><Stats items={[["Phút thi đấu",number(player.mins,0),player.club,"blue"],["Bàn thắng",number(player.goals,0),season,"green"],["Kiến tạo",number(player.assists,0),player.pos,"amber"],["Giá tham chiếu",`€${number(player.val)}M`,`${player.age} tuổi`,"blue"]]}/><div className="u-compare"><Radar a={player} b={other}/><div><h2>{player.name}{other&&` ↔ ${other.name}`}</h2><Table rows={Object.keys(player.raw).map(metric=>({metric:metricNames[metric]||metric,first:player.raw[metric],second:other?.raw[metric],first_pct:player.pct[metric],second_pct:other?.pct[metric]}))}/><button disabled={busy} onClick={()=>action(async()=>setSuggestions(await api(`players/similar?player_id=${encodeURIComponent(first)}`)))}>Tìm và lưu cầu thủ tương đồng</button></div></div>{suggestions&&<><p className="f-saved">Đã lưu {suggestions.run_id}</p><Table rows={suggestions.recommendations.map(r=>({name:r.player.name,club:r.player.club,season:r.player.season,similarity:r.similarity,saved_mil_eur:r.saved_mil_eur}))}/></>}</>}<details><summary>Danh sách cầu thủ</summary><Table rows={data} columns={[["name","Cầu thủ"],["club","CLB"],["pos","Vị trí"],["age","Tuổi"],["mins","Phút"],["val","Giá tham chiếu (triệu EUR)"]]}/></details></>}
-      {tab==="simulation"&&<><p className="u-sim-note">Mô phỏng định giá theo công thức, không phải dự báo chính thức.</p><form onSubmit={e=>{e.preventDefault();action(async()=>setResult(await api("valuation",form)));}}><div className="u-controls">{[["age","Tuổi"],["market_value_mil","Giá tham chiếu (triệu EUR)"],["goals_assists","Bàn thắng + kiến tạo"],["minutes","Phút"]].map(([key,label])=><label key={key}>{label}<input type="number" min="0" required value={form[key]} onChange={e=>setForm({...form,[key]:Number(e.target.value)})}/></label>)}<label>Vị trí<select value={form.position} onChange={e=>setForm({...form,position:e.target.value})}>{["FW","MF","DF","GK"].map(p=><option key={p}>{p}</option>)}</select></label><label>Nhóm CLB<select value={form.tier} onChange={e=>setForm({...form,tier:e.target.value})}>{["tier1","tier2","tier3"].map(p=><option key={p}>{p}</option>)}</select></label></div><button className="f-submit" disabled={busy}>Tính và lưu định giá</button></form>{result?.trajectory&&<div className="u-value"><strong>€{fmt(result.estimated_fee_mil_eur)}M</strong><p>Khoảng €{fmt(result.lower_mil_eur)}M–€{fmt(result.upper_mil_eur)}M · Rủi ro {result.risk}</p><Table rows={result.trajectory}/><p className="f-saved">Đã lưu {result.run_id}</p></div>}</>}
+      {tab==="simulation"&&<ValuationSimulator onSave={async(params)=>{let runId=null;await action(async()=>{const res=await api("valuation",params);runId=res?.run_id;});return runId;}} busy={busy}/>}
       {tab==="history"&&<HistoryPanel {...{data,historyDate,setHistoryDate,first,setFirst,reportKind,setReportKind,busy,action,setDetails,details,table,setTable,offset,setOffset,rows,setRows}}/>}
     </section>}</>}
     <footer className="f-footer"><span>PL Analytics · Premier League 2022–2025</span><span>Báo cáo đã lưu · Có phiên bản và lịch sử</span></footer></main></div></div>;
