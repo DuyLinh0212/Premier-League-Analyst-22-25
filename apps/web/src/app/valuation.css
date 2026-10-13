@@ -1,0 +1,633 @@
+/* Style Sheet Tối Giản cho Phân Hệ Định Giá Cầu Thủ (Hòa nhập hoàn hảo với Giao diện Trang chủ) */
+
+.val-layout {
+  width: 100%;
+}
+
+.val-layout .a-stats,
+.a-page-simulation .a-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 13px;
+  margin-bottom: 14px;
+}
+
+.val-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.val-btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  border: 1px solid #dfe8f6;
+  background: #ffffff;
+  color: #43577b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.val-btn-subtle:hover {
+  background: #edf3ff;
+  border-color: #b9d0f9;
+  color: #275bce;
+}
+
+/* Preset Chips Selection Bar (Tinh gọn) */
+.val-presets-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #e4ecf8;
+  border-radius: 6px;
+  padding: 6px 14px;
+  margin-bottom: 14px;
+}
+
+.val-presets-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #697a96;
+  white-space: nowrap;
+}
+
+.val-preset-chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.val-pchip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #dfe8f6;
+  background: #f8fbff;
+  color: #324767;
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.val-pchip strong {
+  font-weight: 600;
+}
+
+.val-pchip small {
+  margin-left: 5px;
+  color: #8a99b0;
+  font-size: 9.5px;
+}
+
+.val-pchip:hover {
+  background: #edf3ff;
+  border-color: #3977ff;
+  color: #275bce;
+}
+
+.val-pchip.is-selected {
+  background: #3977ff;
+  border-color: #3977ff;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(57, 119, 255, 0.25);
+}
+
+.val-pchip.is-selected small {
+  color: #dbeafe;
+}
+
+.val-pchip-custom {
+  border-style: dashed;
+}
+
+/* 3-Column Horizontal Layout for the 3 Components (Rộng xuống, không để khoảng trắng) */
+.val-three-cols-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 20px;
+}
+
+.val-col-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin-bottom: 0 !important;
+  padding: 15px 18px !important;
+}
+
+.val-col-card .a-card-heading {
+  margin-bottom: 12px !important;
+  gap: 8px;
+}
+
+.val-col-card .a-card-heading h2 {
+  font-size: 13.5px !important;
+  font-weight: 650;
+  color: #14254b;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.val-col-card .a-card-heading span {
+  font-size: 9.5px !important;
+  color: #8b99b1;
+  white-space: nowrap;
+}
+
+/* Card 1: Form inputs - Vertical Stack for each parameter */
+.val-card-inputs {
+  display: flex;
+  flex-direction: column;
+}
+
+.val-vertical-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.val-vfield {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.val-vfield:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.val-field-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.val-field-title-row label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #324767;
+  margin: 0;
+}
+
+.val-field-desc-text {
+  font-size: 9.5px;
+  color: #8b99b1;
+}
+
+.val-input-num-box {
+  display: inline-flex;
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #dfe8f6;
+  border-radius: 4px;
+  padding: 1px 6px;
+  gap: 2px;
+}
+
+.val-input-num-box input {
+  width: 38px;
+  border: none !important;
+  background: transparent !important;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: #3977ff !important;
+  text-align: right;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.val-input-num-box.val-input-wide input {
+  width: 46px;
+}
+
+.val-input-num-box input::-webkit-outer-spin-button,
+.val-input-num-box input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.val-input-num-box span {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: #8a99b0;
+}
+
+.val-range-slider {
+  width: 100%;
+  height: 4px;
+  background: #e4ecf8;
+  border-radius: 2px;
+  appearance: none;
+  cursor: pointer;
+  accent-color: #3977ff;
+  margin: 2px 0 0 0;
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* Segmented Buttons for Position */
+.val-segmented-pos {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.val-seg-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 2px;
+  background: #f8fbff;
+  border: 1px solid #dfe8f6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.val-seg-btn strong {
+  font-size: 10.5px;
+  font-weight: 650;
+  color: #263c64;
+}
+
+.val-seg-btn small {
+  font-size: 8.5px;
+  color: #8a99b0;
+}
+
+.val-seg-btn:hover {
+  background: #edf3ff;
+  border-color: #3977ff;
+}
+
+.val-seg-btn.is-active {
+  background: #3977ff;
+  border-color: #3977ff;
+}
+
+.val-seg-btn.is-active strong,
+.val-seg-btn.is-active small {
+  color: #ffffff;
+}
+
+/* Segmented Buttons for Tier */
+.val-segmented-tier {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.val-tier-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 2px;
+  background: #f8fbff;
+  border: 1px solid #dfe8f6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.val-tier-pill span {
+  font-size: 10px;
+  font-weight: 600;
+  color: #263c64;
+}
+
+.val-tier-pill small {
+  font-size: 8.5px;
+  color: #8a99b0;
+}
+
+.val-tier-pill:hover {
+  background: #edf3ff;
+  border-color: #3977ff;
+}
+
+.val-tier-pill.is-active {
+  background: #3977ff;
+  border-color: #3977ff;
+}
+
+.val-tier-pill.is-active span,
+.val-tier-pill.is-active small {
+  color: #ffffff;
+}
+
+/* Form Actions Footer */
+.val-form-footer {
+  margin-top: auto;
+  padding-top: 9px;
+  border-top: 1px solid #eaf0f9;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.val-save-btn {
+  padding: 9px 14px !important;
+  background: #3977ff !important;
+  color: #ffffff !important;
+  border-radius: 4px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s ease;
+}
+
+.val-save-btn:hover:not(:disabled) {
+  background: #275bce !important;
+}
+
+.val-save-btn-full {
+  width: 100% !important;
+  justify-content: center !important;
+  text-align: center;
+  display: flex;
+  align-items: center;
+}
+
+.val-saved-wrap {
+  text-align: center;
+}
+
+.val-saved-text {
+  font-size: 10px;
+  font-weight: 600;
+  color: #13ab79;
+  background: #e4f7f0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Card 2: Chart, Phase Strip & Seasons (Rộng xuống, đầy đặn toàn bộ thẻ) */
+.val-card-chart {
+  display: flex;
+  flex-direction: column;
+}
+
+.val-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.val-chart-svg {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  display: block;
+}
+
+/* Career Phase & Outlook Strip in Card 2 */
+.val-phase-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fbff;
+  border: 1px solid #e4ecf8;
+  border-radius: 6px;
+  padding: 7px 12px;
+  margin: 10px 0 8px 0;
+  gap: 8px;
+}
+
+.val-phase-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.val-phase-pill {
+  display: inline-block;
+  background: #3977ff;
+  color: #ffffff;
+  font-size: 9.5px;
+  font-weight: 650;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.val-phase-note {
+  font-size: 9.5px;
+  color: #556c8f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.val-phase-stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  color: #697a96;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.val-phase-stat strong {
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.val-seasons-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #eaf0f9;
+}
+
+.val-season-item {
+  background: #f8fbff;
+  border: 1px solid #e4ecf8;
+  border-radius: 6px;
+  padding: 8px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.val-season-item span {
+  font-size: 9.5px;
+  color: #697a96;
+  display: block;
+  white-space: nowrap;
+}
+
+.val-season-item strong {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #3977ff;
+  display: block;
+  margin: 2px 0 1px;
+}
+
+.val-season-item small {
+  font-size: 8.5px;
+  color: #8b99b1;
+  display: block;
+  white-space: nowrap;
+}
+
+.val-season-badge {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 8px;
+  font-weight: 650;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: #edf3ff;
+  color: #2b63db;
+  white-space: nowrap;
+}
+
+/* Card 3: Decomposition Bars, Scenarios & Deal Strategy Box (Rộng xuống, đầy đủ chiều sâu) */
+.val-card-decomp {
+  display: flex;
+  flex-direction: column;
+}
+
+.val-bars-adjusted {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.val-bars-adjusted .a-bar-row {
+  grid-template-columns: minmax(100px, 1.15fr) minmax(40px, 1fr) 52px;
+  gap: 8px;
+}
+
+.val-bars-adjusted .a-bar-row > span {
+  font-size: 10.5px;
+  color: #607394;
+}
+
+.val-bars-adjusted .a-bar-row > strong {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #36527d;
+}
+
+.val-bars-adjusted .a-bar-track {
+  height: 9px;
+  border-radius: 3px;
+}
+
+/* 3 Scenario Pricing Cards */
+.val-scenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.val-sc-card {
+  background: #f8fbff;
+  border: 1px solid #e4ecf8;
+  border-radius: 6px;
+  padding: 7px 4px;
+  text-align: center;
+}
+
+.val-sc-card.is-target {
+  background: #edf3ff;
+  border-color: #b9d0f9;
+}
+
+.val-sc-card span {
+  font-size: 9px;
+  color: #697a96;
+  display: block;
+  white-space: nowrap;
+}
+
+.val-sc-card strong {
+  font-size: 13px;
+  font-weight: 650;
+  display: block;
+  margin: 2px 0 1px;
+  white-space: nowrap;
+}
+
+.val-sc-card small {
+  font-size: 8.5px;
+  color: #8b99b1;
+  display: block;
+  white-space: nowrap;
+}
+
+/* Tỷ trọng cơ cấu mô hình định giá ở chân Card 3 */
+.val-decomp-formula {
+  background: #f8fbff;
+  border: 1px solid #e4ecf8;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.val-decomp-formula span {
+  font-size: 9.5px;
+  color: #697a96;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.val-decomp-formula strong {
+  font-size: 10px;
+  font-weight: 650;
+  color: #275bce;
+  white-space: nowrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .val-three-cols-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 800px) {
+  .val-presets-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
