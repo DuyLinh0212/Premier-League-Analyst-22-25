@@ -35,6 +35,8 @@ def stage(name, run_id=None):
                         str(ROOT / "ml/inference/knn/knn_league_table.py"),
                         "--input-path", ctx.silver_table_path("fact_team_season"), "--output-dir", str(KNN),
                         "--additional-input-path", ctx.uri + ctx.base + "/kafka/processed/facts/league_table",
+                        "--seasons", "2022-2023,2023-2024,2024-2025,2025-2026",
+                        "--query-season", "2025-2026",
                         "--checkpoint-location", ctx.uri + ctx.base + "/checkpoints/analytics/knn_league_table"], check=True)
         ctx.completed("knn")
     elif name == "match_outcome":
@@ -74,7 +76,12 @@ def stage(name, run_id=None):
     elif name == "merged_publish":
         ctx.require("publish")
         from analytics.publish import publish_hdfs
-        ctx.completed("merged_publish", publish_hdfs(ctx))
+        result = publish_hdfs(ctx)
+        ctx.completed("merged_publish", result)
+        print("TÓM TẮT CÔNG BỐ DỮ LIỆU", flush=True)
+        print("Trạng thái: Phân tích và công bố thành công.", flush=True)
+        print(f"Dữ liệu báo cáo Gold (Parquet) trên HDFS: {ctx.gold}", flush=True)
+        print(f"Báo cáo phục vụ website đã lưu vào Neon PostgreSQL; mã lần chạy: {result['serving_run_id']}", flush=True)
     else:
         raise ValueError("Unknown stage: " + name)
 

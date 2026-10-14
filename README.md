@@ -1,5 +1,7 @@
 # Premier League Analytics 2022–2025
 
+> **Giảng viên cài và chạy trên máy riêng:** xem [README chạy thủ công](README_CHAY_THU_CONG.md). Có lệnh trực tiếp cho từng dịch vụ, không dùng `run.py`, `boot.py` hay launcher `.cmd`.
+
 Nền tảng phân tích Premier League hợp nhất dữ liệu FBref và Transfermarkt, chuẩn hóa bằng Spark, lưu lakehouse trên HDFS, chạy phân tích theo Airflow và công bố **báo cáo** lên Neon PostgreSQL. Dữ liệu nguồn và các bảng Silver vẫn ở HDFS; Neon chỉ giữ kết quả đã hoàn chỉnh, lịch sử chạy và trạng thái từng bước. Web Next.js đọc báo cáo qua FastAPI.
 
 ## Kiến trúc mã nguồn

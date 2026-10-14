@@ -1,12 +1,15 @@
 # KNN dự đoán bảng xếp hạng
 
 `knn_league_table.py` dùng Spark SQL và Spark MLlib để ước tính thứ hạng, điểm
-số và khả năng vào Top 4 của các đội trong mùa được chọn. Mặc định:
+số và khả năng vào Top 4 của các đội trong mùa được chọn. Airflow cấu hình mùa
+truy vấn là `2025-2026`, dùng ba mùa 2022–2025 làm dữ liệu tham chiếu.
 
-- Mùa truy vấn: `2024-2025`.
-- Mùa tham chiếu: `2022-2023` và `2023-2024`.
-- 5 mùa đội bóng tương đồng gần nhất được dùng nội bộ cho mỗi đội dự đoán.
-- Chỉ dùng mùa lịch sử trước `2025-2026`; script sẽ từ chối mùa giả lập.
+- Mùa truy vấn của Airflow: `2025-2026`.
+- Mùa tham chiếu: `2022-2023`, `2023-2024` và `2024-2025`.
+- 5 đội tương đồng gần nhất được dùng nội bộ cho mỗi đội.
+- Dữ liệu mùa 2025–2026 phải được ghi vào HDFS bởi luồng Kafka trước bước KNN.
+  Nếu thiếu phân vùng mùa này, Airflow báo thiếu dữ liệu thay vì hiển thị nhầm
+  dự đoán 2024–2025.
 
 ## Đặc trưng và chuẩn hóa
 
@@ -59,9 +62,13 @@ Không cần bật Kafka, FastAPI hoặc `streaming_spark.py` cho báo cáo này
 
 ## Kết quả
 
-```text
-data/models/knn/knn_predictions.csv
-```
+`data/models/knn/knn_predictions.csv` chứa `actual_rank`, `actual_points` (từ
+bảng mô phỏng Kafka) cùng `predicted_rank`, `predicted_points` và
+`top4_probability` để đối chiếu.
+
+Lưu ý: luồng Kafka hiện tạo bảng mô phỏng đầy đủ cả mùa. KNN dùng thống kê cả
+mùa đó để ước tính thứ hạng; đây là minh họa phân tích trên dữ liệu mô phỏng,
+không phải dự báo trước mùa giải hoặc kết quả thực tế của Premier League.
 
 ## Checkpoint lịch sử trên HDFS
 
