@@ -35,6 +35,11 @@ def outlook(season: Literal['2022-2023', '2023-2024', '2024-2025'] = '2024-2025'
     return payload('outlook', {'season': season, 'window': window}, run_id)
 
 
+@router.get('/standings')
+def actual_standings(season: Literal['2022-2023', '2023-2024', '2024-2025'] = '2024-2025', run_id: str | None = None):
+    return payload('actual_standings', {'season': season}, run_id)
+
+
 @router.get('/phases')
 def phases(run_id: str | None = None):
     return payload('phases', run_id=run_id)

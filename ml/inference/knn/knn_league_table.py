@@ -282,6 +282,8 @@ def run_knn(
         F.col("season").alias("query_season"),
         F.col("club_id").alias("query_club_id"),
         F.col("club_name").alias("query_club_name"),
+        F.col("rank").alias("actual_rank"),
+        F.col("points").alias("actual_points"),
         F.col("scaled_array").alias("query_vector"),
     )
     reference = scaled.filter(F.col("season") != query_season).select(
@@ -322,6 +324,8 @@ def run_knn(
         "query_club_id",
         "query_club_name",
     ).agg(
+        F.first("actual_rank", ignorenulls=True).alias("actual_rank"),
+        F.first("actual_points", ignorenulls=True).alias("actual_points"),
         F.avg("neighbor_rank").alias("predicted_rank"),
         F.avg("neighbor_points").alias("predicted_points"),
         F.avg(F.when(F.col("neighbor_rank") <= 4, 1.0).otherwise(0.0)).alias(
@@ -455,7 +459,7 @@ def main() -> int:
             "query_season": query_season,
             "neighbors": args.neighbors,
             "input_fingerprint": source_fingerprint,
-            "output_contract": "predictions-only-v1",
+            "output_contract": "predictions-with-actual-v2",
         }
         outputs_exist = predictions_csv.exists()
         if not args.force and checkpoint and checkpoint.get("config") == checkpoint_key and outputs_exist:
@@ -469,6 +473,8 @@ def main() -> int:
             "query_season",
             "query_club_id",
             "query_club_name",
+            "actual_rank",
+            "actual_points",
             "predicted_rank",
             "predicted_points",
             "top4_probability",

@@ -35,6 +35,8 @@ def stage(name, run_id=None):
                         str(ROOT / "ml/inference/knn/knn_league_table.py"),
                         "--input-path", ctx.silver_table_path("fact_team_season"), "--output-dir", str(KNN),
                         "--additional-input-path", ctx.uri + ctx.base + "/kafka/processed/facts/league_table",
+                        "--seasons", "2022-2023,2023-2024,2024-2025,2025-2026",
+                        "--query-season", "2025-2026",
                         "--checkpoint-location", ctx.uri + ctx.base + "/checkpoints/analytics/knn_league_table"], check=True)
         ctx.completed("knn")
     elif name == "match_outcome":

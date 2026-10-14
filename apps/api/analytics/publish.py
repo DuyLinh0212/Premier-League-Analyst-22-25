@@ -36,6 +36,32 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
             season_metrics[season] = {'matches': len(selected), 'goals': goals,
                                       'goals_per_match': round(goals / len(selected), 2) if selected else None}
         reports.append(('match_results', {'results': results, 'season_metrics': season_metrics}, {}))
+        team_seasons = reader('facts/fact_team_season')
+        for season in SEASONS:
+            standings = []
+            for row in team_seasons:
+                if row['season'] != season:
+                    continue
+                club_id = row['club_id']
+                goals_for = int(row['goals_for'])
+                goals_against = int(row['goals_against'])
+                standings.append({
+                    'season': season,
+                    'club_id': club_id,
+                    'club_name': data.clubs.get(club_id, club_id),
+                    'rank': int(row['rank']),
+                    'matches_played': int(row['matches_played']),
+                    'wins': int(row['wins']),
+                    'draws': int(row['draws']),
+                    'losses': int(row['losses']),
+                    'goals_for': goals_for,
+                    'goals_against': goals_against,
+                    'goal_diff': goals_for - goals_against,
+                    'points': int(row['points']),
+                })
+            if len(standings) != 20:
+                raise ValueError(f"Expected 20 actual standings rows for {season}, got {len(standings)}")
+            reports.append(('actual_standings', sorted(standings, key=lambda row: row['rank']), {'season': season}))
         matches = [json.loads(line) for line in (output / 'matches.jsonl').read_text(encoding='utf-8').splitlines()]
         reports.append(('matches', matches, {}))
         reports.append(('clubs', [{'id': cid, 'name': name} for cid, name in sorted(data.clubs.items()) if any(cid in (m['home_team'], m['away_team']) for m in matches)], {}))
@@ -143,6 +169,7 @@ def publish_hdfs(ctx):
             'matches': 'prediction_features', 'model': 'prediction_features', 'model_metrics': 'prediction_features',
             'forecast_v2': 'prediction_features', 'forecast_v2_metrics': 'prediction_features',
             'knn_predictions': 'league_standings',
+            'actual_standings': 'league_standings',
         }
         for kind, group in groups.items():
             if kind == 'outlook':
@@ -152,6 +179,12 @@ def publish_hdfs(ctx):
                         for group in groups[kind]:
                             target = f"{ctx.gold}/{group}/{kind}/runs/{run_id}/season={season}/window={window}"
                             spark.createDataFrame([(codec.encode(payload),)], 'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
+                continue
+            if kind == 'actual_standings':
+                for season in SEASONS:
+                    payload, _ = read_report(kind, {'season': season})
+                    target = f"{ctx.gold}/{group}/{kind}/runs/{run_id}/season={season}"
+                    spark.createDataFrame([(codec.encode(payload),)], 'payload_json string').coalesce(1).write.mode('overwrite').parquet(target)
                 continue
             payload, _ = read_report(kind, {})
             target_group = groups[kind]
