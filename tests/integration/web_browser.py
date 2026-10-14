@@ -23,7 +23,7 @@ def main():
             nav = page.get_by_role('navigation',name='Phân hệ phân tích')
             alias = {
                 'Radar cầu thủ': 'So sánh cầu thủ',
-                'Mô phỏng': 'Định Giá cầu thủ',
+                'Mô phỏng': 'Định Giá Cầu Thủ',
                 'Trận & KNN': 'Phân tích trận đấu',
             }
             target = alias.get(label, label)
@@ -65,9 +65,10 @@ def main():
         page.locator('.u-heading select').select_option('2024-2025')
         page.wait_for_load_state('networkidle')
         switch('Phong độ CLB')
-        expect(page.locator('.u-phases')).to_have_count(1)
+        expect(page.locator('.u-phases')).to_have_count(2)
         capture('02-phong-do-clb.png','Phong độ CLB qua bốn giai đoạn')
-        expect(page.locator('.pl-phase-charts')).not_to_contain_text('So sánh hai CLB trong mùa chọn')
+        page.locator('.u-controls label').filter(has_text='Đối chiếu').locator('select').select_option('MCI')
+        expect(page.locator('.u-panel')).to_contain_text('Manchester City')
         switch('Radar cầu thủ')
         page.locator('.u-controls label').filter(has_text='Cầu thủ 1').locator('select').select_option('Erling Haaland_2024-2025')
         page.locator('.u-controls label').filter(has_text='Cầu thủ 2').locator('select').select_option('Alexander Isak_2024-2025')
@@ -90,10 +91,11 @@ def main():
         page.locator('.history-report details summary').click()
         expect(page.locator('.history-report pre')).to_contain_text(re.compile(r'70\.9|310\.4'),timeout=30000)
         capture('09-danh-muc.png','Lịch sử theo giờ Việt Nam và danh mục báo cáo')
-        match_btn = page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Phân tích trận đấu',exact=True)
-        if match_btn.count() == 0:
-            match_btn = page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Trận & KNN',exact=True)
-        match_btn.click()
+        match_nav = page.get_by_role('navigation',name='Phân hệ phân tích')
+        btn = match_nav.get_by_role('button',name='Phân tích trận đấu',exact=True)
+        if btn.count() == 0:
+            btn = match_nav.get_by_role('button',name='Trận & KNN',exact=True)
+        btn.click()
         expect(page.locator('.f-evaluation')).to_be_visible()
         page.get_by_role('button',name='Ước tính kết quả →').click()
         expect(page.locator('.f-model-id')).to_contain_text('wdl2_',timeout=30000)
