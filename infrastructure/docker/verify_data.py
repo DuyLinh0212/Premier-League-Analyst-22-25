@@ -1,30 +1,25 @@
 """Read-only acceptance checks for normalized HDFS files and canonical KNN."""
 import csv
 import json
+import math
 import os
 from pathlib import Path
 from pyspark.sql import SparkSession
 
 def main():
     output = Path(os.environ['KNN_OUTPUT_DIR'])
-    reference = Path('/opt/project/data/samples/pipeline-seed/knn')
     checks = {}
-    for name, keys in [('knn_predictions.csv', ['query_season','query_club_id'])]:
-        def read(folder):
-            with (folder/name).open(encoding='utf-8-sig', newline='') as stream:
-                return {tuple(row[k] for k in keys):row for row in csv.DictReader(stream)}
-        expected, actual = read(reference), read(output)
-        assert expected.keys() == actual.keys(), name
-        for key, row in expected.items():
-            assert row.keys() == actual[key].keys(), name
-            for column, value in row.items():
-                if column.endswith('_name'):
-                    continue  # Canonical club IDs are unchanged; display aliases may expand.
-                try:
-                    assert abs(float(value)-float(actual[key][column])) <= 1e-6, (name,key,column)
-                except ValueError:
-                    assert value == actual[key][column], (name,key,column)
-        checks[name] = {'rows':len(actual),'numeric_tolerance':1e-6,'equivalent':True}
+    with (output / 'knn_predictions.csv').open(encoding='utf-8-sig', newline='') as stream:
+        predictions = list(csv.DictReader(stream))
+    metrics = json.loads((output / 'knn_metrics.json').read_text(encoding='utf-8'))
+    overall = metrics['overall']
+    assert len(predictions) == 20, f"Expected 20 KNN club estimates, got {len(predictions)}"
+    assert len({row['query_club_id'] for row in predictions}) == 20
+    assert set(metrics['features']) == {'points_per_mp', 'goal_diff_per_match', 'recent_form', 'goals_for_per_match'}
+    assert 'MinMaxScaler' in metrics['scaling']
+    for metric in ('top4_accuracy', 'top4_precision', 'top4_recall', 'top4_f1', 'rank_mae', 'rank_rmse', 'rank_spearman'):
+        assert overall.get(metric) is not None and math.isfinite(float(overall[metric])), f"Missing or invalid KNN metric: {metric}"
+    checks['knn_model'] = {'prediction_rows':len(predictions),'evaluation_samples':overall['samples'],'features':metrics['features'],'scaling':metrics['scaling']}
     spark = (SparkSession.builder.master('local[2]').appName('HdfsAcceptance')
              .config('spark.driver.memory','512m').config('spark.ui.enabled','false')
              .config('spark.hadoop.fs.defaultFS',os.environ['HDFS_URI'])

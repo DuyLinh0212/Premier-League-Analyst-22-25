@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 export const number = (v,d=1) => v == null || !Number.isFinite(Number(v)) ? "—" : Number(v).toLocaleString("vi-VN",{maximumFractionDigits:d});
 const colors=["#3977ff","#19b58e","#ef6670"];
 const seasons=["2022-2023","2023-2024","2024-2025"];
@@ -34,9 +35,45 @@ function Overview({data,season,Table}) {
  return <><Stats items={[["Đội tham dự",number(clubs.size,0),season],["Trận đấu",number(matches.length,0),"Lịch sử đã hoàn thành"],["Tổng bàn thắng",number(metrics.goals,0),"Bàn thắng được ghi nhận"],["Bàn / trận",number(metrics.goals_per_match,2),"Trung bình mùa giải"],["Sút / đội / trận",number(totalShots,2),"Thống kê hai đội"],["Kiểm soát bóng",`${number(possession)}%`,"Trung bình các trận"]]}/>
  <div className="a-overview-grid"><Card title="Xu hướng bàn thắng theo tháng" subtitle="Đối chiếu cả ba mùa"><Lines series={series}/></Card><Card title="Phân bố kết quả trận đấu" subtitle={season}><Outcome matches={matches}/></Card><Card title="Kết quả gần đây" subtitle={season}><Table rows={recent} columns={[["date","Ngày"],["fixture","Trận đấu"],["score","Tỉ số"]]}/></Card><Card title="Chỉ số nổi bật" subtitle="Trung bình mỗi đội / trận"><Bars rows={[["Dứt điểm","shots"],["Sút trúng đích","shots_on_target"],["Tạt bóng","crosses"],["Phạm lỗi","fouls_committed"],["Thẻ vàng","yellow_cards"],["Thẻ đỏ","red_cards"]].map(([label,key])=>({label,value:perMatch(key)}))}/></Card></div></>;
 }
-function Standings({data,season="2025-2026",Table}) {
- if(season!=="2025-2026") return <Card title={`Bảng xếp hạng thực tế · ${season.replace("-","/")}`} subtitle="Thứ hạng lấy từ dữ liệu Silver đã chuẩn hóa"><Table rows={data.standings||[]} columns={[["rank","Hạng thực tế"],["club_name","Đội bóng"],["matches_played","Trận"],["wins","Thắng"],["draws","Hòa"],["losses","Thua"],["goals_for","Bàn thắng"],["goals_against","Bàn thua"],["goal_diff","Hiệu số"],["points","Điểm"]]} sortable/></Card>;
- const predictions=(data.knn||[]).filter(r=>r.query_season===season).map(r=>({...r,actual_rank:null,actual_points:r.actual_points==null?null:Number(r.actual_points),predicted_rank:Number(r.predicted_rank),predicted_points:Number(r.predicted_points),top4_pct:100*Number(r.top4_probability)})).sort((a,b)=>a.predicted_rank-b.predicted_rank);
- return <><Card title="Dự đoán bảng xếp hạng bằng KNN · 2025/26" subtitle="Mùa mô phỏng chưa có thứ hạng thực tế; KNN ước tính thứ hạng dựa trên các mùa tham chiếu">{!predictions.length&&<p>Chưa có báo cáo KNN cho mùa 2025/26. Hãy chạy lại Airflow sau khi Kafka đã ghi mùa này lên HDFS.</p>}<Table rows={predictions} columns={[["query_club_name","Đội bóng"],["actual_rank","Hạng thực tế"],["predicted_rank","Hạng ước tính KNN"],["predicted_points","Điểm ước tính KNN"],["top4_pct","Tỉ lệ láng giềng Top 4 (%)"]]} sortable/></Card><Card title="Điểm ước tính theo KNN" subtitle="5 láng giềng gần nhất từ các mùa tham chiếu"><Bars rows={predictions.slice(0,5).map(r=>({label:r.query_club_name,value:r.predicted_points}))}/><p className="a-note">2025/26 hiện được tạo bởi luồng Kafka mô phỏng. KNN dùng thống kê toàn mùa đã có để ước tính thứ hạng; đây chưa phải dự báo trước khi mùa giải diễn ra.</p></Card></>;
+const rankFeatures=[
+ {key:"ppg",label:"PPG",help:"Điểm trung bình mỗi trận",min:0,max:3,step:0.01},
+ {key:"goal_difference_per_match",label:"Goal Difference/Game",help:"Hiệu số bàn thắng trung bình mỗi trận",min:-10,max:10,step:0.01},
+ {key:"recent_form",label:"Recent Form",help:"Điểm trung bình trong 5 trận gần nhất",min:0,max:3,step:0.01},
+ {key:"goals_scored_per_game",label:"Goals Scored/Game",help:"Số bàn thắng trung bình mỗi trận",min:0,max:10,step:0.01},
+];
+const emptyClub=(name="")=>({club_name:name,ppg:"",goal_difference_per_match:"",recent_form:"",goals_scored_per_game:""});
+function minMaxScale(samples,keys){
+ const ranges=Object.fromEntries(keys.map(key=>{const values=samples.map(row=>Number(row[key]));return [key,[Math.min(...values),Math.max(...values)]];}));
+ return row=>keys.map(key=>{const value=Number(row[key]),[low,high]=ranges[key];return high===low?0:(value-low)/(high-low);});
 }
-export default function Insights({data,season,tab,Table}) {return tab==="home"?<Overview {...{data,season,Table}}/>:<Standings {...{data,season,Table}}/>;}
+function rankByKnn(input,samples){
+ const keys=rankFeatures.map(feature=>feature.key),scale=minMaxScale(samples,keys),normalized=samples.map(row=>({...row,vector:scale(row)}));
+ const scored=input.map((row,index)=>{const vector=scale(row),neighbors=normalized.map(sample=>({sample,distance:Math.sqrt(vector.reduce((sum,value,i)=>sum+(value-sample.vector[i])**2,0))})).sort((a,b)=>a.distance-b.distance||String(a.sample.season).localeCompare(String(b.sample.season))||String(a.sample.club_id).localeCompare(String(b.sample.club_id))).slice(0,5);return {...row,id:index,mean_neighbor_rank:neighbors.reduce((sum,item)=>sum+Number(item.sample.rank),0)/neighbors.length,nearest:neighbors};});
+ return scored.sort((a,b)=>a.mean_neighbor_rank-b.mean_neighbor_rank||a.club_name.localeCompare(b.club_name,"vi")).map((row,index)=>({...row,predicted_rank:index+1}));
+}
+function Standings({data,Table}) {
+ const samples=Array.isArray(data?.knn_samples)?data.knn_samples.map(row=>({...row,ppg:Number(row.points_per_mp),goals_scored_per_game:Number(row.goals_for_per_match)})):[];
+ const latest=[...new Set(samples.map(row=>row.season))].sort().at(-1);
+ const defaults=[...new Map(samples.filter(row=>row.season===latest).sort((a,b)=>a.rank-b.rank).map(row=>[row.club_id,row.club_name])).values()];
+ const [clubs,setClubs]=useState(()=>defaults.map(name=>emptyClub(name)));
+ const [ranked,setRanked]=useState([]),[validation,setValidation]=useState("");
+ const update=(index,key,value)=>{setClubs(rows=>rows.map((row,i)=>i===index?{...row,[key]:value}:row));setRanked([]);};
+ const calculate=()=>{
+  const complete=clubs.every(row=>row.club_name.trim()&&rankFeatures.every(feature=>row[feature.key]!==""&&Number.isFinite(Number(row[feature.key]))));
+  if(!complete){setValidation("Nhập tên đội và đủ bốn chỉ số cho tất cả các đội.");setRanked([]);return;}
+  if(clubs.length<2){setValidation("Nhập chỉ số cho ít nhất hai đội để xếp hạng.");setRanked([]);return;}
+  if(clubs.some(row=>rankFeatures.some(feature=>Number(row[feature.key])<feature.min||Number(row[feature.key])>feature.max))){setValidation("Giá trị nằm ngoài phạm vi cho phép: PPG/Recent Form 0–3, hiệu số −10–10, bàn thắng/trận 0–10.");setRanked([]);return;}
+  if(new Set(clubs.map(row=>row.club_name.trim().toLocaleLowerCase("vi"))).size!==clubs.length){setValidation("Tên đội bóng không được trùng nhau.");setRanked([]);return;}
+  if(samples.length<5){setValidation("Cần ít nhất 5 mẫu lịch sử để chạy KNN.");setRanked([]);return;}
+  setValidation("");setRanked(rankByKnn(clubs.map(row=>Object.fromEntries(["club_name",...rankFeatures.map(feature=>feature.key)].map(key=>[key,key==="club_name"?row[key].trim():Number(row[key])]))),samples));
+ };
+ const resultRows=ranked.map(row=>({predicted_rank:row.predicted_rank,club_name:row.club_name,mean_neighbor_rank:Number(row.mean_neighbor_rank.toFixed(2)),nearest_reference:`${row.nearest[0]?.sample.club_name} · ${row.nearest[0]?.sample.season}`}));
+ return <><Card title="Ước tính thứ hạng bằng KNN" subtitle={`${samples.length} mẫu CLB–mùa lịch sử · MinMax 0–1 · 5 láng giềng gần nhất`}>
+  <p className="knn-intro">Nhập bốn chỉ số cho từng đội. Dữ liệu tham chiếu là thành tích thực tế của các đội trong ba mùa 2022–2025.</p>
+  <div className="knn-form-scroll"><table className="knn-input-table"><thead><tr><th>Đội bóng</th>{rankFeatures.map(feature=><th key={feature.key}><span>{feature.label}</span><small>{feature.help}</small></th>)}<th aria-label="Thao tác"/></tr></thead><tbody>{clubs.map((row,index)=><tr key={index}><td><input aria-label={`Tên đội ${index+1}`} value={row.club_name} onChange={event=>update(index,"club_name",event.target.value)} placeholder="Tên đội"/></td>{rankFeatures.map(feature=><td key={feature.key}><input aria-label={`${feature.label} · ${row.club_name||`đội ${index+1}`}`} type="number" min={feature.min} max={feature.max} step={feature.step} value={row[feature.key]} onChange={event=>update(index,feature.key,event.target.value)} placeholder="—"/></td>)}<td><button className="knn-remove" type="button" title={`Xóa ${row.club_name||"đội"}`} onClick={()=>{setClubs(rows=>rows.filter((_,i)=>i!==index));setRanked([]);}}>×</button></td></tr>)}</tbody></table></div>
+  <div className="knn-actions"><button type="button" onClick={()=>{setClubs(rows=>[...rows,emptyClub()]);setRanked([]);}}>Thêm đội bóng</button><button type="button" onClick={calculate}>Tính thứ hạng KNN</button></div>{validation&&<p className="knn-validation" role="alert">{validation}</p>}
+ </Card>
+ {ranked.length>0&&<Card title="Kết quả ước tính" subtitle="Xếp theo thứ hạng trung bình của 5 láng giềng gần nhất"><Table rows={resultRows} columns={[["predicted_rank","Hạng ước tính KNN"],["club_name","Đội bóng"],["mean_neighbor_rank","Hạng trung bình của láng giềng"],["nearest_reference","Mẫu lịch sử gần nhất"]]} sortable/></Card>}
+ <Card title="Cách tính" subtitle="KNN hồi cứu trên dữ liệu Silver đã công bố"><ol className="knn-steps"><li>Với từng chỉ số, lấy giá trị nhỏ nhất và lớn nhất trong các mùa tham chiếu.</li><li>Quy đổi mỗi giá trị về thang 0–1 theo công thức (giá trị − nhỏ nhất) / (lớn nhất − nhỏ nhất).</li><li>Tính khoảng cách Euclid giữa đội cần xếp hạng và các mẫu lịch sử; lấy 5 mẫu gần nhất.</li><li>Lấy trung bình hạng thật của 5 đội gần nhất, sau đó sắp xếp các đội người dùng nhập để tạo bảng xếp hạng.</li></ol><p className="a-note">Recent Form trong tập lịch sử được tính từ điểm trung bình của 5 trận cuối mùa: thắng 3 điểm, hòa 1 điểm, thua 0 điểm. Báo cáo metric KNN được tính hồi cứu theo mùa và chuẩn hóa MinMax chỉ trên các mùa dùng để huấn luyện.</p></Card></>;
+}
+export default function Insights({data,season,tab,Table}) {return tab==="home"?<Overview {...{data,season,Table}}/>:<Standings {...{data,Table}}/>;}

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""KNN rank and points estimates for historical and Kafka-ingested tables.
+"""Spark KNN rank estimates and chronological metrics for football teams.
 
-Spark SQL builds the team-season features. Spark MLlib StandardScaler is used
-before pairwise KNN distances are calculated. The latest selected season is the
-query set; earlier selected seasons are the historical reference set.
+Build four club-season features; fit MinMax scaling on historical references and
+evaluate held-out completed seasons without temporal leakage.
 """
 
 from __future__ import annotations
@@ -19,7 +18,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-from pyspark.ml.feature import StandardScaler, VectorAssembler
+from pyspark.ml.feature import MinMaxScaler, VectorAssembler
 from pyspark.ml.functions import vector_to_array
 from pyspark.sql import DataFrame, SparkSession, Window, functions as F
 
@@ -46,15 +45,20 @@ FACT_COLUMNS = (
 FEATURE_COLUMNS = (
     "points_per_mp",
     "goal_diff_per_match",
+    "recent_form",
     "goals_for_per_match",
-    "goals_against_per_match",
-    "wins_per_match",
 )
+MATCH_COLUMNS = ("club_id", "season", "match_id", "match_date", "result")
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-    description="Spark SQL + StandardScaler + KNN for league tables"
+    description="Spark SQL + MinMaxScaler + KNN for league-table estimates"
     )
     parser.add_argument("--input-path", default=DEFAULT_INPUT)
+    parser.add_argument(
+        "--match-input-path",
+        default="hdfs://localhost:9000/bigdata/processed/facts/fact_team_match",
+        help="Match-level Silver Parquet used to derive recent form",
+    )
     parser.add_argument(
         "--seasons",
         default=None,
@@ -174,6 +178,7 @@ def build_features(
     input_path: str,
     seasons: list[str] | None,
     additional_input_paths: list[str] | None = None,
+    match_input_path: str | None = None,
 ) -> tuple[DataFrame, list[str]]:
     source = _load_fact_tables(spark, input_path, additional_input_paths or [])
     if seasons is None:
@@ -192,7 +197,34 @@ def build_features(
 
     # This query deliberately derives rates from the count columns instead of
     # using rank/points as KNN features, avoiding direct target leakage.
+    matches = spark.read.parquet(match_input_path) if match_input_path else None
+    if matches is None:
+        raise RuntimeError("--match-input-path is required to calculate the recent-form feature")
+    missing_match = sorted(set(MATCH_COLUMNS) - set(matches.columns))
+    if missing_match:
+        raise RuntimeError(f"Match input {match_input_path} is missing columns: {', '.join(missing_match)}")
+    matches.select(*MATCH_COLUMNS).createOrReplaceTempView("fact_team_match_history")
     query = f"""
+        WITH ordered_matches AS (
+            SELECT
+                CAST(club_id AS STRING) AS club_id,
+                CAST(season AS STRING) AS season,
+                CASE UPPER(TRIM(CAST(result AS STRING)))
+                    WHEN 'W' THEN 3.0 WHEN 'D' THEN 1.0 WHEN 'L' THEN 0.0
+                END AS match_points,
+                ROW_NUMBER() OVER (
+                    PARTITION BY season, club_id
+                    ORDER BY match_date DESC, match_id DESC
+                ) AS recent_order
+            FROM fact_team_match_history
+            WHERE season IN ({season_values})
+        ),
+        recent AS (
+            SELECT season, club_id, AVG(match_points) AS recent_form
+            FROM ordered_matches
+            WHERE recent_order <= 5 AND match_points IS NOT NULL
+            GROUP BY season, club_id
+        )
         SELECT
             CAST(club_id AS STRING) AS club_id,
             CAST(club_name AS STRING) AS club_name,
@@ -210,17 +242,19 @@ def build_features(
                 AS points_per_mp,
             CASE WHEN matches_played > 0 THEN goal_diff * 1.0 / matches_played ELSE 0.0 END
                 AS goal_diff_per_match,
+            COALESCE(recent.recent_form,
+                CASE WHEN matches_played > 0 THEN points * 1.0 / matches_played ELSE 0.0 END
+            ) AS recent_form,
             CASE WHEN matches_played > 0 THEN goals_for * 1.0 / matches_played ELSE 0.0 END
-                AS goals_for_per_match,
-            CASE WHEN matches_played > 0 THEN goals_against * 1.0 / matches_played ELSE 0.0 END
-                AS goals_against_per_match,
-            CASE WHEN matches_played > 0 THEN wins * 1.0 / matches_played ELSE 0.0 END
-                AS wins_per_match
+                AS goals_for_per_match
         FROM fact_team_season
+        LEFT JOIN recent USING (season, club_id)
         WHERE season IN ({season_values})
           AND matches_played > 0
     """
     features = spark.sql(query).cache()
+    if features.where(F.col("recent_form").isNull()).limit(1).count():
+        raise RuntimeError("Recent form could not be calculated for one or more club-seasons")
     counts = {row["season"]: row["count"] for row in features.groupBy("season").count().collect()}
     missing = [season for season in seasons if counts.get(season, 0) == 0]
     if missing:
@@ -250,27 +284,120 @@ def fingerprint(features: DataFrame) -> str:
         "goals_against",
         "goal_diff",
         "points",
+        *FEATURE_COLUMNS,
     ]
     payload = "\n".join(features.select(*cols).orderBy("season", "rank", "club_id").toJSON().collect())
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def fit_scaled(features: DataFrame) -> DataFrame:
+def fit_scaled_fold(reference: DataFrame, query: DataFrame) -> DataFrame:
+    """Scale a held-out season using reference seasons only (no fold leakage)."""
     assembler = VectorAssembler(
         inputCols=list(FEATURE_COLUMNS),
         outputCol="raw_features",
         handleInvalid="error",
     )
-    assembled = assembler.transform(features)
-    scaler = StandardScaler(
-        inputCol="raw_features",
-        outputCol="scaled_features",
-        withStd=True,
-        withMean=True,
+    reference_vector = assembler.transform(reference)
+    query_vector = assembler.transform(query)
+    scaler = MinMaxScaler(inputCol="raw_features", outputCol="scaled_features", min=0.0, max=1.0).fit(reference_vector)
+    return (
+        scaler.transform(reference_vector)
+        .unionByName(scaler.transform(query_vector))
+        .withColumn("scaled_array", vector_to_array("scaled_features"))
     )
-    return scaler.fit(assembled).transform(assembled).withColumn(
-        "scaled_array", vector_to_array("scaled_features")
-    )
+
+
+def _rank_correlation(actual: list[float], predicted: list[float]) -> float | None:
+    if len(actual) < 2:
+        return None
+    actual_mean = sum(actual) / len(actual)
+    predicted_mean = sum(predicted) / len(predicted)
+    actual_ss = sum((value - actual_mean) ** 2 for value in actual)
+    predicted_ss = sum((value - predicted_mean) ** 2 for value in predicted)
+    denominator = math.sqrt(actual_ss * predicted_ss)
+    if denominator == 0:
+        return None
+    return sum((a - actual_mean) * (p - predicted_mean) for a, p in zip(actual, predicted)) / denominator
+
+
+def evaluate_backtest(features: DataFrame, seasons: list[str], query_season: str, neighbor_count: int) -> dict[str, Any]:
+    """Chronological leave-future-seasons-out evaluation for completed seasons."""
+    fold_reports = []
+    all_actual: list[float] = []
+    all_estimated: list[float] = []
+    all_points: list[tuple[float, float]] = []
+    all_top4: list[tuple[bool, bool]] = []
+    for season in seasons:
+        if season == query_season:
+            continue
+        reference_seasons = [value for value in seasons if value < season]
+        if not reference_seasons:
+            continue
+        reference = features.filter(F.col("season").isin(reference_seasons))
+        held_out = features.filter(F.col("season") == season)
+        scaled = fit_scaled_fold(reference, held_out)
+        predictions = run_knn(scaled, season, neighbor_count)
+        rows = [row.asDict(recursive=True) for row in predictions.collect()]
+        rows.sort(key=lambda row: (float(row["predicted_rank"]), row["query_club_id"]))
+        actual_positions = [int(row["actual_rank"]) for row in rows]
+        predicted_positions = [index + 1 for index in range(len(rows))]
+        rank_errors = [predicted - actual for actual, predicted in zip(actual_positions, predicted_positions)]
+        point_pairs = [(float(row["actual_points"]), float(row["predicted_points"])) for row in rows]
+        actual_top4 = {row["query_club_id"] for row in rows if int(row["actual_rank"]) <= 4}
+        predicted_top4 = {row["query_club_id"] for row in rows[:4]}
+        tp = len(actual_top4 & predicted_top4)
+        tn = len(set(row["query_club_id"] for row in rows) - actual_top4 - predicted_top4)
+        count = len(rows)
+        estimated_top4 = {row["query_club_id"] for row in rows[:4]}
+        for index, row in enumerate(rows):
+            all_actual.append(float(row["actual_rank"]))
+            all_estimated.append(float(predicted_positions[index]))
+            all_points.append((float(row["actual_points"]), float(row["predicted_points"])))
+            all_top4.append((row["query_club_id"] in actual_top4, row["query_club_id"] in estimated_top4))
+        fold_reports.append({
+            "season": season,
+            "reference_seasons": reference_seasons,
+            "samples": count,
+            "rank_mae": sum(abs(error) for error in rank_errors) / max(1, count),
+            "rank_rmse": math.sqrt(sum(error * error for error in rank_errors) / max(1, count)),
+            "rank_spearman": _rank_correlation(actual_positions, predicted_positions),
+            "points_mae": sum(abs(actual - predicted) for actual, predicted in point_pairs) / max(1, count),
+            "points_rmse": math.sqrt(sum((actual - predicted) ** 2 for actual, predicted in point_pairs) / max(1, count)),
+            "top4_accuracy": (tp + tn) / max(1, count),
+            "top4_precision": tp / 4,
+            "top4_recall": tp / 4,
+            "top4_f1": tp / 4,
+        })
+    if not fold_reports:
+        raise RuntimeError("Không đủ mùa hoàn tất trước mùa ước tính để đánh giá hồi cứu KNN")
+    total = sum(item["samples"] for item in fold_reports)
+    actual_top = sum(actual for actual, _ in all_top4)
+    predicted_top = sum(predicted for _, predicted in all_top4)
+    tp = sum(actual and predicted for actual, predicted in all_top4)
+    tn = sum(not actual and not predicted for actual, predicted in all_top4)
+    rank_errors = [predicted - actual for actual, predicted in zip(all_actual, all_estimated)]
+    return {
+        "model": "KNN bảng xếp hạng",
+        "features": list(FEATURE_COLUMNS),
+        "scaling": "MinMaxScaler [0, 1], khớp trên các mùa tham chiếu của từng fold",
+        "neighbors": neighbor_count,
+        "evaluation_scope": "Hồi cứu theo thứ tự mùa giải; mỗi mùa được dự đoán chỉ từ các mùa trước đó.",
+        "limitation": "Đặc trưng là thống kê tổng kết mùa của chính mùa được giữ lại; đây là kiểm định hồi cứu, không phải dự báo trước mùa.",
+        "folds": fold_reports,
+        "overall": {
+            "samples": total,
+            "seasons": [item["season"] for item in fold_reports],
+            "rank_mae": sum(abs(error) for error in rank_errors) / max(1, total),
+            "rank_rmse": math.sqrt(sum(error * error for error in rank_errors) / max(1, total)),
+            "rank_spearman": _rank_correlation(all_actual, all_estimated),
+            "points_mae": sum(abs(actual - predicted) for actual, predicted in all_points) / max(1, total),
+            "points_rmse": math.sqrt(sum((actual - predicted) ** 2 for actual, predicted in all_points) / max(1, total)),
+            "top4_accuracy": (tp + tn) / max(1, total),
+            "top4_precision": tp / max(1, predicted_top),
+            "top4_recall": tp / max(1, actual_top),
+            "top4_f1": (2 * tp / max(1, predicted_top + actual_top)),
+        },
+    }
 
 
 def run_knn(
@@ -431,6 +558,7 @@ def main() -> int:
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     predictions_csv = output_dir / "knn_predictions.csv"
+    metrics_json = output_dir / "knn_metrics.json"
     for retired_output in ("knn_neighbors.csv", "knn_league_table.html"):
         (output_dir / retired_output).unlink(missing_ok=True)
 
@@ -459,16 +587,21 @@ def main() -> int:
             "query_season": query_season,
             "neighbors": args.neighbors,
             "input_fingerprint": source_fingerprint,
-            "output_contract": "predictions-with-actual-v2",
+            "output_contract": "minmax-four-features-with-ml-metrics-v4",
         }
-        outputs_exist = predictions_csv.exists()
+        outputs_exist = predictions_csv.exists() and metrics_json.exists()
         if not args.force and checkpoint and checkpoint.get("config") == checkpoint_key and outputs_exist:
             print("Dữ liệu HDFS không thay đổi; kết quả KNN hiện tại vẫn còn mới.", flush=True)
             print(f"Thời điểm tính gần nhất: {checkpoint.get('run_at_utc', 'không rõ')}", flush=True)
             return 0
 
-        scaled = fit_scaled(features).cache()
+        training = features.filter(F.col("season") < query_season)
+        query = features.filter(F.col("season") == query_season)
+        if training.limit(1).count() == 0:
+            raise RuntimeError("Ít nhất một mùa hoàn tất trước mùa cần ước tính là bắt buộc")
+        scaled = fit_scaled_fold(training, query).cache()
         predictions = run_knn(scaled, query_season, args.neighbors)
+        metrics = evaluate_backtest(features, seasons, query_season, args.neighbors)
         prediction_columns = [
             "query_season",
             "query_club_id",
@@ -481,13 +614,16 @@ def main() -> int:
         ]
         prediction_records = records_from_df(predictions, prediction_columns, ["query_club_id"])
         write_csv(prediction_records, predictions_csv)
-
+        metrics_json.write_text(
+            json.dumps(metrics, ensure_ascii=False, indent=2, allow_nan=False),
+            encoding="utf-8",
+        )
         now = datetime.now(timezone.utc).isoformat()
         history_entry = {
             "run_at_utc": now,
             "config": checkpoint_key,
             "rows": len(prediction_records),
-            "outputs": [str(predictions_csv.resolve())],
+            "outputs": [str(predictions_csv.resolve()), str(metrics_json.resolve())],
         }
         write_hdfs_text(
             spark,
@@ -503,6 +639,15 @@ def main() -> int:
         print(f"Mùa được ước tính: {query_season}", flush=True)
         print(f"Các mùa dùng làm tham chiếu: {', '.join(s for s in seasons if s != query_season)}", flush=True)
         print(f"Số câu lạc bộ được ước tính: {len(prediction_records)}", flush=True)
+        print(
+            "Đánh giá KNN hồi cứu: "
+            f"Top 4 đúng {metrics['overall']['top4_accuracy']:.1%}; "
+            f"MAE thứ hạng {metrics['overall']['rank_mae']:.2f}; "
+            f"RMSE thứ hạng {metrics['overall']['rank_rmse']:.2f}; "
+            f"mẫu {metrics['overall']['samples']}.",
+            flush=True,
+        )
+        print(f"Tệp metric KNN: {metrics_json.resolve()}", flush=True)
         print(f"Mã kiểm tra dữ liệu đầu vào: {source_fingerprint}", flush=True)
         print(f"Tệp kết quả KNN: {predictions_csv.resolve()}", flush=True)
         return 0

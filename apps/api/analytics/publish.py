@@ -69,6 +69,7 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
         reports.append(('model_metrics', json.loads((output / 'metrics.json').read_text(encoding='utf-8')), {}))
         reports.append(('forecast_v2', forecast_artifact, {}))
         reports.append(('forecast_v2_metrics', json.loads((output / 'forecast_v2_metrics.json').read_text(encoding='utf-8')), {}))
+        reports.append(('knn_metrics', json.loads((knn / 'knn_metrics.json').read_text(encoding='utf-8')), {}))
         for kind, filename in [('knn_predictions', 'knn_predictions.csv')]:
             with (knn / filename).open(encoding='utf-8-sig', newline='') as stream:
                 reports.append((kind, list(csv.DictReader(stream)), {}))
@@ -171,7 +172,7 @@ def publish_hdfs(ctx):
             'match_results': 'prediction_features',
             'matches': 'prediction_features', 'model': 'prediction_features', 'model_metrics': 'prediction_features',
             'forecast_v2': 'prediction_features', 'forecast_v2_metrics': 'prediction_features',
-            'knn_predictions': 'league_standings',
+            'knn_predictions': 'league_standings', 'knn_metrics': 'league_standings',
             'actual_standings': 'league_standings',
         }
         for kind, group in groups.items():

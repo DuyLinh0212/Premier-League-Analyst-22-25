@@ -79,6 +79,7 @@ def stage(name, run_id=None):
                         "--conf", "spark.hadoop.dfs.blocksize=67108864", "--conf", "spark.hadoop.parquet.block.size=67108864", "--conf", "spark.hadoop.dfs.replication=2", "--conf", "spark.hadoop.dfs.client.use.datanode.hostname=true",
                         str(ROOT / "ml/inference/knn/knn_league_table.py"),
                         "--input-path", ctx.silver_table_path("fact_team_season"), "--output-dir", str(KNN),
+                        "--match-input-path", ctx.silver_table_path("fact_team_match"),
                         "--additional-input-path", ctx.uri + ctx.base + "/kafka/processed/facts/league_table",
                         "--seasons", "2022-2023,2023-2024,2024-2025,2025-2026",
                         "--query-season", "2025-2026",

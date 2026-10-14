@@ -65,13 +65,13 @@ def compare(output):
     best_model = None
     lr_loss = min(x['log_loss'] for x in report['candidates'])
     for c in report['candidates']:
-        candidates.append({'algorithm':'logistic_regression','parameters':{'reg_param':c['reg_param']},'validation_log_loss':c['log_loss'],'validation_accuracy':c['accuracy'],'validation_macro_f1':c['macro_f1']})
+        candidates.append({'algorithm':'logistic_regression','parameters':{'reg_param':c['reg_param']},'validation_log_loss':c['log_loss'],'validation_accuracy':c['accuracy'],'validation_macro_f1':c['macro_f1'],'validation_brier_score':c.get('brier_score')})
     best_loss = lr_loss
     def consider(artifact, parameters, model=None):
         nonlocal best, best_loss, best_model
         p = softmax(np.stack([base_logits(x,artifact) for x in xs['tune']]))
         score = metrics(ys['tune'],p)
-        candidates.append({'algorithm':artifact['algorithm'],'parameters':parameters,'validation_log_loss':score['log_loss'],'validation_accuracy':score['accuracy'],'validation_macro_f1':score['macro_f1']})
+        candidates.append({'algorithm':artifact['algorithm'],'parameters':parameters,'validation_log_loss':score['log_loss'],'validation_accuracy':score['accuracy'],'validation_macro_f1':score['macro_f1'],'validation_brier_score':score['brier_score']})
         print(f"{artifact['algorithm']} {parameters}: validation log loss={score['log_loss']:.6f}",flush=True)
         if score['log_loss'] < best_loss:
             best, best_loss, best_model = artifact, score['log_loss'], model
