@@ -121,7 +121,7 @@ jobs:
       - name: Migrate Airflow metadata and execute the complete DAG
         run: |
           docker compose -f compose.bigdata.yml run --rm kafka-init
-          docker compose -f compose.bigdata.yml run --rm airflow-cli /opt/python-runtime/bin/python /opt/project/infrastructure/docker/seed_simulated_season.py
+          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli /opt/project/infrastructure/docker/seed_simulated_season.py
           docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli -m analytics.neon_store
           docker compose -f compose.bigdata.yml run --rm airflow-cli airflow db migrate
           docker compose -f compose.bigdata.yml up -d airflow-api-server
