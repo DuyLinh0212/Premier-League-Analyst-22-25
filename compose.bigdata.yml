@@ -24,9 +24,40 @@ x-airflow-env: &airflow-env
   SPARK_LOCAL_IP: 127.0.0.1
   STATE_DIR: /state
   APP_NAMESPACE: premier-league-22-25
+  KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+  KAFKA_TOPIC: league_table_simulated
   NEON_DATABASE_URL: ${NEON_DATABASE_URL:?Set GitHub Actions secret NEON_DATABASE_URL}
   PIPELINE_RUN_ID: ${PIPELINE_RUN_ID:?Set a unique pipeline run ID}
 services:
+  kafka:
+    image: apache/kafka:4.3.1
+    hostname: kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_RETENTION_MS: -1
+      KAFKA_LOG_RETENTION_BYTES: -1
+    healthcheck:
+      test: [CMD-SHELL, "/opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+  kafka-init:
+    image: apache/kafka:4.3.1
+    depends_on:
+      kafka: {condition: service_healthy}
+    entrypoint: ["/opt/kafka/bin/kafka-topics.sh"]
+    command: ["--bootstrap-server", "kafka:29092", "--create", "--if-not-exists", "--topic", "league_table_simulated", "--partitions", "1", "--replication-factor", "1"]
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     hostname: namenode
@@ -75,6 +106,7 @@ services:
     depends_on:
       airflow-db: {condition: service_healthy}
       namenode: {condition: service_healthy}
+      kafka: {condition: service_healthy}
       datanode1: {condition: service_started}
       datanode2: {condition: service_started}
       datanode3: {condition: service_started}

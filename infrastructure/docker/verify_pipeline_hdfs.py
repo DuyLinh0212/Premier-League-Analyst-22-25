@@ -51,6 +51,13 @@ def main():
         for group in ("player_performance", "season_comparison", "league_standings", "tactical_insights", "prediction_features"):
             if not fs.exists(path_cls(f"{uri}/premier-league/gold/{group}")):
                 raise RuntimeError("Gold category missing: " + group)
+        simulated = f"{uri}/premier-league/kafka/processed/facts/league_table/season=2025-2026"
+        simulated_raw = f"{uri}/premier-league/kafka/raw/fbref/2025-2026/01_league/league_table.csv"
+        if not fs.exists(path_cls(simulated_raw)):
+            raise RuntimeError("Kafka Bronze CSV missing for simulated season 2025-2026")
+        simulated_rows = spark.read.parquet(simulated).count()
+        if simulated_rows != 20:
+            raise RuntimeError(f"Expected 20 Kafka Parquet rows for 2025-2026, found {simulated_rows}")
         sample = spark.read.parquet(tables["facts/fact_match_enriched"]["path"]).inputFiles()[0]
         status = fs.getFileStatus(path_cls(sample))
         block_size = int(status.getBlockSize())
@@ -60,6 +67,8 @@ def main():
                   "hdfs_base": "/premier-league", "bronze_seasons": ["2022-23", "2023-24", "2024-25"],
                   "silver_table_count": len(tables), "silver_row_count": total_rows,
                   "silver_paths": sorted({str(info["path"]).split("/silver/",1)[-1].split("/",1)[0] for info in tables.values()}),
+                  "kafka_simulated_season": {"season": "2025-2026", "parquet_rows": simulated_rows,
+                                             "raw_csv_path": simulated_raw, "parquet_path": simulated},
                   "gold_categories": ["player_performance", "season_comparison", "league_standings", "tactical_insights", "prediction_features"],
                   "verified_block_size_bytes": block_size}
         print(json.dumps(output, ensure_ascii=False, sort_keys=True), flush=True)
