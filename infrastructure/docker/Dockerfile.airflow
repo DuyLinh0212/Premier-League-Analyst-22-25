@@ -4,6 +4,7 @@ USER root
 COPY --from=runtime /opt/java/openjdk /opt/java/openjdk
 COPY --from=runtime /opt/spark /opt/spark
 COPY --from=runtime /opt/project /opt/project
+COPY --from=runtime /opt/kafka-jars /opt/kafka-jars
 COPY --from=runtime /usr/local /opt/python-runtime
 COPY orchestration/dags /opt/airflow/dags
 COPY infrastructure/docker/hdfs /usr/local/bin/hdfs
