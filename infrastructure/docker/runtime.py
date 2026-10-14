@@ -10,6 +10,50 @@ from pl_pipeline.core import Context, ROOT
 
 OUTPUT = Path(os.getenv("MATCH_MODEL_DIR", str(ROOT / "data/models/match_outcome")))
 KNN = Path(os.getenv("KNN_OUTPUT_DIR", str(ROOT / "data/models/knn")))
+STAGE_LABELS = {
+    "preflight": "Kiểm tra dữ liệu nguồn và HDFS",
+    "register_raw_snapshot": "Đưa dữ liệu gốc lên HDFS (Bronze)",
+    "build_identity": "Chuẩn hóa mã cầu thủ và câu lạc bộ",
+    "build_silver": "Làm sạch và ghép dữ liệu Silver",
+    "validate_silver": "Kiểm tra chất lượng dữ liệu Silver",
+    "publish_silver": "Xác nhận dữ liệu Silver trên HDFS",
+    "knn": "Ước tính bảng xếp hạng bằng KNN",
+    "match_outcome": "Huấn luyện mô hình dự đoán kết quả trận đấu",
+    "match_forecast_v2": "Huấn luyện mô hình dự đoán trước trận và trong trận",
+    "publish": "Ghi nhận phiên bản mô hình và báo cáo",
+    "merged_publish": "Lưu báo cáo Gold và công bố cho website",
+}
+
+
+def print_stage_summary(name, ctx):
+    details = ctx.manifest.get("stages", {}).get(name, {})
+    print("=== TÓM TẮT CÔNG ĐOẠN ===", flush=True)
+    print(f"Công đoạn: {STAGE_LABELS.get(name, name)}", flush=True)
+    print("Trạng thái: Thành công.", flush=True)
+    if name == "preflight":
+        print(f"Tệp CSV nguồn: {details.get('source_files', 0)}; DataNode hoạt động: {details.get('live_datanodes', 0)}/{details.get('required_datanodes', 0)}.", flush=True)
+    elif name == "register_raw_snapshot":
+        print(f"Bộ dữ liệu: {details.get('dataset_id', ctx.manifest.get('dataset_id', '—'))}", flush=True)
+        print(f"Đường dẫn Bronze trên HDFS: {ctx.manifest.get('raw_snapshot_path', '—')}", flush=True)
+    elif name == "build_identity":
+        print(f"Cầu thủ: {details.get('players', 0)}; ghép được Transfermarkt: {details.get('tm_matched', 0)}; cần rà soát: {details.get('unmatched', 0)}.", flush=True)
+    elif name == "build_silver":
+        tables = [key for key in ctx.manifest.get("tables", {}) if key.startswith("facts/")]
+        print(f"Đã tạo {len(tables)} bảng dữ liệu Silver trên HDFS: {ctx.silver}", flush=True)
+    elif name == "validate_silver":
+        print(f"Kiểm tra chất lượng: {details.get('checks', 0)} mục; đạt: {'Có' if details.get('passed') else 'Không'}.", flush=True)
+    elif name == "publish_silver":
+        print(f"Dữ liệu Silver đã được xác nhận tại: {ctx.silver}/_runs/{ctx.run_id}/_VALIDATED", flush=True)
+    elif name == "knn":
+        print(f"Tệp kết quả KNN: {KNN / 'knn_predictions.csv'}", flush=True)
+    elif name in ("match_outcome", "match_forecast_v2"):
+        print(f"Phiên bản mô hình: {details.get('model_version', 'đã ghi nhận')}", flush=True)
+    elif name == "publish":
+        print(f"Nơi phục vụ báo cáo: {details.get('target', 'Neon PostgreSQL')}", flush=True)
+        print(f"Phiên bản dự đoán trận: {details.get('forecast_version', '—')}", flush=True)
+    elif name == "merged_publish":
+        print(f"Dữ liệu báo cáo Gold (Parquet) trên HDFS: {ctx.gold}", flush=True)
+        print(f"Báo cáo cho website đã lưu vào Neon PostgreSQL; mã lần chạy: {details.get('serving_run_id', '—')}", flush=True)
 
 def hdfs(*args, check=True):
     return subprocess.run([os.getenv("HDFS_BIN", "hdfs"), "dfs", "-Ddfs.blocksize=67108864", "-Ddfs.replication=2", *map(str, args)], check=check)
@@ -25,6 +69,7 @@ def stage(name, run_id=None):
     from pl_pipeline.silver import build_silver, validate_silver, publish_silver
     run_id = run_id or "football_" + hashlib.sha256(os.getenv("PIPELINE_RUN_ID", "manual").encode()).hexdigest()[:24]
     ctx = Context(run_id)
+    print(f"Đang thực hiện: {STAGE_LABELS.get(name, name)}", flush=True)
     functions = {f.__name__: f for f in [preflight, register_raw_snapshot, build_identity, build_silver, validate_silver, publish_silver]}
     if name in functions:
         functions[name](ctx)
@@ -78,12 +123,9 @@ def stage(name, run_id=None):
         from analytics.publish import publish_hdfs
         result = publish_hdfs(ctx)
         ctx.completed("merged_publish", result)
-        print("TÓM TẮT CÔNG BỐ DỮ LIỆU", flush=True)
-        print("Trạng thái: Phân tích và công bố thành công.", flush=True)
-        print(f"Dữ liệu báo cáo Gold (Parquet) trên HDFS: {ctx.gold}", flush=True)
-        print(f"Báo cáo phục vụ website đã lưu vào Neon PostgreSQL; mã lần chạy: {result['serving_run_id']}", flush=True)
     else:
         raise ValueError("Unknown stage: " + name)
+    print_stage_summary(name, ctx)
 
 if __name__ == "__main__":
     import fcntl
@@ -106,4 +148,5 @@ if __name__ == "__main__":
                 neon_store.set_job(run_id, args.stage, "success", Context(run_id).manifest)
             except Exception as exc:
                 neon_store.set_job(run_id, args.stage, "failed", error=str(exc)[:1000])
+                print(f"Công đoạn {STAGE_LABELS.get(args.stage, args.stage)} thất bại; xem chi tiết lỗi bên dưới.", flush=True)
                 raise

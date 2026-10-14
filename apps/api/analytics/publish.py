@@ -87,7 +87,10 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
             neon_store.publish_reports(run_id, dataset_key, reports,
                                        {"source": "HDFS Silver", "dataset": dataset_key,
                                         "report_version": VERSION})
-        print(json.dumps({'run_id': run_id, 'reports': len(reports), 'status': 'complete'}), flush=True)
+        if defer_neon:
+            print(f"Đã tính xong {len(reports)} báo cáo phân tích; tiếp tục ghi Parquet vào Gold/HDFS và công bố lên Neon. Mã lần chạy: {run_id}", flush=True)
+        else:
+            print(f"Đã công bố {len(reports)} báo cáo lên Neon PostgreSQL. Mã lần chạy: {run_id}", flush=True)
         return run_id
     except Exception as exc:
         if not defer_neon:

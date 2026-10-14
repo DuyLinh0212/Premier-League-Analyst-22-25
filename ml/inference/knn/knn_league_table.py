@@ -142,7 +142,7 @@ def _load_fact_tables(
     for priority, path in enumerate(additional_input_paths, start=1):
         partitions = _committed_season_partitions(spark, path)
         if not partitions:
-            print(f"No committed season partitions found under {path}; skipping optional input.")
+            print(f"Không tìm thấy phân vùng mùa giải đã công bố tại {path}; bỏ qua dữ liệu bổ sung tùy chọn.", flush=True)
             continue
         extra = spark.read.option("basePath", path).parquet(*partitions)
         missing = sorted(set(FACT_COLUMNS) - set(extra.columns))
@@ -463,8 +463,8 @@ def main() -> int:
         }
         outputs_exist = predictions_csv.exists()
         if not args.force and checkpoint and checkpoint.get("config") == checkpoint_key and outputs_exist:
-            print("HDFS input has not changed; KNN outputs are already up to date.")
-            print(f"Last run: {checkpoint.get('run_at_utc', 'unknown')}")
+            print("Dữ liệu HDFS không thay đổi; kết quả KNN hiện tại vẫn còn mới.", flush=True)
+            print(f"Thời điểm tính gần nhất: {checkpoint.get('run_at_utc', 'không rõ')}", flush=True)
             return 0
 
         scaled = fit_scaled(features).cache()
@@ -500,11 +500,11 @@ def main() -> int:
             args.checkpoint_location.rstrip("/") + "/latest.json",
             json.dumps(history_entry, ensure_ascii=False, indent=2),
         )
-        print(f"KNN query season: {query_season}")
-        print(f"Reference seasons: {', '.join(s for s in seasons if s != query_season)}")
-        print(f"Query teams: {len(prediction_records)}")
-        print(f"Input fingerprint: {source_fingerprint}")
-        print(f"Predictions CSV: {predictions_csv.resolve()}")
+        print(f"Mùa được ước tính: {query_season}", flush=True)
+        print(f"Các mùa dùng làm tham chiếu: {', '.join(s for s in seasons if s != query_season)}", flush=True)
+        print(f"Số câu lạc bộ được ước tính: {len(prediction_records)}", flush=True)
+        print(f"Mã kiểm tra dữ liệu đầu vào: {source_fingerprint}", flush=True)
+        print(f"Tệp kết quả KNN: {predictions_csv.resolve()}", flush=True)
         return 0
     finally:
         spark.stop()

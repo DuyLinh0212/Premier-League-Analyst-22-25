@@ -185,7 +185,7 @@ class Context:
         }
         self.save()
         cached.unpersist()
-        print(f"TABLE {name}: {count} rows -> {target}", flush=True)
+        print(f"BẢNG {name}: {count} bản ghi -> {target}", flush=True)
         return df.sparkSession.read.parquet(target)
 
     def export_rows(self, df, name):
