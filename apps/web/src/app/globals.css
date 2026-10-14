@@ -1,37 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
-
 * { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #172943;
-  background: #f5f7fc;
-  font-size: 14px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-button, input, select {
-  font-family: inherit;
-}
+body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; color: #172943; background: #f5f7fc; font-size: 14px; }
+button, input, select { font: inherit; }
 button { border: 0; }
 button, select { cursor: pointer; }
 button:disabled, select:disabled { cursor: default; opacity: 0.5; }
 a { color: #2367ab; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #659bcb; outline-offset: 3px; }
-
-/* Logo Image */
-.a-logo-img {
-  object-fit: contain;
-  border-radius: 6px;
-  flex-shrink: 0;
-  display: inline-block;
-}
-.a-brand .a-logo-img {
-  width: 28px;
-  height: 28px;
-}
-.a-breadcrumb .a-logo-img {
-  width: 18px;
-  height: 18px;
-}
-

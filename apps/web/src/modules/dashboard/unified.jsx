@@ -7,8 +7,8 @@ import Insights, {Stats,number} from "./insights";
 import ValuationSimulator from "./valuation-simulator";
 
 const seasons = ["2024-2025","2023-2024","2022-2023"];
-const titles = {home:"Trang chủ",standings:"BXH dự đoán theo KNN",phases:"Phong độ CLB",outlook:"Tiềm năng cầu thủ",players:"So sánh cầu thủ",match:"Phân tích trận đấu",simulation:"Định Giá cầu thủ",history:"Báo cáo & dữ liệu"};
-const descriptions={home:"Phân tích · Dự đoán · Khám phá dữ liệu 2022–2025",standings:"BXH dự đoán theo KNN cho mùa 2024–2025",phases:"Theo dõi phong độ qua bốn giai đoạn mùa giải",outlook:"Tiềm năng và khả năng duy trì qua một đến ba mùa",players:"So sánh kỹ năng và khám phá cầu thủ tương đồng",match:"Dự đoán xác suất và phân tích trận đấu chuyên sâu",simulation:"Mô hình định giá thị trường & dự báo quỹ đạo giá trị 3 năm tới",history:"Xem từng lần phân tích theo ngày và giờ Việt Nam"};
+const titles = {home:"Trang chủ",standings:"BXH dự đoán theo KNN",phases:"Phong độ CLB",outlook:"Tiềm năng cầu thủ",players:"Radar cầu thủ",match:"Trận & KNN",simulation:"Định Giá Cầu Thủ",history:"Báo cáo & dữ liệu"};
+const descriptions={home:"Phân tích · Dự đoán · Khám phá dữ liệu 2022–2025",standings:"BXH dự đoán theo KNN cho mùa 2024–2025",phases:"Theo dõi phong độ qua bốn giai đoạn mùa giải",outlook:"Tiềm năng và khả năng duy trì qua một đến ba mùa",players:"So sánh kỹ năng và khám phá cầu thủ tương đồng",simulation:"Định giá cầu thủ",history:"Xem từng lần phân tích theo ngày và giờ Việt Nam"};
 const labels={player_name:"Cầu thủ",club_name:"CLB",club_id:"Mã CLB",season:"Mùa giải",points:"Điểm",rank:"Hạng",goals_for:"Bàn thắng",goals_against:"Bàn thua",first:"Cầu thủ 1",second:"Cầu thủ 2",metric:"Chỉ số",first_pct:"Bách phân vị 1",second_pct:"Bách phân vị 2",similarity:"Tương đồng (%)",saved_mil_eur:"Chênh giá · M€",name:"Cầu thủ",club:"CLB"};
 const metricNames={assists_p90:"Kiến tạo /90",crosses_p90:"Tạt bóng /90",fouls_dr_p90:"Bị phạm lỗi /90",goals_p90:"Bàn thắng /90",int_p90:"Cắt bóng /90",minutes:"Phút",sot_p90:"Sút trúng đích /90",tackles_p90:"Tắc bóng /90"};
 const fmt = v => v == null ? "—" : typeof v === "number" ? v.toLocaleString("vi-VN",{maximumFractionDigits:2}) : Array.isArray(v)&&v.every(x=>typeof x==="number") ? v.map(x=>`${number(x*100,1)}%`).join(" · ") : typeof v === "object" ? JSON.stringify(v) : String(v);
@@ -18,19 +18,15 @@ const timeVietnam=value=>value?new Intl.DateTimeFormat("vi-VN",{timeZone:"Asia/H
 const statusVietnam=value=>({complete:"Hoàn tất",success:"Hoàn tất",processing:"Đang chạy",running:"Đang chạy",failed:"Thất bại",queued:"Đang chờ",scheduled:"Đã lên lịch",skipped:"Bỏ qua",upstream_failed:"Bước trước thất bại",up_for_retry:"Chờ thử lại",up_for_reschedule:"Chờ lịch mới",deferred:"Tạm hoãn",removed:"Đã gỡ",restarting:"Đang khởi động lại"}[value]||value||"Không rõ");
 const stageVietnam=value=>({preflight:"Kiểm tra đầu vào",raw_snapshot:"Nhập dữ liệu nguồn vào HDFS",register_raw_snapshot:"Nhập dữ liệu nguồn vào HDFS",build_identity:"Chuẩn hóa mã đội và cầu thủ",build_silver:"Chuẩn hóa dữ liệu Silver",validate_silver:"Kiểm tra dữ liệu",publish_silver:"Công bố Silver lên HDFS",knn:"Tính bảng xếp hạng KNN",match_outcome:"Huấn luyện dự đoán trận",match_forecast_v2:"Huấn luyện dự đoán theo tỉ số",publish:"Chuẩn bị báo cáo",merged_publish:"Lưu báo cáo lên Neon"}[value]||String(value||"").replaceAll("_"," "));
 function Icon({id="home"}) {const paths={home:"M3 10 12 3l9 7M5 9v11h5v-7h4v7h5V9",standings:"M4 20V10h4v10m2 0V4h4v16m2 0v-7h4v7",players:"M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-6 9v-2a6 6 0 0 1 12 0v2m3-16a4 4 0 0 1 0 8m1 3a5 5 0 0 1 4 5",match:"M12 3 3 7v10l9 5 9-5V7l-9-4Zm0 6 4 3-2 5h-4l-2-5 4-3",history:"M4 4h16v16H4V4Zm5 4v8m4-8v8m4-8v8",phases:"M3 20h18M5 16l4-6 5 3 6-9",outlook:"M3 20h18M5 15l5-5 4 3 6-9",simulation:"M9 3h6m-5 0v7L4 20h16l-6-10V3M7 16h10"};return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[id]||paths.home}/></svg>;}
-function Logo({className="a-logo-img"}){return <img src="/logo.jpg" alt="Premier League Logo" className={className}/>;}
+function Logo(){return <svg viewBox="0 0 24 24" aria-hidden="true">{[0,1,2].flatMap(y=>[0,1,2].map(x=><rect key={`${x}${y}`} x={2+x*7} y={2+y*7} width="5" height="5" rx="1" fill="currentColor" opacity={x===1 && y===1 ? .4 : 1}/>))}</svg>;}
 function matchHistory(matchReport,features) {
   const results=new Map((matchReport.results||[]).map(r=>[r.match_id,r]));
   if(results.size!==features.length||features.some(m=>{const r=results.get(m.match_id);return !r||!Number.isFinite(r.home_goals)||!Number.isFinite(r.away_goals);})) throw new Error("Báo cáo chưa có kết quả trận đầy đủ. Hãy chạy lại bước công bố dữ liệu.");
   return features.map(m=>({...m,...results.get(m.match_id)}));
 }
-const apiCache = new Map();
 async function api(path,body) {
-  const isGet = !body;
-  if(isGet && apiCache.has(path)) return apiCache.get(path);
   const r=await fetch(`/api/football/${path}`,body?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}:{});
   const data=await r.json(); if(!r.ok) throw new Error(typeof data.detail==="string"?data.detail:"Kiểm tra dữ liệu và thử lại.");
-  if(isGet) apiCache.set(path, data);
   return data;
 }
 function Table({rows=[],columns,sortable=false}) {

@@ -22,9 +22,7 @@ def main():
         def switch(label):
             nav = page.get_by_role('navigation',name='Phân hệ phân tích')
             alias = {
-                'Radar cầu thủ': 'So sánh cầu thủ',
-                'Mô phỏng': 'Định Giá cầu thủ',
-                'Trận & KNN': 'Phân tích trận đấu',
+                'Mô phỏng': 'Định Giá Cầu Thủ',
             }
             target = alias.get(label, label)
             btn = nav.get_by_role('button',name=target,exact=True)
@@ -84,10 +82,7 @@ def main():
         page.locator('.history-report details summary').click()
         expect(page.locator('.history-report pre')).to_contain_text(re.compile(r'70\.9|310\.4'),timeout=30000)
         capture('09-danh-muc.png','Lịch sử theo giờ Việt Nam và danh mục báo cáo')
-        match_btn = page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Phân tích trận đấu',exact=True)
-        if match_btn.count() == 0:
-            match_btn = page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Trận & KNN',exact=True)
-        match_btn.click()
+        page.get_by_role('navigation',name='Phân hệ phân tích').get_by_role('button',name='Trận & KNN',exact=True).click()
         expect(page.locator('.f-evaluation')).to_be_visible()
         page.get_by_role('button',name='Ước tính kết quả →').click()
         expect(page.locator('.f-model-id')).to_contain_text('wdl2_',timeout=30000)
