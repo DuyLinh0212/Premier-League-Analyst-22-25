@@ -23,7 +23,7 @@ def main():
             nav = page.get_by_role('navigation',name='Phân hệ phân tích')
             alias = {
                 'Radar cầu thủ': 'So sánh cầu thủ',
-                'Mô phỏng': 'Định Giá Cầu Thủ',
+                'Mô phỏng': 'Định Giá cầu thủ',
                 'Trận & KNN': 'Phân tích trận đấu',
             }
             target = alias.get(label, label)
