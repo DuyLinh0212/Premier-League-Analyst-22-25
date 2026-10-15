@@ -4,7 +4,7 @@ import argparse
 from . import neon_store
 
 
-def verify(expected_run=None, expected_reports=23):
+def verify(expected_run=None, expected_reports=21):
     neon_store.schema()
     with neon_store._connect() as connection, connection.cursor() as cursor:
         if expected_run:
@@ -29,6 +29,6 @@ def verify(expected_run=None, expected_reports=23):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id")
-    parser.add_argument("--expected-reports", type=int, default=23)
+    parser.add_argument("--expected-reports", type=int, default=21)
     args = parser.parse_args()
     verify(args.run_id, args.expected_reports)

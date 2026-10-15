@@ -13,7 +13,6 @@ from .outlook.club_phases import analyze as phases
 
 def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neon=False, pending_path=None):
     output = Path(os.getenv('MATCH_MODEL_DIR', str(ROOT / 'data/models/match_outcome')))
-    knn = Path(os.getenv('KNN_OUTPUT_DIR', str(ROOT / 'data/models/knn')))
     forecast_artifact = json.loads((output / 'forecast_v2.json').read_text(encoding='utf-8'))
     run_id = run_id or 'bundle_' + codec.digest({'dataset': dataset_key, 'version': VERSION, 'model': json.loads((output / 'model.json').read_text(encoding='utf-8'))['model_version'], 'forecast_v2':forecast_artifact['model_version']})[:24]
     if neon_store.run_complete(run_id):
@@ -69,10 +68,6 @@ def _publish_with_reader(dataset_key, reader, run_id=None, spark=None, defer_neo
         reports.append(('model_metrics', json.loads((output / 'metrics.json').read_text(encoding='utf-8')), {}))
         reports.append(('forecast_v2', forecast_artifact, {}))
         reports.append(('forecast_v2_metrics', json.loads((output / 'forecast_v2_metrics.json').read_text(encoding='utf-8')), {}))
-        reports.append(('knn_metrics', json.loads((knn / 'knn_metrics.json').read_text(encoding='utf-8')), {}))
-        for kind, filename in [('knn_predictions', 'knn_predictions.csv')]:
-            with (knn / filename).open(encoding='utf-8-sig', newline='') as stream:
-                reports.append((kind, list(csv.DictReader(stream)), {}))
         original_players = reader('datamb/players')
         from collections import Counter
         ids = Counter(p['id'] for p in original_players)
@@ -172,7 +167,6 @@ def publish_hdfs(ctx):
             'match_results': 'prediction_features',
             'matches': 'prediction_features', 'model': 'prediction_features', 'model_metrics': 'prediction_features',
             'forecast_v2': 'prediction_features', 'forecast_v2_metrics': 'prediction_features',
-            'knn_predictions': 'league_standings', 'knn_metrics': 'league_standings',
             'actual_standings': 'league_standings',
         }
         for kind, group in groups.items():

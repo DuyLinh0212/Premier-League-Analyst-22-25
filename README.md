@@ -4,6 +4,8 @@
 
 Nền tảng phân tích Premier League hợp nhất dữ liệu FBref và Transfermarkt, chuẩn hóa bằng Spark, lưu lakehouse trên HDFS, chạy phân tích theo Airflow và công bố **báo cáo** lên Neon PostgreSQL. Dữ liệu nguồn và các bảng Silver vẫn ở HDFS; Neon chỉ giữ kết quả đã hoàn chỉnh, lịch sử chạy và trạng thái từng bước. Web Next.js đọc báo cáo qua FastAPI.
 
+> Pipeline batch hiện có **10 task**, đã bỏ KNN xếp hạng và phụ thuộc vào file KNN khi công bố báo cáo. Demo Kafka độc lập với batch; lần công bố mới có **21 báo cáo**.
+
 ## Kiến trúc mã nguồn
 
 ```text

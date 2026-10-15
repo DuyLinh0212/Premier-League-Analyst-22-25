@@ -138,8 +138,11 @@ def model_metrics():
 
 @app.get("/matches")
 def examples():
-    refresh()
-    return [{k: v for k, v in r.items() if k in {"match_id", "match_date", "season", "home_team", "away_team", "home_name", "away_name", "home_stats", "away_stats"}} for r in matches()]
+    from analytics.neon_store import match_examples
+    try:
+        return match_examples()
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 @app.get("/clubs")
 def clubs():

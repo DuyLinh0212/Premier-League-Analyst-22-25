@@ -6,7 +6,7 @@ async function proxy(request, context) {
     return Response.json({ detail: "Không tìm thấy chức năng" }, { status: 404 });
   try {
     const response = await fetch(`${process.env.FOOTBALL_API_URL || "http://127.0.0.1:8000"}/${endpoint}${new URL(request.url).search}`, {
-      method: request.method, cache: "no-store", signal: AbortSignal.timeout(20000),
+      method: request.method, cache: "no-store", signal: AbortSignal.timeout(60000),
       headers: { "Content-Type": "application/json" },
       ...(request.method === "POST" ? { body: await request.text() } : {}),
     });

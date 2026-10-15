@@ -141,6 +141,28 @@ def report(kind, filters=None, run_id=None):
     return payload, {"run_id": published_run, "version": model_version, "completed_at": completed_at.isoformat() if completed_at else None, "status": status}
 
 
+def match_examples():
+    """Project history columns in PostgreSQL instead of transferring model inputs."""
+    schema()
+    columns = ["match_id", "match_date", "season", "home_team", "away_team",
+               "home_name", "away_name", "home_stats", "away_stats"]
+    with _connect() as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT jsonb_agg((SELECT jsonb_object_agg(k,v) "
+            "FROM jsonb_each(item.value) AS fields(k,v) WHERE k=ANY(%s))) "
+            "FROM pl_analysis_active_reports a "
+            "JOIN pl_analysis_reports p USING (run_id,report_name,filter_key) "
+            "JOIN pl_analysis_runs r USING (run_id) "
+            "CROSS JOIN LATERAL jsonb_array_elements(p.payload) AS item(value) "
+            "WHERE a.report_name='matches' AND a.filter_key=%s AND r.status='complete'",
+            (columns, _filter_key(None)[0]),
+        )
+        row = cursor.fetchone()
+    if not row or row[0] is None:
+        raise LookupError("Chưa có báo cáo Neon được công bố: matches")
+    return row[0]
+
+
 def runs(limit=200, day=None):
     schema()
     with _connect() as connection, connection.cursor() as cursor:

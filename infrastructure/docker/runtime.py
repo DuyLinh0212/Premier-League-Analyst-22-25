@@ -86,7 +86,7 @@ def stage(name, run_id=None):
                         "--checkpoint-location", ctx.uri + ctx.base + "/checkpoints/analytics/knn_league_table"], check=True)
         ctx.completed("knn")
     elif name == "match_outcome":
-        ctx.require("knn")
+        ctx.require("publish_silver")
         from match_outcome.train import train
         from match_outcome.compare import compare
         train(ROOT, OUTPUT, ctx.silver_table_path("fact_match_enriched"))

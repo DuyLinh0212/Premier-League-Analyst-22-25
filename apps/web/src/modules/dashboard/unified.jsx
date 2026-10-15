@@ -5,9 +5,9 @@ import PhaseCharts from "./phase-charts";
 import OutlookPanel from "./outlook-panel";
 import Insights, {Stats,number} from "./insights";
 import ValuationSimulator from "./valuation-simulator";
-
+//standings:"Xếp hạng KNN theo chỉ số đội bóng"
 const seasons = ["2024-2025","2023-2024","2022-2023"];
-const titles = {home:"Trang chủ",standings:"Xếp hạng KNN theo chỉ số đội bóng",phases:"Phong độ CLB",outlook:"Tiềm năng cầu thủ",players:"So sánh cầu thủ",match:"Phân tích trận đấu",simulation:"Định Giá cầu thủ",history:"Báo cáo & dữ liệu"};
+const titles = {home:"Trang chủ",phases:"Phong độ CLB",outlook:"Tiềm năng cầu thủ",players:"So sánh cầu thủ",match:"Phân tích trận đấu",simulation:"Định Giá cầu thủ",history:"Báo cáo & dữ liệu"};
 const descriptions={home:"Phân tích · Dự đoán · Khám phá dữ liệu 2022–2025",standings:"Nhập bốn chỉ số của từng đội để KNN ước tính thứ hạng; dữ liệu tham chiếu lấy từ ba mùa 2022–2025",phases:"Theo dõi phong độ qua bốn giai đoạn mùa giải",outlook:"Tiềm năng và khả năng duy trì qua một đến ba mùa",players:"So sánh kỹ năng và khám phá cầu thủ tương đồng",match:"Dự đoán xác suất và phân tích trận đấu chuyên sâu",simulation:"Mô hình định giá thị trường & dự báo quỹ đạo giá trị 3 năm tới",history:"Xem từng lần phân tích theo ngày và giờ Việt Nam"};
 const labels={player_name:"Cầu thủ",club_name:"CLB",club_id:"Mã CLB",season:"Mùa giải",points:"Điểm",rank:"Hạng",goals_for:"Bàn thắng",goals_against:"Bàn thua",first:"Cầu thủ 1",second:"Cầu thủ 2",metric:"Chỉ số",first_pct:"Bách phân vị 1",second_pct:"Bách phân vị 2",similarity:"Tương đồng (%)",saved_mil_eur:"Chênh giá · M€",name:"Cầu thủ",club:"CLB"};
 const metricNames={assists_p90:"Kiến tạo /90",crosses_p90:"Tạt bóng /90",fouls_dr_p90:"Bị phạm lỗi /90",goals_p90:"Bàn thắng /90",int_p90:"Cắt bóng /90",minutes:"Phút",sot_p90:"Sút trúng đích /90",tackles_p90:"Tắc bóng /90"};

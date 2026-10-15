@@ -133,7 +133,7 @@ jobs:
         run: |
           mkdir -p infrastructure/docker/evidence-ci
           docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli /opt/project/infrastructure/docker/verify_pipeline_hdfs.py | tee infrastructure/docker/evidence-ci/hdfs-run.json
-          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli -m analytics.verify_neon --expected-reports 23 | tee infrastructure/docker/evidence-ci/neon-run.json
+          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli -m analytics.verify_neon --expected-reports 21 | tee infrastructure/docker/evidence-ci/neon-run.json
       - name: Upload pipeline verification evidence
         uses: actions/upload-artifact@v4
         with:

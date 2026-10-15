@@ -15,12 +15,14 @@
 
 Cần Internet để clone, cài dependencies và truy cập Neon. Dữ liệu CSV nguồn được lấy từ repository; `appearances.csv` phải giải nén theo mục 2.4 trước khi chạy. Các đường dẫn `$HOME/...` là của tài khoản Ubuntu đang đăng nhập, không phải đường dẫn máy sinh viên. Dành tối thiểu khoảng 8 GB RAM cho WSL và đủ dung lượng trống cho dữ liệu tải về, Bronze/Silver và môi trường; nhu cầu thực tế phụ thuộc các lần chạy.
 
+> **Cập nhật 15/10/2026:** DAG batch có 10 task, không chạy KNN xếp hạng và không công bố `knn_predictions`/`knn_metrics`. Mô phỏng Kafka ở mục 7 là demo riêng, không còn là đầu vào bắt buộc của batch. Báo cáo KNN/checkpoint của các lần cũ nếu còn trên máy không phải kết quả của lần chạy mới.
+
 ## 1. Kiến trúc và thứ tự chạy
 
 ```text
 CSV FBref/Transfermarkt -> HDFS Bronze -> Spark -> HDFS Silver
                                                  |
-API mô phỏng -> Kafka -> Spark -> HDFS Kafka ------+-> KNN 2025–2026
+API mô phỏng -> Kafka -> Spark -> HDFS Kafka (demo riêng)
                                                  |
                            Airflow -> mô hình/báo cáo -> HDFS Gold -> Neon
                                                                        |
@@ -32,7 +34,7 @@ Thứ tự trên máy mới:
 1. Cài công cụ và môi trường Python.
 2. Bật NameNode và 3 DataNode, chờ HDFS sẵn sàng.
 3. Bật Kafka, tạo topic một partition.
-4. Bật API mô phỏng, gửi mùa 2025–2026, chạy Spark Consumer ghi HDFS.
+4. Tùy chọn demo Kafka: bật API mô phỏng, gửi mùa 2025–2026, chạy Spark Consumer ghi HDFS.
 5. Bật Airflow, tạo pool, kích hoạt `football_pipeline`.
 6. Bật đồng bộ lịch sử Airflow lên Neon.
 7. Bật backend và frontend; kiểm tra kết quả và lưu bằng chứng.
@@ -377,7 +379,7 @@ source "$HOME/.config/premier-league.env"
 
 Producer của dự án yêu cầu topic đúng **một partition**. Kafka CLI kết nối được chưa đủ: địa chỉ `advertised.listeners` cũng phải truy cập được từ Spark và producer.
 
-## 7. Tạo dữ liệu Kafka bắt buộc trước KNN
+## 7. Demo dữ liệu Kafka (tùy chọn, độc lập pipeline batch)
 
 ### Terminal S — API sinh bảng mô phỏng
 
@@ -480,7 +482,7 @@ airflow dags trigger football_pipeline --run-id "$run_id" \
 printf '%s\n' "$run_id" > evidence/airflow-run-id.txt
 ```
 
-Chờ `football_pipeline` thành công **11/11 tác vụ** trong UI. Giữ DAG streaming lịch mỗi phút ở trạng thái pause khi đang demo thủ công; pipeline match-stream có cấu hình topic khác và không cần chạy chồng vào demo BXH.
+Chờ `football_pipeline` thành công **10/10 tác vụ** trong UI. Giữ DAG streaming lịch mỗi phút ở trạng thái pause khi đang demo thủ công; pipeline match-stream có cấu hình topic khác và không cần chạy chồng vào demo BXH.
 
 | Thứ tự | Task trong `football.py` | Ý nghĩa |
 |---|---|---|
@@ -490,11 +492,10 @@ Chờ `football_pipeline` thành công **11/11 tác vụ** trong UI. Giữ DAG s
 | 4 | `build_silver` | Tạo bảng Parquet Silver |
 | 5 | `validate_silver` | Kiểm tra dữ liệu, khóa và các điều kiện chất lượng |
 | 6 | `publish_silver` | Công bố Silver, tạo dấu `_VALIDATED` |
-| 7 | `knn` | Đọc Silver + Kafka 2025–2026, tạo dự đoán và checkpoint |
-| 8 | `match_outcome` | Huấn luyện/đánh giá mô hình trận đấu |
-| 9 | `match_forecast_v2` | Mô hình dự đoán trước/trong trận |
-| 10 | `publish` | Chuẩn bị metadata công bố |
-| 11 | `merged_publish` | Ghi Gold và công bố trọn bộ báo cáo lên Neon |
+| 7 | `match_outcome` | Huấn luyện/đánh giá mô hình trận đấu |
+| 8 | `match_forecast_v2` | Mô hình dự đoán trước/trong trận |
+| 9 | `publish` | Chuẩn bị metadata công bố |
+| 10 | `merged_publish` | Ghi Gold và công bố trọn bộ báo cáo lên Neon |
 
 `orchestration/dags/football.py` khai báo thứ tự; từng task gọi `infrastructure/docker/runtime.py stage <task>`. Đây là **mã nghiệp vụ xử lý công đoạn**, không phải `run.py` khởi động dịch vụ. Không chạy trực tiếp `python football.py` để thay Airflow.
 
@@ -523,8 +524,6 @@ source "$HOME/.config/premier-league.env"
 "$HADOOP_HOME/bin/hdfs" dfs -ls /premier-league/silver
 "$HADOOP_HOME/bin/hdfs" dfs -ls /premier-league/silver/_runs
 "$HADOOP_HOME/bin/hdfs" dfs -ls /premier-league/gold
-"$HADOOP_HOME/bin/hdfs" dfs -ls /premier-league/checkpoints/analytics/knn_league_table
-"$HADOOP_HOME/bin/hdfs" dfs -cat /premier-league/checkpoints/analytics/knn_league_table/latest.json
 ```
 
 Cấu trúc cần đối chiếu:
@@ -617,7 +616,6 @@ curl -f http://localhost:8000/health
 curl -f 'http://localhost:8000/reports?limit=1'
 curl -f 'http://localhost:8000/airflow/history?limit=1'
 curl -f 'http://localhost:8000/standings?season=2024-2025'
-curl -f http://localhost:8000/knn/predictions
 curl -f 'http://localhost:3000/api/football/standings?season=2024-2025'
 ```
 
@@ -652,7 +650,7 @@ Checklist bằng chứng phù hợp hồ sơ nộp:
 - Commit/branch và lệnh đã thực hiện, phiên bản Java/Python/Spark/Airflow.
 - NameNode và 3 DataNode, HDFS không ở safe mode.
 - Bronze manifest/checksum, Silver schema/số dòng và `_VALIDATED` của run mới.
-- Airflow DAG, thời gian đầu/cuối và log 11 tác vụ của cùng một run.
+- Airflow DAG, thời gian đầu/cuối và log 10 tác vụ của cùng một run.
 - Kafka topic/partition/offset, producer gửi mùa, Consumer commit, CSV/Parquet tương ứng, checkpoint và replay.
 - Spark KNN features, scaler, mùa tham chiếu, query_season, output CSV và checkpoint fingerprint.
 - Model metrics/split thời gian và nhận xét giới hạn; không gọi dữ liệu mô phỏng là kết quả thật.
@@ -709,4 +707,4 @@ Không dùng `wsl --shutdown`, xóa thư mục dữ liệu hoặc format làm th
 - [Apache archive: Hadoop](https://archive.apache.org/dist/hadoop/common/hadoop-3.5.0/), [Spark](https://archive.apache.org/dist/spark/spark-3.5.9/), [Kafka](https://archive.apache.org/dist/kafka/4.3.1/).
 - Mã đối chiếu: `orchestration/dags/football.py`, `infrastructure/docker/runtime.py`, `apps/api/football/{api,producer,streaming_spark}.py`, `processing/spark/pl_pipeline/{core,silver}.py`, `ml/inference/knn/knn_league_table.py`, `apps/api/analytics/{publish,neon_store,airflow_history}.py`.
 
-Pipeline của commit này đã chạy đủ 11 bước trên môi trường hiện có. Các lệnh cài mới được đối chiếu tài liệu và mã nguồn, **chưa được thử lại toàn bộ trên một máy sạch**. Không format/cài đè môi trường đang chạy chỉ để xác nhận README. Tài liệu không chứa DSN/mật khẩu/token thật và không chứng nhận phần triển khai mà chưa có log/bằng chứng.
+Bản bỏ KNN đã chạy thành công 10/10 bước trên môi trường hiện có (run `manual_no_knn_20261015_104252`). Lần công bố mới có 21 báo cáo, không gồm hai báo cáo KNN cũ. Các lệnh cài mới được đối chiếu tài liệu và mã nguồn, **chưa được thử lại toàn bộ trên một máy sạch**. Không format/cài đè môi trường đang chạy chỉ để xác nhận README. Tài liệu không chứa DSN/mật khẩu/token thật và không chứng nhận phần triển khai mà chưa có log/bằng chứng.

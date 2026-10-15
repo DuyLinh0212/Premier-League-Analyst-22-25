@@ -52,10 +52,10 @@ function rankByKnn(input,samples){
  return scored.sort((a,b)=>a.mean_neighbor_rank-b.mean_neighbor_rank||a.club_name.localeCompare(b.club_name,"vi")).map((row,index)=>({...row,predicted_rank:index+1}));
 }
 function Standings({data,Table}) {
- const samples=Array.isArray(data?.knn_samples)?data.knn_samples.map(row=>({...row,ppg:Number(row.points_per_mp),goals_scored_per_game:Number(row.goals_for_per_match)})):[];
+ const samples=Array.isArray(data?.knn_samples)?data.knn_samples.map(row=>({...row,ppg:Number(row.points_per_mp),goal_difference_per_match:Number(row.goal_diff_per_match),goals_scored_per_game:Number(row.goals_for_per_match)})):[];
  const latest=[...new Set(samples.map(row=>row.season))].sort().at(-1);
- const defaults=[...new Map(samples.filter(row=>row.season===latest).sort((a,b)=>a.rank-b.rank).map(row=>[row.club_id,row.club_name])).values()];
- const [clubs,setClubs]=useState(()=>defaults.map(name=>emptyClub(name)));
+ const defaults=samples.filter(row=>row.season===latest).sort((a,b)=>a.rank-b.rank).map(row=>Object.fromEntries(["club_name",...rankFeatures.map(feature=>feature.key)].map(key=>[key,row[key]])));
+ const [clubs,setClubs]=useState(()=>defaults);
  const [ranked,setRanked]=useState([]),[validation,setValidation]=useState("");
  const update=(index,key,value)=>{setClubs(rows=>rows.map((row,i)=>i===index?{...row,[key]:value}:row));setRanked([]);};
  const calculate=()=>{
@@ -69,7 +69,7 @@ function Standings({data,Table}) {
  };
  const resultRows=ranked.map(row=>({predicted_rank:row.predicted_rank,club_name:row.club_name,mean_neighbor_rank:Number(row.mean_neighbor_rank.toFixed(2)),nearest_reference:`${row.nearest[0]?.sample.club_name} · ${row.nearest[0]?.sample.season}`}));
  return <><Card title="Ước tính thứ hạng bằng KNN" subtitle={`${samples.length} mẫu CLB–mùa lịch sử · MinMax 0–1 · 5 láng giềng gần nhất`}>
-  <p className="knn-intro">Nhập bốn chỉ số cho từng đội. Dữ liệu tham chiếu là thành tích thực tế của các đội trong ba mùa 2022–2025.</p>
+  <p className="knn-intro">Đã điền chỉ số thực tế mùa {latest} làm dữ liệu nhập ban đầu, không phải dự báo mùa tiếp theo. Bạn có thể sửa bốn chỉ số hoặc thêm đội để thử kịch bản riêng. Tập tham chiếu gồm ba mùa 2022–2025.</p>
   <div className="knn-form-scroll"><table className="knn-input-table"><thead><tr><th>Đội bóng</th>{rankFeatures.map(feature=><th key={feature.key}><span>{feature.label}</span><small>{feature.help}</small></th>)}<th aria-label="Thao tác"/></tr></thead><tbody>{clubs.map((row,index)=><tr key={index}><td><input aria-label={`Tên đội ${index+1}`} value={row.club_name} onChange={event=>update(index,"club_name",event.target.value)} placeholder="Tên đội"/></td>{rankFeatures.map(feature=><td key={feature.key}><input aria-label={`${feature.label} · ${row.club_name||`đội ${index+1}`}`} type="number" min={feature.min} max={feature.max} step={feature.step} value={row[feature.key]} onChange={event=>update(index,feature.key,event.target.value)} placeholder="—"/></td>)}<td><button className="knn-remove" type="button" title={`Xóa ${row.club_name||"đội"}`} onClick={()=>{setClubs(rows=>rows.filter((_,i)=>i!==index));setRanked([]);}}>×</button></td></tr>)}</tbody></table></div>
   <div className="knn-actions"><button type="button" onClick={()=>{setClubs(rows=>[...rows,emptyClub()]);setRanked([]);}}>Thêm đội bóng</button><button type="button" onClick={calculate}>Tính thứ hạng KNN</button></div>{validation&&<p className="knn-validation" role="alert">{validation}</p>}
  </Card>

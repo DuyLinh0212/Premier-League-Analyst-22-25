@@ -6,9 +6,9 @@ from pendulum import datetime
 
 DEFAULTS = {"owner": "football", "retries": 2, "retry_delay": timedelta(seconds=30), "pool": "spark_serial"}
 with DAG("football_pipeline", schedule=None, start_date=datetime(2026, 1, 1, tz="Asia/Ho_Chi_Minh"),
-         catchup=False, max_active_runs=1, max_active_tasks=1, default_args=DEFAULTS, tags=["spark", "knn", "outcomes"]) as pipeline:
+         catchup=False, max_active_runs=1, max_active_tasks=1, default_args=DEFAULTS, tags=["spark", "outcomes"]) as pipeline:
     previous = None
-    for stage in ["preflight", "register_raw_snapshot", "build_identity", "build_silver", "validate_silver", "publish_silver", "knn", "match_outcome", "match_forecast_v2", "publish", "merged_publish"]:
+    for stage in ["preflight", "register_raw_snapshot", "build_identity", "build_silver", "validate_silver", "publish_silver", "match_outcome", "match_forecast_v2", "publish", "merged_publish"]:
         task = BashOperator(task_id=stage, bash_command="$SPARK_PYTHON /opt/project/infrastructure/docker/runtime.py stage " + stage,
                             env={"PIPELINE_RUN_ID": "{{ run_id | replace(':', '_') | replace('+', '_') | replace('.', '_') }}"}, append_env=True,
                             execution_timeout=timedelta(hours=2))
