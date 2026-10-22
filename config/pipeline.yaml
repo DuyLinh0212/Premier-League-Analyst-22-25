@@ -1,0 +1,20 @@
+version: 1
+seasons: [2022-2023, 2023-2024, 2024-2025]
+source: data/raw
+expected_source_files: 586
+hdfs_root: /PremierLeagueAnalysis
+state_dir: ~/.local/share/premier-league-pipeline
+credentials_file: ~/.config/plca/credentials.json
+spark_python: ~/.venvs/plca-spark/bin/python
+airflow_python: ~/airflow/airflow_venv/bin/python
+airflow_home: ~/.local/share/premier-league-airflow
+airflow_url: http://127.0.0.1:8080
+api_url: http://127.0.0.1:8000
+web_url: http://127.0.0.1:5173
+spark_master: local[2]
+spark_driver_memory: 2g
+minimum_minutes: 900
+example_club: ARS
+example_clubs: [ARS, MCI, LIV, CHE]
+artifact_dir: artifacts
+run_timeout_seconds: 14400

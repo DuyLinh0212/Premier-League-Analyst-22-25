@@ -1,147 +1,65 @@
-name: Packaged application CI
+name: Premier League - Airflow HDFS PostgreSQL
+
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
+
 permissions:
   contents: read
-concurrency:
-  group: packaged-${{ github.ref }}
-  cancel-in-progress: true
-jobs:
-  packaged-runtime:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v4
-      - name: Free runner disk for Spark and Airflow
-        run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet
-      - name: Validate production and CI Compose
-        run: |
-          docker compose --env-file .env.example -f compose.yml config --quiet
-          docker compose -f compose.dev.yml config --quiet
-          for script in infrastructure/scripts/launchers/start-*.sh; do bash -n "$script"; done
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Train chronological pregame and live score models from Silver fixture
-        env:
-          PYTHONPATH: apps/api:ml/inference:processing/spark
-          OPENBLAS_NUM_THREADS: '1'
-        run: |
-          python -m pip install numpy==2.4.6
-          python -m match_outcome.train_v2
-          cp data/models/match_outcome/forecast_v2*.json data/samples/pipeline-seed/match_outcome/
-      - name: Build packaged runtime and API
-        run: |
-          docker build -f infrastructure/docker/Dockerfile.runtime --target runtime -t football-runtime:4.0 .
-          docker build -f infrastructure/docker/Dockerfile.runtime --target api -t football-api:4.0 .
-      - name: Unit and analytical contract tests
-        run: |
-          docker run --rm football-runtime:4.0 python -m unittest discover -s tests -v
-          docker run --rm football-runtime:4.0 python -m unittest discover -s apps/api/football/tests -v
-          docker run --rm football-runtime:4.0 python -m analytics.outlook.verify_outlook
-          docker run --rm football-runtime:4.0 python -m analytics.outlook.verify_club_phases
-          docker run --rm football-runtime:4.0 python -m unittest discover -s tests/ml/match_outcome -v
-      - name: Build Web and check packaged Airflow DAGs
-        run: |
-          docker build -f infrastructure/docker/Dockerfile.web -t football-web:4.0 .
-          docker build -f infrastructure/docker/Dockerfile.airflow -t football-airflow:4.0 .
-          docker run --rm --entrypoint python football-airflow:4.0 -c "from airflow.dag_processing.dagbag import DagBag; b=DagBag('/opt/airflow/dags'); assert not b.import_errors,b.import_errors; assert 'match_forecast_v2' in b.dags['football_pipeline'].task_dict; assert 'merged_publish' in b.dags['football_pipeline'].task_dict; assert 'match_statistics' in b.dags['football_kafka_analytics'].task_dict; assert 'transfer_simulation' not in b.dags['football_kafka_analytics'].task_dict"
-      - name: Start fixture services and packaged application
-        run: docker compose -f compose.dev.yml up -d --wait --wait-timeout 1200
-      - name: Database Kafka HTTP and recovery acceptance
-        run: |
-          set -o pipefail
-          mkdir -p infrastructure/docker/evidence-ci
-          docker compose -f compose.dev.yml exec -T api python tests/integration/pipeline_acceptance.py | tee infrastructure/docker/evidence-ci/acceptance.log
-          docker compose -f compose.dev.yml stop postgres
-          docker compose -f compose.dev.yml exec -T api python -c "import urllib.request,urllib.error; exec('try:\n urllib.request.urlopen(\"http://localhost:8000/health\")\n raise AssertionError(\"DB loss was hidden\")\nexcept urllib.error.HTTPError as e:\n assert e.code==503')"
-          docker compose -f compose.dev.yml start postgres
-          docker compose -f compose.dev.yml up -d --wait --wait-timeout 180
-          docker compose -f compose.dev.yml restart api
-          docker compose -f compose.dev.yml up -d --wait --wait-timeout 180
-          docker compose -f compose.dev.yml exec -T api python -c "import urllib.request,json; assert len(json.load(urllib.request.urlopen('http://localhost:8000/matches')))==1140"
-      - name: Browser acceptance after removing report files
-        if: success()
-        run: |
-          python -m pip install -r tests/integration/requirements-web.txt
-          python -m playwright install --with-deps chromium
-          docker compose -f compose.dev.yml exec -T api python -c "from pathlib import Path; p=Path('/opt/project'); paths=[p/'data/lake/silver',p/'data/raw/datamb/players.json',p/'data/models/match_outcome',p/'data/models/knn']; [r.rename(r.with_name(r.name+'_disabled_for_browser')) for r in paths]"
-          python tests/integration/web_browser.py
-      - name: Package verified delivery and browser screenshots
-        run: |
-          python infrastructure/scripts/build/package_portable.py
-          python infrastructure/docker/verify_bundle.py --archive artifacts/PremierLeague_Docker.zip
-          python -c "import zipfile; z=zipfile.ZipFile('artifacts/PremierLeague_Docker.zip'); n=set(z.namelist()); assert all('infrastructure/scripts/launchers/start-'+s+ext in n for s in ('frontend','backend','kafka','airflow','all') for ext in ('.ps1','.sh')); assert 'infrastructure/scripts/launchers/run.py' in n; assert not {'README_BAN_GIAO.md','README_MERGED.md'} & n"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: PremierLeague-verified-delivery
-          path: |
-            artifacts/PremierLeague_Docker.zip
-            artifacts/PremierLeague_Docker.zip.sha256
-            infrastructure/docker/evidence-ci/
-      - name: Diagnostic logs
-        if: always()
-        run: docker compose -f compose.dev.yml logs --no-color --tail 100
-      - name: Clean fixture services
-        if: always()
-        run: docker compose -f compose.dev.yml down -v
 
-  hdfs-airflow-neon:
-    if: github.event_name != 'pull_request'
-    needs: packaged-runtime
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
+concurrency:
+  group: premier-league-local-pipeline
+  cancel-in-progress: false
+
+jobs:
+  historical-pipeline:
+    runs-on: [self-hosted, Windows, X64, plca-local]
+    timeout-minutes: 360
     env:
-      NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
-      PIPELINE_RUN_ID: ci_${{ github.run_id }}_${{ github.run_attempt }}
+      PLCA_RAW_SOURCE: F:\NgDuyLinh\Do_an\BigData\Premier-League-Analyst-22-25\data\raw
+      PLCA_RUN_ID: ci_${{ github.run_id }}_${{ github.run_attempt }}
+    defaults:
+      run:
+        shell: powershell
     steps:
-      - uses: actions/checkout@v4
-      - name: Require Neon connection secret
-        run: test -n "$NEON_DATABASE_URL"
-      - name: Validate HDFS and Airflow Compose
-        run: docker compose -f compose.bigdata.yml config --quiet
-      - name: Build existing Spark and Airflow runtime
+      - name: Checkout mã theo commit trong workspace riêng
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            src
+            scripts
+            config
+            apps/analytics-web
+            airflow
+            .github
+      - name: Chuẩn bị nguồn lịch sử từ máy cục bộ
         run: |
-          docker build -f infrastructure/docker/Dockerfile.runtime --target runtime -t football-runtime:4.0 .
-          docker build -f infrastructure/docker/Dockerfile.airflow -t football-airflow:4.0 .
-      - name: Start ephemeral CI NameNode, three DataNodes and Airflow metadata DB
-        run: docker compose -f compose.bigdata.yml up -d --wait --wait-timeout 300 kafka namenode datanode1 datanode2 datanode3 airflow-db
-      - name: Wait for all three live DataNodes
+          New-Item -ItemType Directory -Path artifacts -Force | Out-Null
+          Start-Transcript -Path artifacts/bootstrap.log -Append
+          try { .\scripts\prepare_pipeline_ci.ps1 } finally { Stop-Transcript }
+      - name: Kiểm tra PowerShell 5.1 và cầu nối WSL
+        run: .\src\pipeline\tests\check_setup_bridge.ps1
+      - name: Chuyển bản triển khai và kiểm tra môi trường
         run: |
-          for attempt in $(seq 1 90); do
-            live=$(curl -fsS 'http://localhost:9870/jmx?qry=Hadoop:service=NameNode,name=NameNodeInfo' | python -c 'import json,sys; print(len(json.loads(json.load(sys.stdin)["beans"][0].get("LiveNodes","{}"))))' 2>/dev/null || true)
-            if [ "$live" = 3 ]; then echo "HDFS reports three live DataNodes"; exit 0; fi
-            sleep 5
-          done
-          docker compose -f compose.bigdata.yml logs --no-color namenode datanode1 datanode2 datanode3
-          exit 1
-      - name: Migrate Airflow metadata and execute the complete DAG
+          .\scripts\run_pipeline.ps1 -Action stop
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\scripts\run_pipeline.ps1 -Action setup -SkipPostgresSetup
+          exit $LASTEXITCODE
+      - name: Chạy kiểm thử, build Web và DAG bằng scheduler thật
         run: |
-          docker compose -f compose.bigdata.yml run --rm kafka-init
-          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli /opt/project/infrastructure/docker/seed_simulated_season.py
-          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli -m analytics.neon_store
-          docker compose -f compose.bigdata.yml run --rm airflow-cli airflow db migrate
-          docker compose -f compose.bigdata.yml up -d airflow-api-server
-          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli /opt/project/infrastructure/docker/wait_for_airflow_api.py
-          docker compose -f compose.bigdata.yml run --rm airflow-cli airflow pools set spark_serial 1 'Serial Spark jobs'
-          docker compose -f compose.bigdata.yml run --rm airflow-cli airflow tasks test football_kafka_analytics league_normalization 2026-10-11
-          docker compose -f compose.bigdata.yml run --rm airflow-cli airflow dags test football_pipeline 2026-10-11 --use-executor
-      - name: Verify HDFS layout and Neon reports
+          .\scripts\run_pipeline.ps1 -Action run -RunId $env:PLCA_RUN_ID
+          exit $LASTEXITCODE
+      - name: Thu thập log và ảnh minh chứng kể cả khi lỗi
+        if: always()
         run: |
-          mkdir -p infrastructure/docker/evidence-ci
-          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli /opt/project/infrastructure/docker/verify_pipeline_hdfs.py | tee infrastructure/docker/evidence-ci/hdfs-run.json
-          docker compose -f compose.bigdata.yml run --rm --entrypoint /opt/python-runtime/bin/python airflow-cli -m analytics.verify_neon --expected-reports 21 | tee infrastructure/docker/evidence-ci/neon-run.json
-      - name: Upload pipeline verification evidence
+          .\scripts\collect_pipeline_evidence.ps1 -RunId $env:PLCA_RUN_ID
+          exit $LASTEXITCODE
+      - name: Lưu artifact 30 ngày
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: PremierLeague-HDFS-Airflow-Neon-${{ github.run_id }}
-          path: infrastructure/docker/evidence-ci/
-      - name: HDFS and Airflow diagnostic logs
-        if: always()
-        run: docker compose -f compose.bigdata.yml logs --no-color --tail 120
-      - name: Clean ephemeral CI services
-        if: always()
-        run: docker compose -f compose.bigdata.yml down -v
+          name: premier-league-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 30
+          if-no-files-found: error

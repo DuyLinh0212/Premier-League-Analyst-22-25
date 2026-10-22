@@ -1,0 +1,7 @@
+# Use the existing ~/.venvs/plca-spark environment in Ubuntu/WSL.
+pyspark==4.1.0
+fastapi>=0.115,<1
+pydantic>=2.9,<3
+uvicorn>=0.30,<1
+httpx>=0.27,<1
+confluent-kafka>=2.12,<3

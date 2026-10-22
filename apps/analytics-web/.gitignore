@@ -1,0 +1,9 @@
+api/.venv/
+api/__pycache__/
+api/app/__pycache__/
+api/app/queries/__pycache__/
+api/generated/
+api/logs/
+web/node_modules/
+web/dist/
+web/.vite/
