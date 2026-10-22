@@ -255,11 +255,13 @@ def run(config, run_id):
         with airflow_client(config) as client:
             while time.monotonic() < deadline:
                 dag = client.get(f"/api/v2/dags/{DAG_ID}")
-                if dag.is_success:
+                if dag.is_success and dag.json().get("fileloc") == str(ROOT / "airflow/dags/report_dag.py"):
+                    atomic_json(ctx.local / "airflow-deployment.json", {"fileloc": dag.json()["fileloc"],
+                                "commit_sha": ctx.manifest["commit_sha"], "project": str(ROOT)})
                     break
                 time.sleep(3)
             else:
-                raise RuntimeError("DAG chưa import được; xem log DAG processor")
+                raise RuntimeError("DAG chưa import đúng bản mã đang triển khai; xem log DAG processor")
             client.patch(f"/api/v2/dags/{DAG_ID}", json={"is_paused": False}).raise_for_status()
             endpoint = f"/api/v2/dags/{DAG_ID}/dagRuns/{ctx.run_id}"
             existing = client.get(endpoint)
