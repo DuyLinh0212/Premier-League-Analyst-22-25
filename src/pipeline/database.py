@@ -197,7 +197,7 @@ class PostgresRuntime:
     @property
     def manifest(self):
         value = REQUEST.get()
-        return {**value["run"]["manifest"], "dataset_id": value["run"]["run_id"]} if value else {}
+        return {**value["run"]["manifest"], "run_id": value["run"]["run_id"], "dataset_id": value["run"]["run_id"]} if value else {}
 
     @property
     def reports_dir(self):
@@ -215,7 +215,12 @@ class PostgresRuntime:
         path = self.reports_dir / season / (slug + ".json")
         if not path.is_file():
             raise RuntimeError("Báo cáo chưa được xuất cho snapshot này")
-        value = json.loads(path.read_text())["report"]
-        value["meta"] = {**value.get("meta", {}), **provenance()}
+        exported = json.loads(path.read_text())["report"]
+        analysis = ("head-to-head-matrix" if slug == "head-to-head" else slug) + "__" + season
+        record = REQUEST.get()["db"].execute("SELECT payload FROM analysis_results WHERE analysis_id=%s", (analysis,)).fetchone()
+        if record is None:
+            raise RuntimeError("PostgreSQL chưa có dữ liệu của báo cáo này")
+        value = {**record["payload"], "title": exported["title"]}
+        value["meta"] = {**value.get("meta", {}), "season": season, "dataset_id": self.manifest["run_id"], **provenance()}
         value["image_url"] = f"/reports/{season}/{slug}.png?run_id={self.manifest['run_id']}"
         return value

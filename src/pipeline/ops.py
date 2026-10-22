@@ -331,6 +331,11 @@ def run(config, run_id):
             collect_artifacts(ctx, destination, failed is None)
         except Exception:
             LOG.exception("Không thu thập đủ artifact; trạng thái lần chạy là thất bại.")
+            ctx.manifest["status"] = "failed"
+            ctx.manifest["artifact_collection_failed"] = True
+            ctx.save()
+            if destination.is_dir():
+                atomic_json(destination / "manifest.json", ctx.manifest)
             if failed is None:
                 failed = RuntimeError("Thu thập artifact thất bại")
         LOG.info("Artifact: %s", destination)

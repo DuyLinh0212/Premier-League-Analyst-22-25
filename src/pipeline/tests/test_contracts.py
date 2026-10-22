@@ -180,3 +180,22 @@ def test_interrupted_postgres_copy_keeps_active_snapshot(tmp_path, monkeypatch):
         assert db.execute("SELECT run_id FROM plca.active WHERE id=1").fetchone() == before
         assert db.execute("SELECT to_regnamespace(%s) AS name", (ctx.schema_name,)).fetchone()["name"] is None
         assert db.execute("SELECT run_id FROM plca.runs WHERE run_id=%s", (ctx.run_id,)).fetchone() is None
+
+
+def test_static_report_rows_come_from_postgres_not_image_json(tmp_path):
+    from src.pipeline.database import PostgresRuntime, REQUEST
+    from unittest.mock import Mock
+    directory = tmp_path / "reports/2024-2025"
+    directory.mkdir(parents=True)
+    (directory / "age-distribution.json").write_text(json.dumps({"report": {"title": "Độ tuổi", "data": [{"stale": True}]}}))
+    db = Mock()
+    db.execute.return_value.fetchone.return_value = {"payload": {"data": [{"age_band": "23–27", "player_count": 100}], "meta": {}}}
+    token = REQUEST.set({"db": db, "run": {"run_id": "published_run", "artifact_path": str(tmp_path), "manifest": {}}})
+    try:
+        value = PostgresRuntime().report("2024-2025", "age-distribution")
+        assert value["data"] == [{"age_band": "23–27", "player_count": 100}]
+        assert value["meta"]["source"] == "postgresql"
+        assert value["meta"]["run_id"] == "published_run"
+        assert db.execute.call_args.args[1] == ("age-distribution__2024-2025",)
+    finally:
+        REQUEST.reset(token)
