@@ -1,6 +1,0 @@
-fastapi>=0.110,<1
-uvicorn>=0.29,<1
-kafka-python>=2.0,<3
-pyspark==3.5.1
-numpy>=1.24,<3
-pandas>=2.0,<3
